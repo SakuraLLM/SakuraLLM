@@ -15,9 +15,9 @@
 模型下载：
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化|
 |:-------:|:-------:|:-------:|:-------:|
-| 20230827-v0.1 | 🤗 [Sakura-13B-Galgame-v0.1](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/blob/main/sakura_13b_model_v0.1) | - | - |
-| 20230908-v0.4 | 🤗 [Sakura-13B-Galgame-v0.4](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/blob/main/sakura_13b_model_v0.4) | - | - |
-| 20230917-v0.5 | 🤗 [Sakura-13B-Galgame-v0.5](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/blob/main/sakura_13b_model_v0.5) | 待上传 | - |
+| 20230827-v0.1 | 🤗 [Sakura-13B-Galgame-v0.1](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.1) | - | - |
+| 20230908-v0.4 | 🤗 [Sakura-13B-Galgame-v0.4](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.4) | - | - |
+| 20230917-v0.5 | 🤗 [Sakura-13B-Galgame-v0.5](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5) | 待上传 | - |
 
 目前仍为实验版本，翻译质量较差.
 
