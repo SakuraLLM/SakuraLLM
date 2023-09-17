@@ -40,7 +40,7 @@
 - Base model: [LLaMA2-13B](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf)
 - Languages: Chinese/Japanese
 
-### v
+### v0.5+
 
 - Finetuned by [SakuraUmi](https://github.com/pipixia244)
 - Finetuned on [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
@@ -49,7 +49,7 @@
 
 ## 版本
 
-### v
+### v0.5+
 
 数据集：约260k Galgame中日文本 + 约2.3M 轻小说中日文本
 
