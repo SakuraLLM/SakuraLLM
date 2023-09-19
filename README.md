@@ -23,6 +23,8 @@
 
 # 日志
 
+`20230918`：上传第三版模型的8bits量化版`sakura-13b-2epoch-2.6M-0917-v0.5-8bits`。
+
 `20230917`：上传第三版模型`sakura-13b-2epoch-2.6M-0917-v0.5`，改用Baichuan2-13B-Chat模型进行微调，翻译质量有所提高。
 
 `20230908`：上传第二版模型`sakura-13b-1epoch-2.6M-0903-v0.4`，使用Galgame和轻小说数据集进行微调，语法能力有所提高。轻小说数据集感谢[CjangCjengh](https://github.com/CjangCjengh)大佬提供。
@@ -49,7 +51,7 @@
 
 ## 版本
 
-### v0.5+
+### v0.5
 
 数据集：约260k Galgame中日文本 + 约2.3M 轻小说中日文本
 
