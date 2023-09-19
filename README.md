@@ -10,7 +10,7 @@
 
 # 介绍
 
-基于LLaMA2-13B，OpenBuddy(v0.1-v0.4)和Baichuan2-13B(v0.5+)构建，在Galgame中日文本数据上进行微调，旨在提供离线的Galgame文本翻译大模型.
+基于LLaMA2-13B，OpenBuddy(v0.1-v0.4)和Baichuan2-13B(v0.5+)构建，在Galgame中日文本数据上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型.
 
 模型下载：
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化|
