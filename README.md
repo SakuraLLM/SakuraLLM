@@ -10,7 +10,7 @@
 
 # 介绍
 
-基于LLaMA2-13B，OpenBuddy(v0.1-v0.4)和Baichuan2-13B(v0.5+)构建，在Galgame中日文本数据上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型.
+基于LLaMA2-13B，OpenBuddy(v0.1-v0.4)和Baichuan2-13B(v0.5+)构建，在Galgame中日文本数据上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型. 新建了[TG交流群](https://t.me/+sCYaCYEsd3ZkMTE1)，欢迎交流讨论。
 
 模型下载：
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化|
@@ -19,7 +19,7 @@
 | 20230908-v0.4 | 🤗 [Sakura-13B-Galgame-v0.4](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.4) | - | - |
 | 20230917-v0.5 | 🤗 [sakuraumi/Sakura-13B-Galgame默认模型](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/) | 🤗 [Sakura-13B-Galgame-v0.5-8bits](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5_8bits) | - |
 
-目前仍为实验版本，翻译质量较差.
+目前仍为实验版本，翻译质量较差. 
 
 # 日志
 
