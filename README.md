@@ -119,7 +119,7 @@
 
 - Novel
 
-  使用[该仓库](https://github.com/FishHawk/sakura-test)的测试文本，仓库内提供了测试代码，测试文本以及v0.5版本的测试结果。
+  使用[该仓库](https://github.com/FishHawk/sakura-test)的测试文本，仓库内提供了测试代码，测试文本以及v0.5版本的测试结果。使用该仓库代码在v0.7模型上对测试文本进行测试的结果已上传到[sakuraumi/Sakura-13B-Galgame-Archived](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/text.sa-packed)。
 
 # 推理
 
