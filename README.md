@@ -206,6 +206,23 @@
 
 根据transformers文档中给出的AutoGPTQ量化教程自行量化，或使用我们已经量化好的模型。
 
+使用量化模型推理的示例代码：
+
+```python
+from transformers import AutoTokenizer, GenerationConfig
+from auto_gptq import AutoGPTQForCausalLM
+
+path = "path/to/your/model"
+text = "" #要翻译的文本
+
+generation_config = GenerationConfig.from_pretrained(path)
+tokenizer = AutoTokenizer.from_pretrained(path, use_fast=False, trust_remote_code=True)
+model = AutoGPTQForCausalLM.from_quantized(path, device="cuda:0", trust_remote_code=True)
+
+response = tokenizer.decode(model.generate(**tokenizer(f"<reserved_106>将下面的日文文本翻译成中文：{text}<reserved_107>", return_tensors="pt").to(model.device), generation_config=generation_config)[0]).replace("</s>", "").split("<reserved_107>")[1]
+print(response)
+```
+
 # 微调
 
 流程与LLaMA2(v0.1-v0.4)/Baichuan2(v0.5与v0.8)/Qwen14B(v0.7)一致，prompt构造参考推理部分
