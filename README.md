@@ -12,17 +12,33 @@
 
 基于LLaMA2-13B，OpenBuddy(v0.1-v0.4)和Baichuan2-13B(v0.5+)构建，在Galgame中日文本数据上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型. 新建了[TG交流群](https://t.me/+sCYaCYEsd3ZkMTE1)，欢迎交流讨论。
 
-模型下载：
-|   版本  | 全量模型 | 8-bit量化 | 4-bit量化|
-|:-------:|:-------:|:-------:|:-------:|
-| 20230827-v0.1 | 🤗 [Sakura-13B-Galgame-v0.1](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.1) | - | - |
-| 20230908-v0.4 | 🤗 [Sakura-13B-Galgame-v0.4](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.4) | - | - |
-| 20230917-v0.5 | 🤗 [sakuraumi/Sakura-13B-Galgame默认模型](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/) | 🤗 [Sakura-13B-Galgame-v0.5-8bits](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5_8bits) | [Sakura-13B-Galgame-v0.5-4bits](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5_4bits_autogptq_40k) |
-| 20231011-v0.7 | 🤗 [Sakura-14B-LNovel](https://huggingface.co/sakuraumi/Sakura-14B-LNovel) | - | - |
+### 模型下载：
+|   版本  | 全量模型 | 8-bit量化 | 4-bit量化 | 3-bit量化 |
+|:-------:|:-------:|:-------:|:-------:|:-------:|
+| 20230827-v0.1 | 🤗 [Sakura-13B-Galgame-v0.1](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.1) | - | - | - |
+| 20230908-v0.4 | 🤗 [Sakura-13B-Galgame-v0.4](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.4) | - | - | - |
+| 20230917-v0.5 | 🤗 [Sakura-13B-Galgame-v0.5](https://huggingface.co/sakuraumi/Sakura-13B-Galgame) | 🤗 [Sakura-13B-Galgame-v0.5-8bits](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5_8bits) | [Sakura-13B-Galgame-v0.5-4bits](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5_4bits_autogptq_40k) | - |
+| 20231011-v0.7 | 🤗 [Kisara-14B-LNovel](https://huggingface.co/sakuraumi/Sakura-14B-LNovel) | - | - | - |
+| 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0.8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-8bit) | 🤗 [Sakura-13B-LNovel-v0.8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-4bit) | 🤗 [Sakura-13B-LNovel-v0.8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-3bit) |
 
 目前仍为实验版本，翻译质量较差. 
 
+~~lsp们最关注的翻译R18轻小说的效果：使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本(其中GPT网页端和API均无法翻译)，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)~~
+
+# 显存需求(尚未完成)
+
+使用v0.8版本进行测试，模型生成参数与仓库中`generation_config.json`一致，显存占用数据取自`nvidia-smi`
+
+|  模型量化类型  | 载入显存 | 推理显存(ctx约600) | 推理显存(ctx约1800) |
+|:-------:|:-------:|:-------:|:-------:|
+| 全量 | 超出游戏显卡显存范围 | - | - |
+| 8bit | - | - | - |
+| 4bit | - | 14.9G | 17.4G |
+| 3bit | - | - | - |
+
 # 日志
+
+`20231026`：上传第五版模型`sakura-13b-2epoch-3.8M-1025-v0.8`，改善数据集质量与格式，修复之前版本模型无法正确解析\n的问题，使用Baichuan2-13B-Chat模型进行微调。
 
 `20231011`：上传第四版模型`sakura-14b-2epoch-4.4M-1003-v0.7`，改用QWen-14B-Chat模型进行微调，针对较长文本进行优化，增加数据集。
 
@@ -59,7 +75,24 @@
 - Base model: [Qwen-14B](https://huggingface.co/Qwen/Qwen-14B)
 - Languages: Chinese/Japanese
 
+### v0.8
+
+- Finetuned by [SakuraUmi](https://github.com/pipixia244)
+- Finetuned on [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
+- Base model: [Baichuan2-13B-Base](https://huggingface.co/baichuan-inc/Baichuan2-13B-Base)
+- Languages: Chinese/Japanese
+
 ## 版本
+
+### v0.8
+
+数据集：约3.8M条galgame与轻小说中日平行语料(共约0.25B字数)
+
+微调方式：全参数
+
+微调epoch数：2
+
+参数量：13.9B
 
 ### v0.7
 
@@ -117,9 +150,13 @@
 | 伝えなければ、伝わらない。きっと、大事なことであるほど。 | 不表达就传达不了。越是重要的事情，越是如此。 | 不说出来就不会知道。越是重要的事情，就越是不能不说。 | -- | 如果不传达，就不会传达。毫无疑问，对于重要的事情来说是如此。 |
 | が、ハチロクを手伝うことでそれが果たせるというのなら、仕事がどれほど増えようと、決して苦とは感じない。 | 不过，如果帮忙八六能让我实现这个愿望，无论工作增加多少，我也绝不会觉得痛苦。 | 不过，如果帮助八六就能实现这个愿望，不管工作多么繁重，我都不会觉得辛苦。 | -- | 如果通过帮助八六实现这一目标，无论工作增加多少，我绝不会感到苦恼。 |
 
-- Novel
+- 轻小说(全龄)
 
-  使用[该仓库](https://github.com/FishHawk/sakura-test)的测试文本，仓库内提供了测试代码，测试文本以及v0.5版本的测试结果。使用该仓库代码在v0.7模型上对测试文本进行测试的结果已上传到[sakuraumi/Sakura-13B-Galgame-Archived](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/text.sa-packed)。
+使用[该仓库](https://github.com/FishHawk/sakura-test)的测试文本，仓库内提供了测试代码，测试文本以及v0.5版本的测试结果。使用该仓库代码在v0.7模型上对测试文本进行测试的结果已上传到[sakuraumi/Sakura-13B-Galgame-Archived](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/text.sa-packed)。
+
+- 轻小说(R18)
+
+使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本(其中GPT网页端和API均无法翻译)，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)
 
 # 推理
 
@@ -141,7 +178,7 @@
     prompt = "User: " + query + "\nAssistant: "
     ```
 
-  - v0.5
+  - v0.5与v0.8
 
     ```python
     input_text = "" # 用户输入
@@ -171,7 +208,7 @@
 
 # 微调
 
-流程与LLaMA2(v0.1-v0.4)/Baichuan2(v0.5+)/Qwen14B(v0.7)一致，prompt构造参考推理部分
+流程与LLaMA2(v0.1-v0.4)/Baichuan2(v0.5与v0.8)/Qwen14B(v0.7)一致，prompt构造参考推理部分
 
 # 后续工作
 
@@ -186,6 +223,8 @@
 - [ryank231231](https://github.com/ryank231231)
 
 - 三日月クリ
+
+- [FishHawk](https://github.com/FishHawk)
 
 - [K024](https://github.com/K024)
 
