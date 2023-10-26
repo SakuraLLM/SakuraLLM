@@ -52,7 +52,7 @@
 # --output_path：翻译(或对照)文本输出文件路径
 # 以下为一个例子
 python translate_novel.py \
-    --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0.8-4bit \
+    --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0_8-4bit \
     --model_version 0.8 \
     --use_gptq_model \
     --text_length 512 \
