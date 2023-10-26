@@ -19,7 +19,7 @@
 | 20230908-v0.4 | 🤗 [Sakura-13B-Galgame-v0.4](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.4) | - | - | - |
 | 20230917-v0.5 | 🤗 [Sakura-13B-Galgame-v0.5](https://huggingface.co/sakuraumi/Sakura-13B-Galgame) | 🤗 [Sakura-13B-Galgame-v0.5-8bits](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5_8bits) | [Sakura-13B-Galgame-v0.5-4bits](https://huggingface.co/sakuraumi/Sakura-13B-Galgame/tree/main/sakura_13b_model_v0.5_4bits_autogptq_40k) | - |
 | 20231011-v0.7 | 🤗 [Kisara-14B-LNovel](https://huggingface.co/sakuraumi/Sakura-14B-LNovel) | - | - | - |
-| 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0.8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-8bit) | 🤗 [Sakura-13B-LNovel-v0.8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-4bit) | 🤗 [Sakura-13B-LNovel-v0.8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-3bit) |
+| 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) |
 
 目前仍为实验版本，翻译质量较差. 
 
