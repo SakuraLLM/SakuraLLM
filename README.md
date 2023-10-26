@@ -25,7 +25,7 @@
 
 ~~lsp们最关注的翻译R18轻小说的效果：使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本(其中GPT网页端和API均无法翻译)，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)~~
 
-# 显存需求(尚未完成)
+# 显存需求
 
 使用v0.8版本进行测试，模型生成参数与仓库中`generation_config.json`一致，显存占用数据取自`nvidia-smi`
 
@@ -35,6 +35,31 @@
 | 8bit | 17G | - | - |
 | 4bit | 11.3G | 14.9G | 17.4G |
 | 3bit | 9.7G | 13.7G | - |
+
+# 快速开始
+
+- 翻译轻小说（或其他任何纯文本）
+
+仓库提供了脚本`translate_novel.py`，用于翻译轻小说等文本，支持输出中日对照文本。使用示例如下：
+
+```bash
+# 参数说明：
+# --model_version：模型版本，本仓库README表格中即可查看。可选范围：['0.1', '0.4', '0.5', '0.7', '0.8']
+# --use_gptq_model：如果模型为gptq量化模型，则需加此项；如是全量模型，则不需要添加。
+# --text_length：文本分块的最大单块文字数量。每块文字量将在text_length/2至text_length内随机选择。
+# --compare_text：是否需要输出中日对照文本，如需要，则需加此项；如不需要则不要添加。
+# --data_path：日文原文文件路径
+# --output_path：翻译(或对照)文本输出文件路径
+# 以下为一个例子
+python translate_novel.py \
+    --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0.8-4bit \
+    --model_version 0.8 \
+    --use_gptq_model \
+    --text_length 512 \
+    --data_path data.txt \
+    --output_path data_translated.txt \
+    --compare_text
+```
 
 # 日志
 
