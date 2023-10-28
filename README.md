@@ -268,7 +268,7 @@ print(response)
 
 - [ryank231231](https://github.com/ryank231231)
 
-- 三日月クリ
+- [KurikoMoe](https://github.com/kurikomoe)
 
 - [FishHawk](https://github.com/FishHawk)
 
