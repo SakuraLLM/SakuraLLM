@@ -179,6 +179,10 @@ python translate_novel.py \
 
 使用[该仓库](https://github.com/FishHawk/sakura-test)的测试文本，仓库内提供了测试代码，测试文本以及v0.5版本的测试结果。使用该仓库代码在v0.7模型上对测试文本进行测试的结果已上传到[sakuraumi/Sakura-13B-Galgame-Archived](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/text.sa-packed)。
 
+[该仓库](https://github.com/FishHawk/sakura-test)更新了v0.8版本的测试，并提供了测试代码（需要自建openai like api后端）。
+
+也可以通过本仓库的翻译脚本自行测试对比。
+
 - 轻小说(R18)
 
 使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本(其中GPT网页端和API均无法翻译)，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)
