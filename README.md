@@ -223,8 +223,8 @@ python translate_novel.py \
 
 | 参数 | 值 |
 | ---- | ---- |
-| temperature | 1 |
-| top p | 0.5 |
+| temperature | 0.1 |
+| top p | 0.3 |
 | do sample | True |
 | beams number | 1 |
 | repetition penalty | 1 |
