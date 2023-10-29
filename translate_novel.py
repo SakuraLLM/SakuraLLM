@@ -98,7 +98,7 @@ def main():
         from auto_gptq import AutoGPTQForCausalLM
 
     generation_config = GenerationConfig(
-        temperature=1.0,
+        temperature=0.1,
         top_p=0.3,
         top_k=40,
         num_beams=1,
