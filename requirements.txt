@@ -1,4 +1,4 @@
---find-links https://download.pytorch.org/whl/cu121/torch_stable.html
-torch==2.0.1+cu121
+--find-links https://download.pytorch.org/whl/cu118/torch_stable.html
+torch==2.0.1+cu118
 transformers==4.33.2
 auto-gptq
