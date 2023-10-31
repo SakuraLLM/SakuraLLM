@@ -1,4 +1,6 @@
 --find-links https://download.pytorch.org/whl/cu118/torch_stable.html
-torch==2.0.1+cu118
+torch
 transformers==4.33.2
 auto-gptq
+sentencepiece
+bitsandbytes
