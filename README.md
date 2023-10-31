@@ -32,18 +32,42 @@
 |  模型量化类型  | 载入显存 | 推理显存(ctx约600) | 推理显存(ctx约1800) |
 |:-------:|:-------:|:-------:|:-------:|
 | 全量 | 超出游戏显卡显存范围 | - | - |
-| 8bit | 17G | - | - |
+| 8bit | 17G | 21.1G | 23.4G |
 | 4bit | 11.3G | 14.9G | 17.4G |
-| 3bit | 9.7G | 13.7G | - |
+| 3bit | 9.7G | 13.7G | 15.5G |
 
 # 快速开始
 
-- 翻译轻小说（或其他任何纯文本）
+- 翻译Epub文件
 
-仓库提供了脚本`translate_novel.py`，用于翻译轻小说等文本，支持输出中日对照文本。使用示例如下：
+仓库提供了脚本`translate_epub.py`（感谢[CjangCjengh](https://github.com/CjangCjengh)），用于翻译Epub格式的小说。使用示例如下：
 
 ```bash
 # 参数说明：
+# --model_name_or_path：模型本地路径或者huggingface仓库id。
+# --model_version：模型版本，本仓库README表格中即可查看。可选范围：['0.1', '0.4', '0.5', '0.7', '0.8']
+# --use_gptq_model：如果模型为gptq量化模型，则需加此项；如是全量模型，则不需要添加。
+# --text_length：文本分块的最大单块文字数量。
+# --data_path：日文原文Epub小说文件路径。
+# --data_folder：批量翻译Epub小说时，小说所在的文件夹路径
+# --output_folder：翻译后的Epub文件输出路径（注意是文件夹路径）。
+# 以下为一个例子
+python translate_epub.py \
+    --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0_8-4bit \
+    --model_version 0.8 \
+    --use_gptq_model \
+    --text_length 512 \
+    --data_path novel.epub \
+    --output_folder output
+```
+
+- 翻译纯文本
+
+仓库提供了脚本`translate_novel.py`，用于翻译轻小说等纯文本格式，支持输出中日对照文本。使用示例如下：
+
+```bash
+# 参数说明：
+# --model_name_or_path：模型本地路径或者huggingface仓库id。
 # --model_version：模型版本，本仓库README表格中即可查看。可选范围：['0.1', '0.4', '0.5', '0.7', '0.8']
 # --use_gptq_model：如果模型为gptq量化模型，则需加此项；如是全量模型，则不需要添加。
 # --text_length：文本分块的最大单块文字数量。每块文字量将在text_length/2至text_length内随机选择。
