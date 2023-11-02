@@ -4,17 +4,29 @@ import random
 import time
 import re
 from tqdm import tqdm
+from sampler_hijack import hijack_samplers
+
+total_token = 0
+generation_time = 0
+def add_token_cnt(cnt):
+    global total_token
+    total_token += cnt
+
+def add_time(time):
+    global generation_time
+    generation_time += time
 
 def get_novel_text_list(data_path, text_length):
     data_list = list()
     with open(data_path, 'r', encoding="utf-8") as f:
         data = f.read()
-    data = data.replace("　", "")
+    data = data.strip()
     data_raw = re.sub('\n+', '\n', data)
+    print(f"text total words: {len(data_raw)}")
     data = data_raw.strip().split("\n")
     i = 0
     while i < len(data):
-        r = random.randint(int(text_length/2), text_length)
+        r = text_length
         text = ""
         while len(text) < r:
             if i >= len(data):
@@ -61,9 +73,62 @@ def split_response(response, model_version):
     
     raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
 
-def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
+def detect_degeneration(generation: list, model_version):
+    if model_version != "0.8":
+        return False
+    i = generation.index(196)
+    generation = generation[i+1:]
+    print(len(generation))
+    if len(generation) >= 1023:
+        print("model degeneration detected, retrying...")
+        return True
+    else:
+        return False
+
+def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
+
+    backup_generation_config_stage2 = GenerationConfig(
+            temperature=0.1,
+            top_p=0.3,
+            top_k=40,
+            num_beams=1,
+            bos_token_id=1,
+            eos_token_id=2,
+            pad_token_id=0,
+            max_new_tokens=2 * text_length,
+            min_new_tokens=1,
+            do_sample=True,
+            repetition_penalty=1.0,
+            frequency_penalty=0.05
+        )
+    
+    backup_generation_config_stage3 = GenerationConfig(
+            temperature=0.1,
+            top_p=0.3,
+            top_k=40,
+            num_beams=1,
+            bos_token_id=1,
+            eos_token_id=2,
+            pad_token_id=0,
+            max_new_tokens=2 * text_length,
+            min_new_tokens=1,
+            do_sample=True,
+            repetition_penalty=1.0,
+            frequency_penalty=0.2
+        )
+
+
+    backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
     generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
+    if len(generation) > 2 * text_length:
+        stage = 0
+        while detect_degeneration(list(generation), model_version):
+            stage += 1
+            if stage > 2:
+                print("model degeneration cannot be avoided.")
+                break
+            generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=backup_generation_config[stage-1])[0]
     response = tokenizer.decode(generation)
     output = split_response(response, model_version)
     return output
@@ -73,7 +138,13 @@ def get_compare_text(source_text, translated_text):
     translated_text_list = translated_text.strip().split("\n")
     output_text = ""
     if len(source_text_list) != len(translated_text_list):
-        print("error occurred when output compared text, fallback to output only translated text.")
+        print(f"error occurred when output compared text(length of source is {len(source_text_list)} while length of translated is {len(translated_text_list)}), fallback to output only translated text.")
+        # for i in range(len(source_text_list)):
+        #     try:
+        #         tmp = translated_text_list[i]
+        #     except Exception as e:
+        #         tmp = ""
+        #     output_text += source_text_list[i] + "\n" + tmp + "\n\n"
         return translated_text
     else:
         for i in range(len(source_text_list)):
@@ -92,11 +163,21 @@ def main():
     parser.add_argument("--output_path", type=str, default="data_translated.txt", help="save path of the text model translated.")
     parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
     parser.add_argument("--compare_text", action="store_true", help="whether to output with both source text and translated text in order to compare.")
+    parser.add_argument("--trust_remote_code", action="store_true", help="whether to trust remote code.")
+    parser.add_argument("--llama", action="store_true", help="whether your model is llama family.")
     args = parser.parse_args()
 
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
+        
+    if args.llama:
+        from transformers import LlamaForCausalLM, LlamaTokenizer
+        
+    if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8":
+        
+        raise ValueError("If you use model version 0.5, 0.7 or 0.8, please add flag --trust_remote_code.")
 
+    hijack_samplers()
     generation_config = GenerationConfig(
         temperature=0.1,
         top_p=0.3,
@@ -108,16 +189,22 @@ def main():
         max_new_tokens=1024,
         min_new_tokens=1,
         do_sample=True
-    )
+    )    
 
     print("loading...")
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=False, trust_remote_code=True)
+    if args.llama:
+        tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=args.trust_remote_code)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=False, trust_remote_code=args.trust_remote_code)
 
     if args.use_gptq_model:
-        model = AutoGPTQForCausalLM.from_quantized(args.model_name_or_path, device="cuda:0", trust_remote_code=True)
+        model = AutoGPTQForCausalLM.from_quantized(args.model_name_or_path, device="cuda:0", trust_remote_code=args.trust_remote_code)
     else:
-        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=True)
-
+        if args.llama:
+            model = LlamaForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
+        else:
+            model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
+            
     print("translating...")
     start = time.time()
 
@@ -125,11 +212,11 @@ def main():
     data = ""
     for d in tqdm(data_list):
         prompt = get_prompt(d, args.model_version)
-        output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config)
+        output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length)
         data += output.strip() + "\n"
 
     end = time.time()
-    print("translation completed, used time: ", end-start)
+    print("translation completed, used time: ", generation_time, end-start, ", total tokens: ", total_token, ", speed: ", total_token/(end-start), " token/s")
 
     print("saving...")
     if args.compare_text:
