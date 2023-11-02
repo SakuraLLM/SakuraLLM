@@ -42,6 +42,8 @@
 
 # 快速开始
 
+首先将本仓库拉取到本地。
+
 - 翻译Epub文件
 
 仓库提供了脚本`translate_epub.py`（感谢[CjangCjengh](https://github.com/CjangCjengh)），用于翻译Epub格式的小说。使用示例如下：
