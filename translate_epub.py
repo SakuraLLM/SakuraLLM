@@ -7,6 +7,7 @@ import glob
 import shutil
 import zipfile
 from tqdm import tqdm
+from sampler_hijack import hijack_samplers
 
 def find_all_htmls(root_dir):
     html_files = []
@@ -105,27 +106,33 @@ def detect_degeneration(generation: list, model_version):
 def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
 
     backup_generation_config_stage2 = GenerationConfig(
-            temperature=1,
-            top_p=0.6,
+            temperature=0.1,
+            top_p=0.3,
             top_k=40,
             num_beams=1,
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=1024,
+            max_new_tokens=2 * text_length,
             min_new_tokens=1,
-            do_sample=True
+            do_sample=True,
+            repetition_penalty=1.0,
+            frequency_penalty=0.05
         )
 
     backup_generation_config_stage3 = GenerationConfig(
-            top_k=5,
+            temperature=0.1,
+            top_p=0.3,
+            top_k=40,
             num_beams=1,
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=1024,
+            max_new_tokens=2 * text_length,
             min_new_tokens=1,
-            penalty_alpha=0.3
+            do_sample=True,
+            repetition_penalty=1.0,
+            frequency_penalty=0.2
         )
 
     backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
@@ -153,11 +160,21 @@ def main():
     parser.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
     parser.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
     parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
+    parser.add_argument("--trust_remote_code", action="store_true", help="whether to trust remote code.")
+    parser.add_argument("--llama", action="store_true", help="whether your model is llama family.")
     args = parser.parse_args()
 
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
+        
+    if args.llama:
+        from transformers import LlamaForCausalLM, LlamaTokenizer
+        
+    if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8":
+        
+        raise ValueError("If you use model version 0.5, 0.7 or 0.8, please add flag --trust_remote_code.")
 
+    hijack_samplers()
     generation_config = GenerationConfig(
         temperature=0.1,
         top_p=0.3,
@@ -172,12 +189,18 @@ def main():
     )
 
     print("Loading model...")
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=False, trust_remote_code=True)
+    if args.llama:
+        tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=args.trust_remote_code)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=False, trust_remote_code=args.trust_remote_code)
 
     if args.use_gptq_model:
-        model = AutoGPTQForCausalLM.from_quantized(args.model_name_or_path, device="cuda:0", trust_remote_code=True)
+        model = AutoGPTQForCausalLM.from_quantized(args.model_name_or_path, device="cuda:0", trust_remote_code=args.trust_remote_code)
     else:
-        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=True)
+        if args.llama:
+            model = LlamaForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
+        else:
+            model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
 
     print("Start translating...")
     start = time.time()
