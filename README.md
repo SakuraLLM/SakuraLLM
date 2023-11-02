@@ -12,6 +12,10 @@
 
 基于LLaMA2-13B，OpenBuddy(v0.1-v0.4)和Baichuan2-13B(v0.5+)构建，在Galgame中日文本数据上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型. 新建了[TG交流群](https://t.me/+QMDKZyO9GV1kNDA1)，欢迎交流讨论。
 
+### 网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译结果可供参考。
+
+轻小说机翻机器人网站是一个自动生成轻小说机翻并分享的网站。你可以浏览日文网络小说，或者上传Epub/Txt文件，并生成机翻。
+
 ### 模型下载：
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化 | 3-bit量化 |
 |:-------:|:-------:|:-------:|:-------:|:-------:|
@@ -51,9 +55,12 @@
 # --data_path：日文原文Epub小说文件路径。
 # --data_folder：批量翻译Epub小说时，小说所在的文件夹路径
 # --output_folder：翻译后的Epub文件输出路径（注意是文件夹路径）。
+# --trust_remote_code：是否允许执行外部命令（对于0.5，0.7，0.8版本模型需要加上这个参数，否则报错。
+# --llama：如果你使用的模型是llama家族的模型（对于0.1，0.4版本），则需要加入此命令。
 # 以下为一个例子
 python translate_epub.py \
     --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0_8-4bit \
+    --trust_remote_code \
     --model_version 0.8 \
     --use_gptq_model \
     --text_length 512 \
@@ -74,9 +81,12 @@ python translate_epub.py \
 # --compare_text：是否需要输出中日对照文本，如需要，则需加此项；如不需要则不要添加。
 # --data_path：日文原文文件路径
 # --output_path：翻译(或对照)文本输出文件路径
+# --trust_remote_code：是否允许执行外部命令（对于0.5，0.7，0.8版本模型需要加上这个参数，否则报错。
+# --llama：如果你使用的模型是llama家族的模型（对于0.1，0.4版本），则需要加入此命令。
 # 以下为一个例子
 python translate_novel.py \
     --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0_8-4bit \
+    --trust_remote_code \
     --model_version 0.8 \
     --use_gptq_model \
     --text_length 512 \
