@@ -27,9 +27,7 @@
 | 20231011-v0.7 | 🤗 [Kisara-14B-LNovel](https://huggingface.co/sakuraumi/Sakura-14B-LNovel) | - | - | - |
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) |
 
-目前仍为实验版本，翻译质量较差. 
-
-~~lsp们最关注的翻译R18轻小说的效果：使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本(其中GPT网页端和API均无法翻译)，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)~~
+目前仍为实验版本，翻译质量较差. 个人使用推荐GPT4.
 
 # 显存需求
 
@@ -223,7 +221,9 @@ python translate_novel.py \
 
 - 轻小说(R18)
 
-使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本(其中GPT网页端和API均无法翻译)，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)
+  - v0.7
+
+  使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)
 
 # 推理
 
