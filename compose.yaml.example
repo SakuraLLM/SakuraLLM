@@ -1,0 +1,51 @@
+# apt-get install nvidia-container-runtime
+# which nvidia-container-runtime-hook
+# sudo systemctl restart dockerd
+version: "1.0"
+services:
+  server:
+    image: kurikomoe/sakura-13b-galgame:0.8
+    environment:
+      COMMAND: run_server
+      USERNAME: SakuraLLM
+      PASSWORD: It's MyGO!!!!!
+      SAKURA_MODEL_NAME: Sakura-13B-LNovel-v0_8-4bit
+      SAKURA_MODEL_VERSION: 0.8
+      ADDRESS: 0.0.0.0
+      PORT: 5000
+    volumes:
+      - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, ]
+    network_mode: 'host'
+  translate-novel:
+    image: kurikomoe/sakura-13b-galgame:0.8
+    environment:
+      COMMAND: translate_novel
+    volumes:
+      - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, ]
+  translate-epub:
+    image: kurikomoe/sakura-13b-galgame:0.8
+    environment:
+      COMMAND: translate-epub
+    volumes:
+      - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, ]
