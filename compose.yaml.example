@@ -2,9 +2,23 @@
 # which nvidia-container-runtime-hook
 # sudo systemctl restart dockerd
 version: "1.0"
+
+x-gpu-template: &gpu_template
+  image: kurikomoe/sakura-13b-galgame:0.8
+  volumes: &mount_model
+    - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
+  deploy: &deploy_with_gpu
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu, ]
+
 services:
   server:
-    image: kurikomoe/sakura-13b-galgame:0.8
+    <<: *gpu_template
+    network_mode: 'host'
     environment:
       COMMAND: run_server
       USERNAME: SakuraLLM
@@ -13,39 +27,13 @@ services:
       SAKURA_MODEL_VERSION: 0.8
       ADDRESS: 0.0.0.0
       PORT: 5000
-    volumes:
-      - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu, ]
-    network_mode: 'host'
+
   translate-novel:
-    image: kurikomoe/sakura-13b-galgame:0.8
+    <<: *gpu_template
     environment:
       COMMAND: translate_novel
-    volumes:
-      - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu, ]
+
   translate-epub:
-    image: kurikomoe/sakura-13b-galgame:0.8
+    <<: *gpu_template
     environment:
       COMMAND: translate-epub
-    volumes:
-      - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu, ]
