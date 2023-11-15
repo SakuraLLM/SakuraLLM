@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import *
 
@@ -9,9 +10,9 @@ class ServerConfig:
     username: str|None = None
     password: str|None = None
 
-    # command line arguments
-    args: Any
-
+    @classmethod
+    def show(cls) -> str:
+        return f"Server(listen: {cls.address}:{cls.port}, auth: {cls.username}:{cls.password})"
 
 sakura_model = None
 

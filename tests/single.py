@@ -63,6 +63,7 @@ request = {
     "skip_special_tokens": True,
     "stopping_strings": [],
 }
+pprint(request)
 
 response = session.post(endpoint, json=request)
 result = response.json()

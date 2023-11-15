@@ -52,7 +52,11 @@ python3 tests/single.py --auth sakura:itsmygo http://127.0.0.1:5000
 
 > TODO(kuriko)
 
+> put file into models directory
+
 ```shell
 docker compose run translate-epub {--data_path <EPUB> | --data_folder <EPUB folder>}  --output_folder <output>
 docker compose run translate-novel --data_path <TXT> --output_path <TXT OUT> [--compare_text true|false]
+
+# docker compose run translate-novel --data_path /models/a.txt --output_path /models/b.txt 
 ```

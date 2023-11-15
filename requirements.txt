@@ -13,3 +13,4 @@ numpy
 fastapi
 uvicorn[standard]
 coloredlogs
+dacite

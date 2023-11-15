@@ -53,6 +53,5 @@ FROM pip as working
 
 COPY . .
 RUN mkdir -p ${SAKURA_MODEL_PATH}
-ADD https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat/blob/main/tokenization_baichuan.py ${MODEL_ROOT}
 
 ENTRYPOINT ["/bin/bash", "./docker/scripts/run.sh"]

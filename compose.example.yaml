@@ -4,9 +4,9 @@
 version: "1.0"
 
 x-gpu-template: &gpu_template
-  image: kurikomoe/sakura-13b-galgame:0.8
+  image: kurikomoe/sakura-13b-galgame:0.8.1
   volumes: &mount_model
-    - ./models/Sakura-13B-LNovel-v0_8-4bit:/models/Sakura-13B-LNovel-v0_8-4bit
+    - ./models:/models
   deploy: &deploy_with_gpu
     resources:
       reservations:
@@ -15,25 +15,32 @@ x-gpu-template: &gpu_template
             count: 1
             capabilities: [gpu, ]
 
+x-environment: &env_template
+    LOGLEVEL: info 
+    SAKURA_MODEL_NAME: Sakura-13B-LNovel-v0_8-4bit
+    SAKURA_MODEL_VERSION: 0.8
+    
+
 services:
   server:
     <<: *gpu_template
     network_mode: 'host'
     environment:
+      <<: *env_template
       COMMAND: run_server
-      USERNAME: SakuraLLM
-      PASSWORD: It's MyGO!!!!!
-      SAKURA_MODEL_NAME: Sakura-13B-LNovel-v0_8-4bit
-      SAKURA_MODEL_VERSION: 0.8
+      USERNAME: sakurallm
+      PASSWORD: itsmygo
       ADDRESS: 0.0.0.0
       PORT: 5000
 
   translate-novel:
     <<: *gpu_template
     environment:
+      <<: *env_template
       COMMAND: translate_novel
 
   translate-epub:
     <<: *gpu_template
     environment:
+      <<: *env_template
       COMMAND: translate-epub

@@ -1,9 +1,10 @@
-from functools import lru_cache
 import re
 import time
 import random
 from pathlib import Path
+from functools import lru_cache
 from threading import Thread, Lock
+from dataclasses import dataclass
 
 from pydantic import BaseModel
 
@@ -21,6 +22,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+@dataclass
 class SakuraModelConfig:
     model_name_or_path: str
     use_gptq_model: bool
@@ -60,6 +62,7 @@ def load_model(args: SakuraModelConfig):
 class SakuraModel:
     # typing
     class ModelResponse(BaseModel):
+        context_token: int
         new_token: int
         text: str
 
@@ -82,6 +85,8 @@ class SakuraModel:
     
     def check_model_by_magic(self) -> bool:
         (ground_truth, output) = self.test_loaded()
+        logger.debug(f"test output: {output}")
+        logger.debug(f"ground truth: {ground_truth}")
         ret = ground_truth == output.text
         if not ret:
             logging.warning(f"model output is not correct, please check the loaded model")
@@ -94,7 +99,9 @@ class SakuraModel:
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
 
-    def completion(self, prompt: str, generation_config: GenerationConfig = utils.get_default_generation_config()) -> ModelResponse:
+    def completion(self, prompt: str, generation_config: GenerationConfig) -> ModelResponse:
+        t0 = time.time()        
+
         output = self.get_model_response(
             self.model, 
             self.tokenizer, 
@@ -102,27 +109,38 @@ class SakuraModel:
             self.cfg.model_version, 
             generation_config, 
             self.get_max_text_length(len(prompt))
-            )
+        )
+        t1 = time.time()
+        original_tokens = output.context_token
+        new_tokens = output.new_token
+        logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {original_tokens} tokens)')
 
         return output
 
     def test_loaded(self) -> (str, ModelResponse):
-        test_input = consts.get_test_input(self.cfg.model_version)
+        testcase = consts.get_test_case_by_model_version(self.cfg.model_version)
+
+        generation_config = testcase.generation_config
+        test_input = testcase.test_input
+        test_output = testcase.test_output
+
         prompt = utils.get_prompt(test_input, self.cfg.model_version)
-        output = self.completion(prompt, utils.get_default_generation_config())
-        return consts.get_test_output(self.cfg.model_version), output
+        output = self.completion(prompt, generation_config)
+
+        return test_output, output
 
 
     def get_model_response(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int) -> ModelResponse:
         input_token = tokenizer(prompt, return_tensors="pt")
         input_token_len = input_token.input_ids.shape[-1]
-        with self.lock:  # using lock to prevent to many memory allocated on GPU
+        with self.lock:  # using lock to prevent too many memory allocated on GPU
             generation = model.generate(**input_token.to(model.device), generation_config=generation_config)[0]
         new_token = generation.shape[-1] - input_token_len
         response = tokenizer.decode(generation)
         output = utils.split_response(response, model_version)
 
         return self.ModelResponse(
+            context_token = input_token_len,
             new_token = new_token,
             text = output, 
         )

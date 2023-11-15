@@ -2,7 +2,7 @@
 
 ORGNIZATION="kurikomoe"
 NAME="sakura-13b-galgame"
-TAG="0.8"
+TAG="0.8.1"
 
 # GIT_COMMIT=$(git log -1 --pretty=%h)
 # BUILD_TIMESTAMP=$(date '+%F_%H:%M:%S')

@@ -2,8 +2,7 @@
 
 if [ ! -e "${SAKURA_MODEL_PATH}/config.json" ]; then
     tree "${SAKURA_MODEL_PATH}/config.json"
-    echo "Please use -v<MODEL_PATH>:/model/$MODEL_NAME to bind model"
+    echo "Please use -v<path to models>:/models to bind model"
+    echo "and make sure that /models/${SAKURA_MODEL_PATH} exists"
     exit -1
 fi
-
-cp ${MODEL_ROOT}/tokenization_baichuan.py ${SAKURA_MODEL_PATH}/

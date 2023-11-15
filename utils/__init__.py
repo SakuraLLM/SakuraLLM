@@ -1,22 +1,3 @@
-from transformers import GenerationConfig
-
-def get_default_generation_config():
-    return GenerationConfig(
-        temperature=0.1,
-        top_p=0.3,
-        top_k=40,
-        num_beams=1,
-        bos_token_id=1,
-        eos_token_id=2,
-        pad_token_id=0,
-        max_new_tokens=1024,
-        min_new_tokens=1,
-        do_sample=True,
-        # repetition_penalty=1.0,
-        # frequency_penalty=0.2,
-        # presence_penalty=0,
-        # repetition_penalty_range=0,
-    )
 
 def get_prompt(input, model_version):
     if model_version == '0.5' or model_version == '0.8':
