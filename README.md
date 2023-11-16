@@ -12,6 +12,8 @@
 
 基于OpenBuddy(v0.1-v0.4), Qwen-14B(v0.7)和Baichuan2-13B(v0.5,v0.8)构建，在通用日文语料与轻小说/Galgame等领域的中日语料上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型. 新建了[TG交流群](https://t.me/+QMDKZyO9GV1kNDA1)，欢迎交流讨论。
 
+### [部署教程](https://sakura.srpr.moe)
+
 # 如果使用模型翻译并发布，请在最显眼的位置标注机翻！！！！！开发者对于滥用本模型造成的一切后果不负任何责任。
 
 ### 网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译结果可供参考。
