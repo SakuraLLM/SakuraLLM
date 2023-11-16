@@ -18,6 +18,3 @@ class UserMessage(BaseModel):
 class Completion(BaseModel):
     messages: str
     model: str
-
-
-    

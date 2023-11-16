@@ -34,10 +34,10 @@ class SakuraModelConfig:
 def load_model(args: SakuraModelConfig):
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
-        
+
     if args.llama:
         from transformers import LlamaForCausalLM, LlamaTokenizer
-        
+
     if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8":
         raise ValueError("If you use model version 0.5, 0.7 or 0.8, please add flag --trust_remote_code.")
 
@@ -82,7 +82,7 @@ class SakuraModel:
         self.lock = Lock()
 
         return
-    
+
     def check_model_by_magic(self) -> bool:
         (prompt, ground_truth, output) = self.test_loaded()
         logger.debug(f"test output: {output}")
@@ -100,14 +100,15 @@ class SakuraModel:
         return max(self.cfg.text_length, length)
 
     def completion(self, prompt: str, generation_config: GenerationConfig) -> ModelResponse:
-        t0 = time.time()        
+        t0 = time.time()
 
+        logger.debug(f"current generation config: {generation_config}")
         output = self.get_model_response(
-            self.model, 
-            self.tokenizer, 
-            prompt, 
-            self.cfg.model_version, 
-            generation_config, 
+            self.model,
+            self.tokenizer,
+            prompt,
+            self.cfg.model_version,
+            generation_config,
             self.get_max_text_length(len(prompt))
         )
         t1 = time.time()
@@ -142,7 +143,7 @@ class SakuraModel:
         return self.ModelResponse(
             context_token = input_token_len,
             new_token = new_token,
-            text = output, 
+            text = output,
         )
 
     def get_model_response_anti_degen(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
@@ -160,7 +161,7 @@ class SakuraModel:
                 repetition_penalty=1.0,
                 frequency_penalty=0.05
             )
-        
+
         backup_generation_config_stage3 = GenerationConfig(
                 temperature=0.1,
                 top_p=0.3,

@@ -14,7 +14,7 @@ def split_response(response, model_version):
     if model_version == '0.4':
         output = response.split("\nAssistant: ")[1]
         return output
-    
+
     raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
 
 

@@ -37,7 +37,7 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     rm -f /etc/apt/apt.conf.d/docker-clean \
     && apt-get update && apt-get install -y \
         python3=3.10.* python3-pip \
-        build-essential curl wget gcc 
+        build-essential curl wget gcc
 
 # stage 2
 FROM base as pip

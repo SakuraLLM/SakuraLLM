@@ -42,7 +42,7 @@ You can use the python script in `test/single.py` to test the connection and per
 
 > remember to change the username and password
 ```shell
-python3 tests/single.py --auth sakura:itsmygo http://127.0.0.1:5000 
+python3 tests/single.py --auth sakura:itsmygo http://127.0.0.1:5000
 ```
 
 > It seems docker version is a little slower than run scripts in host machine. If that applies, you can follow the setup instruction in Dockerfile to prepare your own environment.
@@ -58,5 +58,5 @@ python3 tests/single.py --auth sakura:itsmygo http://127.0.0.1:5000
 docker compose run translate-epub {--data_path <EPUB> | --data_folder <EPUB folder>}  --output_folder <output>
 docker compose run translate-novel --data_path <TXT> --output_path <TXT OUT> [--compare_text true|false]
 
-# docker compose run translate-novel --data_path /models/a.txt --output_path /models/b.txt 
+# docker compose run translate-novel --data_path /models/a.txt --output_path /models/b.txt
 ```

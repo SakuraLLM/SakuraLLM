@@ -12,7 +12,7 @@ from api.legacy.type import GenerateRequest, GenerateResponse
 from utils import state
 from api.auth import get_auth_username
 
-import logging 
+import logging
 logger = logging.getLogger(__name__)
 
 

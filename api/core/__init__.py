@@ -9,4 +9,3 @@ router = APIRouter(
         Depends(get_auth_username)
     ]
 )
-
