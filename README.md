@@ -211,19 +211,9 @@ python translate_novel.py \
 | 伝えなければ、伝わらない。きっと、大事なことであるほど。 | 不表达就传达不了。越是重要的事情，越是如此。 | 不说出来就不会知道。越是重要的事情，就越是不能不说。 | -- | 如果不传达，就不会传达。毫无疑问，对于重要的事情来说是如此。 |
 | が、ハチロクを手伝うことでそれが果たせるというのなら、仕事がどれほど増えようと、決して苦とは感じない。 | 不过，如果帮忙八六能让我实现这个愿望，无论工作增加多少，我也绝不会觉得痛苦。 | 不过，如果帮助八六就能实现这个愿望，不管工作多么繁重，我都不会觉得辛苦。 | -- | 如果通过帮助八六实现这一目标，无论工作增加多少，我绝不会感到苦恼。 |
 
-- 轻小说(全龄)
+- 轻小说
 
-使用[该仓库](https://github.com/FishHawk/sakura-test)的测试文本，仓库内提供了测试代码，测试文本以及v0.5版本的测试结果。使用该仓库代码在v0.7模型上对测试文本进行测试的结果已上传到[sakuraumi/Sakura-13B-Galgame-Archived](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/text.sa-packed)。
-
-[该仓库](https://github.com/FishHawk/sakura-test)更新了v0.8版本的测试，并提供了测试代码（需要自建openai like api后端）。
-
-也可以通过本仓库的翻译脚本自行测试对比。
-
-- 轻小说(R18)
-
-  - v0.7
-
-  使用[这本r18小说](https://novel18.syosetu.com/n2975ig)的部分文本，比较各版本输出文本，结果已上传至[链接](https://huggingface.co/sakuraumi/Sakura-13B-Galgame-Archived/blob/main/r18_test.txt)
+  网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译的轻小说可供参考。
 
 # 推理
 
