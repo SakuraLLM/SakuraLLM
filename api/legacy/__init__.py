@@ -1,6 +1,6 @@
 from typing import *
 from fastapi import Depends
-import pprint
+from pprint import pprint, pformat
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -25,9 +25,9 @@ router = APIRouter(
 @router.post("/generate")
 def completions(data: GenerateRequest):
     # Mixin the required parameter with optional ones in extra.
-    logger.debug(f"Incoming request: {pprint.pformat(data)}")
+    logger.debug(f"Incoming request: \n{data.model_dump()}")
 
-    generation_config = GenerationConfig(**data.__dict__)
+    generation_config = GenerationConfig(**data.model_dump())
 
     logger.info(f"translate: {data.prompt}")
     output = state.get_model().completion(data.prompt, generation_config)

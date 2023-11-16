@@ -1,3 +1,8 @@
+import logging
+from pprint import pprint, pformat
+from transformers import GenerationConfig
+
+logger = logging.getLogger(__name__)
 
 
 def split_response(response, model_version):
@@ -49,3 +54,7 @@ def get_compare_text(source_text, translated_text):
             output_text += source_text_list[i] + "\n" + translated_text_list[i] + "\n\n"
         output_text = output_text.strip()
         return output_text
+
+
+def log_generation_config(generation_config: GenerationConfig):
+    logger.debug(f"current generation config: \n{pformat(generation_config.to_diff_dict())}")

@@ -5,6 +5,7 @@ from pathlib import Path
 from functools import lru_cache
 from threading import Thread, Lock
 from dataclasses import dataclass
+from pprint import pformat
 
 from pydantic import BaseModel
 
@@ -16,7 +17,7 @@ from sampler_hijack import hijack_samplers
 from typing import *
 
 import utils
-from utils import consts
+from utils import consts, log_generation_config
 
 import logging
 
@@ -102,7 +103,8 @@ class SakuraModel:
     def completion(self, prompt: str, generation_config: GenerationConfig) -> ModelResponse:
         t0 = time.time()
 
-        logger.debug(f"current generation config: {generation_config}")
+        log_generation_config(generation_config)
+
         output = self.get_model_response(
             self.model,
             self.tokenizer,
