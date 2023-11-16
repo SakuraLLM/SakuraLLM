@@ -42,7 +42,35 @@
 
 # 快速开始
 
+## Docker部署
+
+详见分支`dev_server`中的[README.docker.md](https://github.com/SakuraLLM/Sakura-13B-Galgame/blob/dev_server/README.docker.md)
+
+## 本地部署
+
 首先将本仓库拉取到本地。
+
+- 启动API服务
+
+仓库提供了API接口（感谢[KurikoMoe](https://github.com/kurikomoe)），用以提供API服务，以接入其他程序。
+
+```bash
+# 参数说明：
+# 模型相关
+# --model_name_or_path：模型本地路径或者huggingface仓库id。
+# --model_version：模型版本，本仓库README表格中即可查看。可选范围：['0.1', '0.4', '0.5', '0.7', '0.8']
+# --use_gptq_model：如果模型为gptq量化模型，则需加此项；如是全量模型，则不需要添加。
+# --trust_remote_code：是否允许执行外部命令（对于0.5，0.7，0.8版本模型需要加上这个参数，否则报错。
+# --llama：如果你使用的模型是llama家族的模型（对于0.1，0.4版本），则需要加入此命令。
+# API服务相关
+# --listen：指定要监听的IP和端口，格式为<IP>:<Port>，如127.0.0.1:5000。默认为127.0.0.1:5000
+# --auth：使用认证，访问API需要提供账户和密码。
+# --no-auth：不使用认证，如果将API暴露在公网可能会降低安全性。
+# --log：设置日志等级。
+# 下面为一个使用v0.8-4bit模型，同时不使用认证，监听127.0.0.1:5000的命令示例。
+# 这里模型默认从huggingface拉取，如果你已经将模型下载至本地，可以将--model_name_or_path参数的值指定为本地目录。
+python server.py --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0_8-4bit --use_gptq_model --model_version 0.8 --trust_remote_code --no-auth
+```
 
 - 翻译Epub文件
 
