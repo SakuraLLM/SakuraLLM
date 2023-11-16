@@ -52,7 +52,7 @@
 
 - 启动API服务
 
-仓库提供了API接口（感谢[KurikoMoe](https://github.com/kurikomoe)），用以提供API服务，以接入其他程序。
+切换到`dev_server`分支，该分支提供了API接口（感谢[KurikoMoe](https://github.com/kurikomoe)），用以提供API服务，以接入其他程序。
 
 ```bash
 # 参数说明：
