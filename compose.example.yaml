@@ -4,7 +4,7 @@
 version: "1.0"
 
 x-gpu-template: &gpu_template
-  image: kurikomoe/sakura-13b-galgame:0.8.1
+  image: kurikomoe/sakura-13b-galgame:0.8.1.1
   volumes: &mount_model
     - ./models:/models
   deploy: &deploy_with_gpu
@@ -16,10 +16,10 @@ x-gpu-template: &gpu_template
             capabilities: [gpu, ]
 
 x-environment: &env_template
-    LOGLEVEL: info 
+    LOGLEVEL: info
     SAKURA_MODEL_NAME: Sakura-13B-LNovel-v0_8-4bit
     SAKURA_MODEL_VERSION: 0.8
-    
+
 
 services:
   server:

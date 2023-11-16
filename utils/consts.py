@@ -15,20 +15,35 @@ class ModelTestCase:
     test_output: str
 
 
+def get_prompt(input, model_version):
+    if model_version == '0.5' or model_version == '0.8':
+        prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"
+        return prompt
+    if model_version == '0.7':
+        prompt = f"<|im_start|>user\n将下面的日文文本翻译成中文：{input}<|im_end|>\n<|im_start|>assistant\n"
+        return prompt
+    if model_version == '0.1':
+        prompt = "Human: \n将下面的日文文本翻译成中文：" + input + "\n\nAssistant: \n"
+        return prompt
+    if model_version == '0.4':
+        prompt = "User: 将下面的日文文本翻译成中文：" + input + "\nAssistant: "
+        return prompt
+
+    raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
+
+
 def get_test_case_by_model_version(model_version: str):
+    default_generation_config = GenerationConfig(
+        num_beams=1,
+        max_new_tokens=1024,
+        min_new_tokens=1,
+        do_sample=False,
+    )
+
     if model_version == "0.8":
         return ModelTestCase(
             model_version=model_version,
-            generation_config=GenerationConfig(
-                num_beams=1,
-                max_new_tokens=1024,
-                min_new_tokens=1,
-                do_sample=False,
-                # do_sample cannot be used with these
-                # top_k=40,
-                # top_p=0.3,
-                # temperature=0.1,
-            ),
+            generation_config=default_generation_config,
             test_input="やる気マンゴスキン",
             test_output="干劲Mangoskin",
         )

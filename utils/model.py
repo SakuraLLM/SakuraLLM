@@ -84,13 +84,13 @@ class SakuraModel:
         return
     
     def check_model_by_magic(self) -> bool:
-        (ground_truth, output) = self.test_loaded()
+        (prompt, ground_truth, output) = self.test_loaded()
         logger.debug(f"test output: {output}")
         logger.debug(f"ground truth: {ground_truth}")
         ret = ground_truth == output.text
         if not ret:
             logging.warning(f"model output is not correct, please check the loaded model")
-            logging.warning(f"input: {consts.get_test_input(self.cfg.model_version)}")
+            logging.warning(f"input: {prompt}")
             logging.warning(f"ground_truth: {ground_truth}")
             logging.warning(f"current output: {output}")
         return ret
@@ -124,10 +124,10 @@ class SakuraModel:
         test_input = testcase.test_input
         test_output = testcase.test_output
 
-        prompt = utils.get_prompt(test_input, self.cfg.model_version)
+        prompt = consts.get_prompt(test_input, self.cfg.model_version)
         output = self.completion(prompt, generation_config)
 
-        return test_output, output
+        return prompt, test_output, output
 
 
     def get_model_response(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int) -> ModelResponse:

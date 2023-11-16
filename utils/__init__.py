@@ -1,20 +1,4 @@
 
-def get_prompt(input, model_version):
-    if model_version == '0.5' or model_version == '0.8':
-        prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"
-        return prompt
-    if model_version == '0.7':
-        prompt = f"<|im_start|>user\n将下面的日文文本翻译成中文：{input}<|im_end|>\n<|im_start|>assistant\n"
-        return prompt
-    if model_version == '0.1':
-        prompt = "Human: \n将下面的日文文本翻译成中文：" + input + "\n\nAssistant: \n"
-        return prompt
-    if model_version == '0.4':
-        prompt = "User: 将下面的日文文本翻译成中文：" + input + "\nAssistant: "
-        return prompt
-
-    raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
-
 
 def split_response(response, model_version):
     response = response.replace("</s>", "")
