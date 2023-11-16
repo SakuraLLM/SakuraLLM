@@ -175,7 +175,7 @@ python translate_novel.py \
 
 ### v0.8
 
-数据集：约3.8M条galgame与轻小说中日平行语料(共约0.25B字数)
+数据集：约0.25B字数的轻小说/Galgame中日平行语料
 
 微调方式：全参数
 
@@ -185,7 +185,7 @@ python translate_novel.py \
 
 ### v0.7
 
-数据集：约1M Galgame中日文本 + 约3.4M 轻小说中日文本
+数据集：约0.3B字数的轻小说/Galgame中日平行语料
 
 微调方式：全参数
 
@@ -195,7 +195,7 @@ python translate_novel.py \
 
 ### v0.5
 
-数据集：约260k Galgame中日文本 + 约2.3M 轻小说中日文本
+数据集：约0.17B字数的轻小说/Galgame中日平行语料
 
 微调方式：全参数
 
@@ -205,7 +205,7 @@ python translate_novel.py \
 
 ### v0.4
 
-数据集：约260k Galgame中日文本 + 约2.3M 轻小说中日文本
+数据集：约0.17B字数的轻小说/Galgame中日平行语料
 
 微调方式：全参数
 
@@ -215,7 +215,7 @@ python translate_novel.py \
 
 ### v0.1
 
-数据集：约260k Galgame中日文本
+数据集：约10M字数的Galgame中日平行语料
 
 微调方式：全参数
 
