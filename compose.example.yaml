@@ -4,7 +4,7 @@
 version: "1.0"
 
 x-gpu-template: &gpu_template
-  image: kurikomoe/sakura-13b-galgame:0.8.1.2
+  image: kurikomoe/sakura-13b-galgame:0.8.2.0
   volumes: &mount_model
     - ./models:/models
   deploy: &deploy_with_gpu

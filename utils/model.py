@@ -5,7 +5,7 @@ from pathlib import Path
 from functools import lru_cache
 from threading import Thread, Lock
 from dataclasses import dataclass
-from pprint import pformat
+from pprint import pformat, pprint
 
 from pydantic import BaseModel
 
@@ -25,12 +25,17 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SakuraModelConfig:
+    # read from console
     model_name_or_path: str
     use_gptq_model: bool
-    model_version: str = "0.8"
     trust_remote_code: bool = False
     llama: bool = False
     text_length: int = 512
+
+    # read from config.json (model_name_or_path)
+    model_name: str|None = None
+    model_quant: str|None = None
+    model_version: str = "0.8"  # Can be also read from terminal, double check this.
 
 def load_model(args: SakuraModelConfig):
     if args.use_gptq_model:
@@ -76,13 +81,37 @@ class SakuraModel:
 
         hijack_samplers()
 
+        # Global lock for model generation.
+        self.lock = Lock()
+
         (tokenizer, model) = load_model(cfg)
         self.tokenizer = tokenizer
         self.model = model
 
-        self.lock = Lock()
+
+        try:
+            model_name = self.model.config.sakura_name
+            model_version = self.model.config.sakura_version
+            model_quant = self.model.config.sakura_quant
+        except:
+            logger.error("Some attrs are missing in model config.json (sakura_{name|version|quant}), please check the model!")
+            exit(-1)
+
+        # FIXME(kuriko): Currently we only know quant version from terminal, we cannot depend on parsing `model_name_or_path`
+        # FIXME(kuriko): sakura_xxx is hard coded here, maybe we can find a better way.
+        if (input_model_version := self.cfg.model_version) != model_version:
+            logger.error(f"Model version check failed, {input_model_version} != {model_version}")
+            logger.error(f"Current config: {model_name}-v{model_version}-{model_quant}")
+            exit(-1)
+
+        self.cfg.model_name = model_name
+        self.cfg.model_version = model_version
+        self.cfg.model_quant = model_quant
 
         return
+
+    def get_cfg(self) -> SakuraModelConfig:
+        return self.cfg
 
     def check_model_by_magic(self) -> bool:
         (prompt, ground_truth, output) = self.test_loaded()
@@ -100,8 +129,7 @@ class SakuraModel:
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
 
-    def completion(self, prompt: str, generation_config: GenerationConfig) -> ModelResponse:
-
+    def completion(self, prompt: str, generation_config: GenerationConfig, is_print_speed:bool=True) -> ModelResponse:
         log_generation_config(generation_config)
 
         output = self.get_model_response(
@@ -110,7 +138,8 @@ class SakuraModel:
             prompt,
             self.cfg.model_version,
             generation_config,
-            self.get_max_text_length(len(prompt))
+            self.get_max_text_length(len(prompt)),
+            is_print_speed,
         )
 
         return output
@@ -123,26 +152,24 @@ class SakuraModel:
         test_output = testcase.test_output
 
         prompt = consts.get_prompt(test_input, self.cfg.model_version)
-        output = self.completion(prompt, generation_config)
+        output = self.completion(prompt, generation_config, is_print_speed=False)
 
         return prompt, test_output, output
 
 
-    def get_model_response(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int) -> ModelResponse:
-        input_token = tokenizer(prompt, return_tensors="pt")
-        input_token_len = input_token.input_ids.shape[-1]
-
+    def get_model_response(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
         with self.lock:  # using lock to prevent too many memory allocated on GPU
             t0 = time.time()
+            input_token = tokenizer(prompt, return_tensors="pt")
+            input_token_len = input_token.input_ids.shape[-1]
             generation = model.generate(**input_token.to(model.device), generation_config=generation_config)[0]
+            new_token = generation.shape[-1] - input_token_len
+            response = tokenizer.decode(generation)
+            output = utils.split_response(response, model_version)
             t1 = time.time()
 
-        new_token = generation.shape[-1] - input_token_len
-        response = tokenizer.decode(generation)
-
-        output = utils.split_response(response, model_version)
-
-        logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_token/(t1-t0):.2f} tokens/s, {new_token} tokens, context {input_token_len} tokens)')
+        if is_print_speed:
+            logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_token/(t1-t0):.2f} tokens/s, {new_token} tokens, context {input_token_len} tokens)')
 
         return self.ModelResponse(
             context_token = input_token_len,

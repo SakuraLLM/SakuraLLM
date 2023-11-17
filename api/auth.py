@@ -6,6 +6,8 @@ from fastapi import status
 
 from utils.state import ServerConfig as server_cfg
 
+import logging
+logger = logging.getLogger(__name__)
 
 security = HTTPBasic()
 

@@ -18,8 +18,6 @@ from utils import model as M
 from utils import state
 from utils.state import ServerConfig
 
-from api.legacy import router as legacy_router
-
 
 dependencies = []
 
@@ -82,7 +80,11 @@ ServerConfig.password = auth[1]
 
 app = FastAPI(dependencies=dependencies)
 
+from api.legacy import router as legacy_router
 app.include_router(legacy_router)
+
+from api.core import router as core_router
+app.include_router(core_router)
 
 origins = [
     "*",
