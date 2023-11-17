@@ -101,7 +101,6 @@ class SakuraModel:
         return max(self.cfg.text_length, length)
 
     def completion(self, prompt: str, generation_config: GenerationConfig) -> ModelResponse:
-        t0 = time.time()
 
         log_generation_config(generation_config)
 
@@ -113,10 +112,6 @@ class SakuraModel:
             generation_config,
             self.get_max_text_length(len(prompt))
         )
-        t1 = time.time()
-        original_tokens = output.context_token
-        new_tokens = output.new_token
-        logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {original_tokens} tokens)')
 
         return output
 
@@ -136,11 +131,18 @@ class SakuraModel:
     def get_model_response(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int) -> ModelResponse:
         input_token = tokenizer(prompt, return_tensors="pt")
         input_token_len = input_token.input_ids.shape[-1]
+
         with self.lock:  # using lock to prevent too many memory allocated on GPU
+            t0 = time.time()
             generation = model.generate(**input_token.to(model.device), generation_config=generation_config)[0]
+            t1 = time.time()
+
         new_token = generation.shape[-1] - input_token_len
         response = tokenizer.decode(generation)
+
         output = utils.split_response(response, model_version)
+
+        logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_token/(t1-t0):.2f} tokens/s, {new_token} tokens, context {input_token_len} tokens)')
 
         return self.ModelResponse(
             context_token = input_token_len,
