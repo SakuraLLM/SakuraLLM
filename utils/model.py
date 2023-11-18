@@ -1,9 +1,9 @@
-import re
 import time
-import random
+import asyncio
 from pathlib import Path
 from functools import lru_cache
-from threading import Thread, Lock
+# from threading import Lock
+from asyncio import Lock
 from dataclasses import dataclass
 from pprint import pformat, pprint
 
@@ -55,7 +55,13 @@ def load_model(args: SakuraModelConfig):
         tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=False, trust_remote_code=args.trust_remote_code, use_safetensors=False)
 
     if args.use_gptq_model:
-        model = AutoGPTQForCausalLM.from_quantized(args.model_name_or_path, device="cuda:0", trust_remote_code=args.trust_remote_code, use_safetensors=False)
+        model = AutoGPTQForCausalLM.from_quantized(
+            args.model_name_or_path,
+            device="cuda:0",
+            trust_remote_code=args.trust_remote_code,
+            use_safetensors=False,
+            use_triton=False,
+        )
     else:
         if args.llama:
             model = LlamaForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
@@ -129,10 +135,10 @@ class SakuraModel:
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
 
-    def completion(self, prompt: str, generation_config: GenerationConfig, is_print_speed:bool=True) -> ModelResponse:
+    async def completion(self, prompt: str, generation_config: GenerationConfig, is_print_speed:bool=True) -> ModelResponse:
         log_generation_config(generation_config)
 
-        output = self.get_model_response(
+        output = await self.get_model_response(
             self.model,
             self.tokenizer,
             prompt,
@@ -152,13 +158,14 @@ class SakuraModel:
         test_output = testcase.test_output
 
         prompt = consts.get_prompt(test_input, self.cfg.model_version)
-        output = self.completion(prompt, generation_config, is_print_speed=False)
+
+        output = asyncio.run(self.completion(prompt, generation_config, is_print_speed=False))
 
         return prompt, test_output, output
 
 
-    def get_model_response(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
-        with self.lock:  # using lock to prevent too many memory allocated on GPU
+    async def get_model_response(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
+        async with self.lock:  # using lock to prevent too many memory allocated on GPU
             t0 = time.time()
             input_token = tokenizer(prompt, return_tensors="pt")
             input_token_len = input_token.input_ids.shape[-1]

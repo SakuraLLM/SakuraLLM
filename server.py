@@ -1,3 +1,4 @@
+import asyncio
 import coloredlogs
 import logging
 import os
@@ -6,11 +7,15 @@ from contextlib import asynccontextmanager
 from pprint import pprint, pformat
 import random
 from dacite import from_dict
+from hypercorn import Config
 
-import uvicorn
+# import uvicorn
+from hypercorn.asyncio import serve
 from fastapi import FastAPI, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
+
+from api import log_request
 from api.auth import get_auth_username
 
 from utils import *
@@ -19,7 +24,9 @@ from utils import state
 from utils.state import ServerConfig
 
 
-dependencies = []
+dependencies = [
+    Depends(log_request),
+]
 
 # parse config
 parser = ArgumentParser()
@@ -113,9 +120,19 @@ if __name__ == "__main__":
         f"Server will run at http://{ServerConfig.address}:{ServerConfig.port}, preparing...")
 
     # disable multiprocessing, since LLM model is not thread safe
-    uvicorn.run("server:app",
-                host=ServerConfig.address,
-                port=ServerConfig.port,
-                log_level=args.logLevel,
-                workers=1
-                )
+    if False:  # use uvicorn
+        uvicorn.run("server:app",
+                    host=ServerConfig.address,
+                    port=ServerConfig.port,
+                    log_level=args.logLevel,
+                    workers=1
+                    )
+    else:  # use hypercorn
+        config = Config()
+        binding = f"{ServerConfig.address}:{ServerConfig.port}"
+        logger.debug(f"hypercorn binding: {binding}")
+        config.bind= [binding,]
+        config.loglevel = args.logLevel
+        config.debug = args.logLevel == "debug"
+
+        asyncio.run(serve(app, config))

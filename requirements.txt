@@ -10,7 +10,10 @@ scipy
 numpy
 
 # server
-fastapi
-uvicorn[standard]
+fastapi[all]
+asyncio
+sse-starlette  # Server Side Event Support
+# uvicorn[standard]
+hypercorn
 coloredlogs
 dacite
