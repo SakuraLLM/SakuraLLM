@@ -15,7 +15,12 @@ class ModelTestCase:
     test_output: str
 
 
-def get_prompt(input, model_version):
+def get_prompt(input, model_name:str, model_version:str, model_quant:str):
+    # FIXME(kuriko): hardcoded here for llama_cpp quant model
+    if model_name == 'llama_cpp':
+        prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"
+        return prompt
+
     if model_version == '0.5' or model_version == '0.8':
         prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"
         return prompt
@@ -32,7 +37,7 @@ def get_prompt(input, model_version):
     raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
 
 
-def get_test_case_by_model_version(model_version: str):
+def get_test_case_by_model_version(model_name:str, model_version:str, model_quant:str):
     default_generation_config = GenerationConfig(
         num_beams=1,
         max_new_tokens=1024,
@@ -40,7 +45,7 @@ def get_test_case_by_model_version(model_version: str):
         do_sample=False,
     )
 
-    if model_version == "0.8":
+    if model_name == "llama_cpp" or model_version == "0.8":
         return ModelTestCase(
             model_version=model_version,
             generation_config=default_generation_config,

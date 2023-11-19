@@ -1,0 +1,7 @@
+# server
+fastapi[all]
+asyncio
+sse-starlette  # Server Side Event Support
+hypercorn
+coloredlogs
+dacite

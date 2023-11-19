@@ -3,9 +3,10 @@
 # --extra-index-url https://download.pytorch.org/whl/cu118
 torch>=2.1.0
 transformers==4.33.2
-auto-gptq
-sentencepiece
-bitsandbytes
-xformers
 scipy
 numpy
+
+# please setup env variables before pip install
+# Linux & macOS: CMAKE_ARGS="-xxx=on"
+# Windows: $env:CMAKE_ARGS="-xxx=on"
+llama-cpp-python

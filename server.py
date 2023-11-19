@@ -50,9 +50,15 @@ parser.add_argument("--model_version", type=str, default="0.8",
                     help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8']")
 parser.add_argument("--trust_remote_code", action="store_true",
                     help="whether to trust remote code.")
+
 parser.add_argument("--llama", action="store_true",
                     help="whether your model is llama family.")
+
+parser.add_argument("--llama_cpp", action="store_true", help="whether to use llama.cpp.")
+parser.add_argument("--use_gpu", action="store_true", help="whether to use gpu when using llama.cpp.")
+parser.add_argument("--n_gpu_layers", type=int, default=0, help="layers cnt when using gpu in llama.cpp")
 args = parser.parse_args()
+
 
 coloredlogs.install(level=args.logLevel.upper())
 logger = logging.getLogger(__name__)
