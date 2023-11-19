@@ -73,13 +73,13 @@ def split_response(response, model_version):
     
     raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
 
-def detect_degeneration(generation: list, model_version):
+def detect_degeneration(generation: list, model_version, text_length):
     if model_version != "0.8":
         return False
     i = generation.index(196)
     generation = generation[i+1:]
     print(len(generation))
-    if len(generation) >= 1023:
+    if len(generation) >= text_length:
         print("model degeneration detected, retrying...")
         return True
     else:
@@ -95,7 +95,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=2 * text_length,
+            max_new_tokens=text_length,
             min_new_tokens=1,
             do_sample=True,
             repetition_penalty=1.0,
@@ -110,7 +110,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=2 * text_length,
+            max_new_tokens=text_length,
             min_new_tokens=1,
             do_sample=True,
             repetition_penalty=1.0,
@@ -121,14 +121,30 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
     backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
     if llama_cpp:
-        output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
+        
+        def generate(model, generation_config):
+            if "frequency_penalty" in generation_config.__dict__.keys():
+                output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
+            else:
+                output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
+            return output
+        
+        stage = 0
+        output = generate(model, generation_config)
+        while output['usage']['completion_tokens'] == text_length:
+            stage += 1
+            if stage > 2:
+                print("model degeneration cannot be avoided.")
+                break
+            print("model degeneration detected, retrying...")
+            output = generate(model, backup_generation_config[stage-1])
         response = output['choices'][0]['text']
         return response
 
     generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
     if len(generation) > 2 * text_length:
         stage = 0
-        while detect_degeneration(list(generation), model_version):
+        while detect_degeneration(list(generation), model_version, text_length):
             stage += 1
             if stage > 2:
                 print("model degeneration cannot be avoided.")
@@ -199,7 +215,7 @@ def main():
         bos_token_id=1,
         eos_token_id=2,
         pad_token_id=0,
-        max_new_tokens=1024,
+        max_new_tokens=512,
         min_new_tokens=1,
         do_sample=True
     )    
