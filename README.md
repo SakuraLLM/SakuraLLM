@@ -29,7 +29,7 @@
 | 20231011-v0.7 | 🤗 [Kisara-14B-LNovel](https://huggingface.co/sakuraumi/Sakura-14B-LNovel) | - | - | - |
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) |
 
-目前仍为实验版本，翻译质量较差. 个人使用推荐GPT4.
+目前仍为实验版本，翻译质量整体接近GPT-3.5，但更贴近轻小说/Galgame的文风. 个人使用推荐GPT4.
 
 # 显存需求
 
