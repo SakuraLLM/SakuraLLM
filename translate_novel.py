@@ -142,7 +142,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
         return response
 
     generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
-    if len(generation) > 2 * text_length:
+    if len(generation) > text_length:
         stage = 0
         while detect_degeneration(list(generation), model_version, text_length):
             stage += 1
