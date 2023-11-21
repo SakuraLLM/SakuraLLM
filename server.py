@@ -57,6 +57,7 @@ parser.add_argument("--llama", action="store_true",
 parser.add_argument("--llama_cpp", action="store_true", help="whether to use llama.cpp.")
 parser.add_argument("--use_gpu", action="store_true", help="whether to use gpu when using llama.cpp.")
 parser.add_argument("--n_gpu_layers", type=int, default=0, help="layers cnt when using gpu in llama.cpp")
+parser.add_argument("--dry_run", action="store_true", help="whether to use gpu when using llama.cpp.")
 args = parser.parse_args()
 
 

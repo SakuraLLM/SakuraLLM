@@ -41,6 +41,7 @@ class SakuraModelConfig:
     use_gptq_model: bool
     trust_remote_code: bool = False
     text_length: int = 512
+    dry_run: bool = False
 
     # llama.cpp
     llama: bool = False
@@ -118,18 +119,23 @@ class SakuraModel:
         cfg: SakuraModelConfig,
     ):
         self.cfg = cfg
+        self.dry_run = self.cfg.dry_run
 
         hijack_samplers()
 
         # Global lock for model generation.
         self.lock = Lock()
 
-        (tokenizer, model) = load_model(cfg)
-        self.tokenizer = tokenizer
-        self.model = model
+        if self.dry_run:
+            self.tokenizer = None
+            self.model = None
+        else:
+            (tokenizer, model) = load_model(cfg)
+            self.tokenizer = tokenizer
+            self.model = model
 
         try:
-            if not cfg.llama_cpp:
+            if not cfg.llama_cpp and not self.dry_run:
                 model_name = self.model.config.sakura_name
                 model_version = self.model.config.sakura_version
                 model_quant = self.model.config.sakura_quant
@@ -204,6 +210,8 @@ class SakuraModel:
         return prompt, test_output, output
 
     def __llama_cpp_model(self, model: "Llama", prompt: str, generation_config: GenerationConfig):
+        if self.dry_run:
+            return prompt, (1, 1)
         output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
         response = output['choices'][0]['text']
         pprint(output)
@@ -214,6 +222,8 @@ class SakuraModel:
 
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
+        if self.dry_run:
+            return prompt, (1, 1)
         input_tokens = tokenizer(prompt, return_tensors="pt")
         input_tokens_len = input_tokens.input_ids.shape[-1]
 
@@ -235,7 +245,7 @@ class SakuraModel:
                 output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
             t1 = time.time()
 
-        if is_print_speed:
+        if is_print_speed and not self.dry_run:
             logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {input_tokens_len} tokens)')
 
         return self.ModelResponse(
