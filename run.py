@@ -5,7 +5,8 @@ import json
 import os
 import sys
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
+from ansi2html import Ansi2HTMLConverter
 
 
 class ModelType(Enum):
@@ -90,9 +91,13 @@ class ApiServerConsole(QtWidgets.QWidget):
 
         self.process = QtCore.QProcess()
         self.process.stateChanged.connect(self.onProcessStateChanged)
-        self.process.readyReadStandardError.connect(self.onReadyReadStandardError)
         self.process.readyReadStandardOutput.connect(self.onReadyReadStandardOutput)
+        self.process.readyReadStandardError.connect(self.onReadyReadStandardOutput)
         self.terminal = QtWidgets.QTextBrowser()
+        # 使用等宽字体
+        fixed_font = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont)
+        self.terminal.setFont(fixed_font)
+        self.terminal_ansi_converter = Ansi2HTMLConverter()
 
         hbox = QtWidgets.QHBoxLayout()
         hbox.addLayout(self.vbox)
@@ -110,16 +115,16 @@ class ApiServerConsole(QtWidgets.QWidget):
         event.accept()
 
     @QtCore.Slot()
-    def onReadyReadStandardError(self):
-        error = self.process.readAllStandardError().data().decode()
-        self.terminal.setTextColor(QtCore.Qt.red)
-        self.terminal.insertPlainText(error)
-
-    @QtCore.Slot()
     def onReadyReadStandardOutput(self):
         output = self.process.readAllStandardOutput().data().decode()
-        self.terminal.setTextColor(self.terminal.palette().text().color())
-        self.terminal.insertPlainText(output)
+        html = self.terminal_ansi_converter.convert(
+            output,
+            full=False,
+        )
+        print()
+        # self.terminal_ansi_converter
+        # self.terminal.setStyle(QtWidgets.QStyle.fr)
+        self.terminal.insertHtml(html)
 
     @QtCore.Slot()
     def onProcessStateChanged(self, state):
