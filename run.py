@@ -131,11 +131,10 @@ class ApiServerConsole(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def scanModels(self):
-        print(1)
         for _, button in self.models:
             button.deleteLater()
-        self.models = []
 
+        self.models = []
         for index, model in enumerate(list_model()):
             button = QtWidgets.QRadioButton(model.model_path)
             button.setChecked(index == 0)
@@ -167,14 +166,15 @@ class ApiServerConsole(QtWidgets.QWidget):
             "python",
             "server_fake.py",
             f"--model_name_or_path ./{model.model_path}",
-            "--model_version 0.8",
             "--trust_remote_code",
             "--no-auth",
             # --log info
         ]
         if model.model_type == ModelType.LLAMA:
+            command_parts.append("--model_version 0.8")
             command_parts.append("--llama_cpp")
         elif model.model_type == ModelType.GPTQ:
+            command_parts.append("--model_version " + model.model_version)
             if model.model_quant != "":
                 command_parts.append("--use_gptq_model")
 
