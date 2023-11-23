@@ -5,6 +5,7 @@ import time
 import re
 from tqdm import tqdm
 from sampler_hijack import hijack_samplers
+import sys
 
 total_token = 0
 generation_time = 0
@@ -56,6 +57,16 @@ def get_prompt(input, model_version):
 
     raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
 
+def get_llm_sharp_type(model_version):
+    if model_version == '0.5' or model_version == '0.8':
+        return "BaichuanAwq"
+    if model_version == '0.7':
+        return "QwenAwq"
+    if model_version == '0.1' or model_version == '0.4':
+        return "Llama"
+
+    raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
+
 def split_response(response, model_version):
     response = response.replace("</s>", "")
     if model_version == '0.5' or model_version == '0.8':
@@ -85,7 +96,7 @@ def detect_degeneration(generation: list, model_version, text_length):
     else:
         return False
 
-def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, llama_cpp: bool):
+def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, llama_cpp: bool, use_llm_sharp: bool):
 
     backup_generation_config_stage2 = GenerationConfig(
             temperature=0.1,
@@ -141,6 +152,27 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
         response = output['choices'][0]['text']
         return response
 
+    elif use_llm_sharp:
+        import System
+        import llm_sharp
+        def generate(model, generation_config):
+            history = System.Collections.Generic.List[System.ValueTuple[System.String, System.String]]()
+            g = llm_sharp.LLM.Pretrained.GenerationConfig()
+            g.temperature = generation_config.__dict__['temperature']
+            g.top_p = generation_config.__dict__['top_p']
+            g.max_generated_tokens = generation_config.__dict__['max_new_tokens']
+            output = model.chat(history, prompt, g)
+            output_ret = ""
+            cnt = 0
+            for o in output:
+                output_ret += o
+                cnt += 1
+            add_token_cnt(cnt)
+            return output_ret
+            
+        response = generate(model, generation_config)
+        return response
+
     generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
     if len(generation) > 2 * text_length:
         stage = 0
@@ -189,15 +221,29 @@ def main():
     parser.add_argument("--llama_cpp", action="store_true", help="whether to use llama.cpp.")
     parser.add_argument("--use_gpu", action="store_true", help="whether to use gpu when using llama.cpp.")
     parser.add_argument("--n_gpu_layers", type=int, default=0, help="layers cnt when using gpu in llama.cpp")
+    parser.add_argument("--use_llm_sharp", action="store_true", help="whether to use llm-sharp.")
+    parser.add_argument("--llm_sharp_lib_path", type=str, default="./llm-sharp", help="path of the library of llm-sharp")
     args = parser.parse_args()
 
+    if args.use_gptq_model + args.llama_cpp + args.use_llm_sharp != 1:
+        raise ValueError('You are using two or more of the "use_gptq_model", "llama_cpp", "llm_sharp" flags, which is not supported.')
+    
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
-        
-    if args.llama_cpp:
-        if args.use_gptq_model:
-            raise ValueError("You are using both use_gptq_model and llama_cpp flag, which is not supported.")
+    
+    if args.llama_cpp:            
         from llama_cpp import Llama
+        
+    if args.use_llm_sharp:
+        path = args.llm_sharp_lib_path
+        sys.path.append(path)
+        from pythonnet import load
+        load("coreclr")
+        import clr
+        clr.AddReference("LLM")
+        from llm_sharp.LLM.Pretrained import LanguageModel
+        from llm_sharp.LLM.Utils import LibTorchLoader
+        from TorchSharp import torch
         
     if args.llama:
         from transformers import LlamaForCausalLM, LlamaTokenizer
@@ -221,7 +267,7 @@ def main():
     )    
 
     print("loading...")
-    if not args.llama_cpp:
+    if not args.llama_cpp and not args.use_llm_sharp:
         if args.llama:
             tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=args.trust_remote_code)
         else:
@@ -239,6 +285,11 @@ def main():
         else:
             n_gpu = 0
         model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length)
+    elif args.use_llm_sharp:
+        LibTorchLoader.EnsureLoaded()
+        device = torch.device("cuda")
+        dtype = torch.ScalarType.Float16
+        model = LanguageModel.from_pretrained(get_llm_sharp_type(args.model_version), args.model_name_or_path, dtype, device)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
             
@@ -249,11 +300,11 @@ def main():
     data = ""
     for d in tqdm(data_list):
         prompt = get_prompt(d, args.model_version)
-        output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length, args.llama_cpp)
+        output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length, args.llama_cpp, args.use_llm_sharp)
         data += output.strip() + "\n"
 
     end = time.time()
-    print("translation completed, used time: ", generation_time, end-start, ", total tokens: ", total_token, ", speed: ", total_token/(end-start), " token/s")
+    print("translation completed, used time: ", end-start, ", total tokens: ", total_token, ", speed: ", total_token/(end-start), " token/s")
 
     print("saving...")
     if args.compare_text:
