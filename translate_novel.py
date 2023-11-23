@@ -225,7 +225,7 @@ def main():
     parser.add_argument("--llm_sharp_lib_path", type=str, default="./llm-sharp", help="path of the library of llm-sharp")
     args = parser.parse_args()
 
-    if args.use_gptq_model + args.llama_cpp + args.use_llm_sharp != 1:
+    if args.use_gptq_model + args.llama_cpp + args.use_llm_sharp > 1:
         raise ValueError('You are using two or more of the "use_gptq_model", "llama_cpp", "llm_sharp" flags, which is not supported.')
     
     if args.use_gptq_model:
