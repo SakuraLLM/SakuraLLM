@@ -41,7 +41,7 @@ def list_model():
             )
 
     def parse_model_file(model_file):
-        assert model_file.endswith(".gguf")
+        assert model_file.endswith(".gguf") or model_file.endswith(".ggml")
         return Model(
             model_path=model_file,
             model_type=ModelType.LLAMA,
