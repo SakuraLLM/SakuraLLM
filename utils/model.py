@@ -2,8 +2,8 @@ import time
 import asyncio
 from pathlib import Path
 from functools import lru_cache
-# from threading import Lock
-from asyncio import Lock
+from threading import Lock
+# from asyncio import Lock
 from dataclasses import dataclass
 from pprint import pformat, pprint
 
@@ -17,7 +17,7 @@ from sampler_hijack import hijack_samplers
 from typing import *
 
 import utils
-from utils import consts, log_generation_config
+from utils import consts, log_generation_config, state
 
 import logging
 
@@ -175,17 +175,20 @@ class SakuraModel:
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
 
-    async def completion(self, prompt: str, generation_config: GenerationConfig, is_print_speed:bool=True) -> ModelResponse:
+    async def completion(self, prompt: str, generation_config: GenerationConfig, is_print_speed: bool = True) -> ModelResponse:
         log_generation_config(generation_config)
 
-        output = await self.get_model_response(
-            self.model,
-            self.tokenizer,
-            prompt,
-            self.cfg.model_version,
-            generation_config,
-            self.get_max_text_length(len(prompt)),
-            is_print_speed,
+        loop = asyncio.get_running_loop()
+        output = await loop.run_in_executor(
+            state.g_pool,
+            lambda: self.get_model_response(
+                self.model,
+                self.tokenizer,
+                prompt,
+                self.cfg.model_version,
+                generation_config,
+                self.get_max_text_length(len(prompt)),
+                is_print_speed)
         )
 
         return output
@@ -226,8 +229,8 @@ class SakuraModel:
         return output, (input_tokens_len, new_tokens)
 
 
-    async def get_model_response(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
-        async with self.lock:  # using lock to prevent too many memory allocated on GPU
+    def get_model_response(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
+        with self.lock:  # using lock to prevent too many memory allocated on GPU
             t0 = time.time()
             if self.cfg.llama_cpp:
                 output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)

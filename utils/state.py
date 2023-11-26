@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import *
@@ -15,6 +16,8 @@ class ServerConfig:
         return f"Server(listen: {cls.address}:{cls.port}, auth: {cls.username}:{cls.password})"
 
 sakura_model = None
+
+g_pool = ThreadPoolExecutor()
 
 def init_model(*args, **kwargs):
     global sakura_model

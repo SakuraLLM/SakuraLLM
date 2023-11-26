@@ -1,16 +1,14 @@
+import os
+import random
 import asyncio
 import coloredlogs
 import logging
-import os
 from argparse import ArgumentParser
 from contextlib import asynccontextmanager
 from pprint import pprint, pformat
-import random
 from dacite import from_dict
 from hypercorn import Config
 
-# import uvicorn
-from hypercorn.asyncio import serve
 from fastapi import FastAPI, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,8 +30,7 @@ dependencies = [
 parser = ArgumentParser()
 # server config
 parser.add_argument("--listen", type=str, default="127.0.0.1:5000")
-parser.add_argument("--auth", type=str, default=None,
-                    help="user:pass, user & pass should not contain ':'")
+parser.add_argument("--auth", type=str, help="user:pass, user & pass should not contain ':'")
 parser.add_argument("--no-auth", action="store_true",
                     help="force disable auth")
 
@@ -127,6 +124,7 @@ if __name__ == "__main__":
 
     # disable multiprocessing, since LLM model is not thread safe
     if False:  # use uvicorn
+        import uvicorn
         uvicorn.run("server:app",
                     host=ServerConfig.address,
                     port=ServerConfig.port,
@@ -134,6 +132,7 @@ if __name__ == "__main__":
                     workers=1
                     )
     else:  # use hypercorn
+        from hypercorn.asyncio import serve
         config = Config()
         binding = f"{ServerConfig.address}:{ServerConfig.port}"
         logger.debug(f"hypercorn binding: {binding}")
