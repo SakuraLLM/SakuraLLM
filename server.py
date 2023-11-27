@@ -1,4 +1,9 @@
 import os
+import sys
+# Fix for windows embedded environment
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
+
 import random
 import asyncio
 import coloredlogs
@@ -31,8 +36,7 @@ parser = ArgumentParser()
 # server config
 parser.add_argument("--listen", type=str, default="127.0.0.1:5000")
 parser.add_argument("--auth", type=str, help="user:pass, user & pass should not contain ':'")
-parser.add_argument("--no-auth", action="store_true",
-                    help="force disable auth")
+parser.add_argument("--no-auth", action="store_true", help="force disable auth")
 
 # log
 parser.add_argument("-l", "--log", dest="logLevel", choices=[
@@ -78,7 +82,7 @@ if args.no_auth:
 else:
     if not args.auth:
         # Generate random auth credentials
-        auth = f"sakura:{random.randint(114514, 19194545)}"
+        args.auth = f"sakura:{random.randint(114514, 19194545)}"
         logger.warning(f"Using random auth credentials. {auth}")
 
     auth = args.auth.split(":")
