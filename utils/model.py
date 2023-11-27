@@ -230,22 +230,28 @@ class SakuraModel:
 
 
     def get_model_response(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
-        with self.lock:  # using lock to prevent too many memory allocated on GPU
-            t0 = time.time()
-            if self.cfg.llama_cpp:
-                output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
-            else:
-                output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
-            t1 = time.time()
+        for i in range(3):
+            with self.lock:  # using lock to prevent too many memory allocated on GPU
+                t0 = time.time()
+                if self.cfg.llama_cpp:
+                    output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+                else:
+                    output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
+                t1 = time.time()
 
-        if is_print_speed:
-            logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {input_tokens_len} tokens)')
+            # FIXME(kuriko): a temporary solution to avoid empty output in llama.cpp
+            if len(output) == 0:
+                logger.error(f"Model output is empty, retrying ({i}/3)..., This is a very rare situation, please report to devs")
+                continue
 
-        return self.ModelResponse(
-            context_token = input_tokens_len,
-            new_token = new_tokens,
-            text = output,
-        )
+            if is_print_speed:
+                logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {input_tokens_len} tokens)')
+
+            return self.ModelResponse(
+                context_token = input_tokens_len,
+                new_token = new_tokens,
+                text = output,
+            )
 
     def get_model_response_anti_degen(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
         backup_generation_config_stage2 = GenerationConfig(
