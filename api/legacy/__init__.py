@@ -26,7 +26,7 @@ async def get_output(data: GenerateRequest) -> GenerateResponse:
     generation_config = GenerationConfig(**data.model_dump())
 
     logger.info(f"translate: {data.prompt}")
-    output = await state.get_model().completion(data.prompt, generation_config)
+    output = await state.get_model().completion_async(data.prompt, generation_config)
     # FIXME(kuriko): only for testing, remember to comment this out.
     # await asyncio.sleep(600)
 

@@ -15,7 +15,7 @@ class ModelTestCase:
     test_output: str
 
 
-def get_prompt(input, model_name:str, model_version:str, model_quant:str):
+def get_prompt(input, model_name:str, model_version:str, model_quant:str=None):
     # FIXME(kuriko): hardcoded here for llama_cpp quant model
     if model_name == 'llama_cpp':
         prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"

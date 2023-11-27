@@ -1,7 +1,6 @@
 import time
 import asyncio
 from pathlib import Path
-from functools import lru_cache
 from threading import Lock
 # from asyncio import Lock
 from dataclasses import dataclass
@@ -9,15 +8,13 @@ from pprint import pformat, pprint
 
 from pydantic import BaseModel
 
-from tqdm import tqdm
-from argparse import ArgumentParser
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 from sampler_hijack import hijack_samplers
 
 from typing import *
 
 import utils
-from utils import consts, log_generation_config, state
+from utils import consts, log_generation_config
 
 import logging
 
@@ -175,20 +172,31 @@ class SakuraModel:
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
 
-    async def completion(self, prompt: str, generation_config: GenerationConfig, is_print_speed: bool = True) -> ModelResponse:
+    def completion(self, prompt: str, generation_config: GenerationConfig, is_print_speed: bool = True) -> ModelResponse:
+        log_generation_config(generation_config)
+
+        output = self.get_model_response(
+            self.model,
+            self.tokenizer,
+            prompt,
+            self.cfg.model_version,
+            generation_config,
+            self.get_max_text_length(len(prompt)),
+            is_print_speed)
+
+        return output
+
+    async def completion_async(self, prompt: str, generation_config: GenerationConfig, is_print_speed: bool = True) -> ModelResponse:
         log_generation_config(generation_config)
 
         loop = asyncio.get_running_loop()
         output = await loop.run_in_executor(
-            state.g_pool,
-            lambda: self.get_model_response(
-                self.model,
-                self.tokenizer,
-                prompt,
-                self.cfg.model_version,
-                generation_config,
-                self.get_max_text_length(len(prompt)),
-                is_print_speed)
+            None,
+            lambda: self.completion(
+                prompt=prompt,
+                generation_config=generation_config,
+                is_print_speed=is_print_speed,
+            )
         )
 
         return output
@@ -202,7 +210,7 @@ class SakuraModel:
 
         prompt = consts.get_prompt(test_input, self.cfg.model_name, self.cfg.model_version, self.cfg.model_quant)
 
-        output = asyncio.run(self.completion(prompt, generation_config, is_print_speed=False))
+        output = self.completion(prompt, generation_config, is_print_speed=False)
 
         return prompt, test_output, output
 
