@@ -84,6 +84,7 @@ python server.py --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0_8-4bit --us
 # --data_path：日文原文Epub小说文件路径。
 # --data_folder：批量翻译Epub小说时，小说所在的文件夹路径
 # --output_folder：翻译后的Epub文件输出路径（注意是文件夹路径）。
+# --translate_title：是否翻译Epub文件的文件名（添加则翻译）
 # --trust_remote_code：是否允许执行外部命令（对于0.5，0.7，0.8版本模型需要加上这个参数，否则报错。
 # --llama：如果你使用的模型是llama家族的模型（对于0.1，0.4版本），则需要加入此命令。
 # 以下为一个例子

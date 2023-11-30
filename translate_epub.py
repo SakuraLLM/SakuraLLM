@@ -28,7 +28,7 @@ def get_html_text_list(epub_path, text_length):
 
     with open(epub_path, 'r', encoding='utf-8') as f:
         file_text = f.read()
-        matches = re.finditer(r'<(h[1-6]|p).*?>(.+?)</\1>', file_text, flags=re.DOTALL)
+        matches = re.finditer(r'<(h[1-6]|p|a|title).*?>(.+?)</\1>', file_text, flags=re.DOTALL)
         if not matches:
             print("perhaps this file is a struct file")
             return data_list, file_text
@@ -179,6 +179,7 @@ def main():
     parser.add_argument("--model_version", type=str, default="0.8", help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8']")
     parser.add_argument("--data_path", type=str, default="", help="file path of the epub you want to translate.")
     parser.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
+    parser.add_argument("--translate_title", action='store_true', help='whether to translate the file names of the epubs')
     parser.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
     parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
     parser.add_argument("--trust_remote_code", action="store_true", help="whether to trust remote code.")
@@ -245,13 +246,23 @@ def main():
     epub_list = []
     save_list = []
     if args.data_path:
+        assert args.data_path.endswith(".epub")
         epub_list.append(args.data_path)
-        save_list.append(os.path.join(args.output_folder, os.path.basename(args.data_path)))
+        f = os.path.basename(args.data_path)
+        if args.translate_title:
+            prompt = get_prompt(f[:-5], args.model_version)
+            output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length, args.llama_cpp)
+            f = output.strip() + '.epub'
+        save_list.append(os.path.join(args.output_folder, f))
     if args.data_folder:
         os.makedirs(args.output_folder, exist_ok=True)
         for f in os.listdir(args.data_folder):
             if f.endswith(".epub"):
                 epub_list.append(os.path.join(args.data_folder, f))
+                if args.translate_title:
+                    prompt = get_prompt(f[:-5], args.model_version)
+                    output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length, args.llama_cpp)
+                    f = output.strip() + '.epub'
                 save_list.append(os.path.join(args.output_folder, f))
     
     for epub_path, save_path in zip(epub_list, save_list):
