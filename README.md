@@ -10,7 +10,7 @@
 
 # 介绍
 
-基于OpenBuddy(v0.1-v0.4), Qwen-14B(v0.7)和Baichuan2-13B(v0.5,v0.8)构建，在通用日文语料与轻小说/Galgame等领域的中日语料上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型. 新建了[TG交流群](https://t.me/+QMDKZyO9GV1kNDA1)，欢迎交流讨论。
+基于OpenBuddy(v0.1-v0.4), Qwen-14B(v0.7,v0.9)和Baichuan2-13B(v0.5,v0.8)构建，在通用日文语料与轻小说/Galgame等领域的中日语料上进行微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型. 新建了[TG交流群](https://t.me/+QMDKZyO9GV1kNDA1)，欢迎交流讨论。
 
 ### [部署教程](https://sakura.srpr.moe)
 
@@ -24,6 +24,7 @@
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化 | 3-bit量化 | GGUF | AWQ
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
+| 20231125-v0.9.0pre1 | 🤗 [Sakura-13B-LNovel-v0.9.0pre1](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre1) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre1-GGUF) | - |
 
 目前仍为实验版本，翻译质量整体接近GPT-3.5，但更贴近轻小说/Galgame的文风. 个人使用推荐GPT4.
 
@@ -124,6 +125,8 @@ python translate_novel.py \
 ```
 
 # 日志
+
+`20231125`: 上传第六版模型预览，改善数据集质量与格式，使用Qwen-14B-Chat模型进行继续预训练+微调，增加数据集。
 
 `20231026`：上传第五版模型`sakura-13b-2epoch-3.8M-1025-v0.8`，改善数据集质量与格式，修复之前版本模型无法正确解析\n的问题，使用Baichuan2-13B-Chat模型进行微调。
 
