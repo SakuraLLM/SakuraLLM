@@ -26,6 +26,10 @@
   
    轻小说机翻机器人网站是一个自动生成轻小说机翻并分享的网站。你可以浏览日文网络小说，或者上传Epub/Txt文件，并生成机翻。
 
+3. **[LunaTranslator](https://github.com/HIllya51/LunaTranslator)已经支持Sakura API，可以通过本地部署API后端，并在LunaTranslator中配置Sakura API来使用Sakura模型翻译Galgame。**
+
+   LunaTranslator是一个Galgame翻译工具，支持剪贴板、OCR、HOOK，支持40余种翻译引擎。
+
 ### 模型下载：
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化 | 3-bit量化 | GGUF | AWQ
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
