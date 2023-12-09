@@ -17,6 +17,7 @@
 ### 快速开始
  - [python部署教程](https://sakura.srpr.moe)
  - [llama.cpp一键包教程](https://books.fishhawk.top/forum/656d60530286f15e3384fcf8)
+ - [autodl租显卡部署教程](https://books.fishhawk.top/forum/65719bf16843e12bd3a4dc98)
 
 ### News
 
