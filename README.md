@@ -35,8 +35,7 @@
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化 | 3-bit量化 | GGUF | AWQ
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
-| 20231125-v0.9.0pre1 | 🤗 [Sakura-13B-LNovel-v0.9.0pre1](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre1) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre1-GGUF) | - |
-| 20231125-v0.9.0pre2 | - | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2-GGUF) | - |
+| 20231125-v0.9.0pre2 | 🤗 [Sakura-13B-LNovel-v0.9.0pre2](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2-GGUF) | - |
 
 目前仍为实验版本，翻译质量在文风与流畅度上强于GPT-3.5，但词汇量逊于GPT-3.5. 个人使用推荐GPT4.
 
