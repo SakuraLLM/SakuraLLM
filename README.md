@@ -21,7 +21,7 @@
 
 ### News
 
-1. 预览版v0.9.0pre1模型发布。该版本模型只是预览版本，目前仍然存在问题，如只针对长文本，短文本有大概率退化，请谨慎使用。
+1. 预览版v0.9.0pre2模型发布。该版本模型只是预览版本，目前可能仍存在问题。修复了上一预览版本短文本退化的问题。
 
 2. **网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译结果可供参考。你也可以自行部署模型并使用该网站生成机翻，目前已经支持v0.8与v0.9模型，且提供了llama.cpp一键包。**
   
@@ -36,6 +36,7 @@
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
 | 20231125-v0.9.0pre1 | 🤗 [Sakura-13B-LNovel-v0.9.0pre1](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre1) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre1-GGUF) | - |
+| 20231125-v0.9.0pre2 | - | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2-GGUF) | - |
 
 目前仍为实验版本，翻译质量在文风与流畅度上强于GPT-3.5，但词汇量逊于GPT-3.5. 个人使用推荐GPT4.
 
