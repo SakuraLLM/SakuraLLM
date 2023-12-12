@@ -16,12 +16,12 @@
 
 **对于模型翻译的人称代词问题（错用，乱加，主宾混淆，男女不分等）和上下文理解问题，如果有好的想法或建议，欢迎提issue！**
 
-### 快速开始
+## 快速开始
  - [python部署教程](https://sakura.srpr.moe)
  - [llama.cpp一键包教程](https://books.fishhawk.top/forum/656d60530286f15e3384fcf8)
  - [autodl租显卡部署教程](https://books.fishhawk.top/forum/65719bf16843e12bd3a4dc98)
 
-### News
+## News
 
 1. 预览版v0.9.0pre2模型发布。该版本模型只是预览版本，目前可能仍存在问题。修复了上一预览版本短文本退化的问题。
 
@@ -33,13 +33,25 @@
 
    LunaTranslator是一个Galgame翻译工具，支持剪贴板、OCR、HOOK，支持40余种翻译引擎。
 
-### 模型下载：
+## 模型下载：
 |   版本  | 全量模型 | 8-bit量化 | 4-bit量化 | 3-bit量化 | GGUF | AWQ
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
 | 20231125-v0.9.0pre2 | 🤗 [Sakura-13B-LNovel-v0.9.0pre2](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre2-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2-GGUF) | - |
 
 目前仍为实验版本，翻译质量在文风与流畅度上强于GPT-3.5，但词汇量逊于GPT-3.5. 个人使用推荐GPT4.
+
+## TODO
+- [ ] 将`dev_server`分支合并到主分支，并将api格式改为openai like api格式。
+- [ ] 支持多种后端至v0.9
+    - [ ] `llama.cpp server`
+    - [x] `llama-cpp-python`
+    - [x] `autogptq`
+    - [ ] `llm-sharp`
+- [ ] 适配LunaTranslator和GalTransl
+- [ ] 发布v0.9模型
+- [ ] ~7B模型测试
+- [ ] ~30B模型测试
 
 # 显存需求
 
