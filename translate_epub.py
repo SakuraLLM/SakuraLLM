@@ -32,7 +32,7 @@ def get_html_text_list(epub_path, text_length):
 
     with open(epub_path, 'r', encoding='utf-8') as f:
         file_text = f.read()
-        matches = re.finditer(r'<(h[1-6]|p).*?>(.+?)</\1>', file_text, flags=re.DOTALL)
+        matches = re.finditer(r'<(h[1-6]|p|a|title).*?>(.+?)</\1>', file_text, flags=re.DOTALL)
         if not matches:
             print("perhaps this file is a struct file")
             return data_list, file_text
@@ -73,7 +73,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=2 * text_length,
+            max_new_tokens=text_length,
             min_new_tokens=1,
             do_sample=True,
             repetition_penalty=1.0,
@@ -88,7 +88,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=2 * text_length,
+            max_new_tokens=text_length,
             min_new_tokens=1,
             do_sample=True,
             repetition_penalty=1.0,
@@ -98,12 +98,28 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
     backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
     if llama_cpp:
-        output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
+        
+        def generate(model, generation_config):
+            if "frequency_penalty" in generation_config.__dict__.keys():
+                output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
+            else:
+                output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
+            return output
+        
+        stage = 0
+        output = generate(model, generation_config)
+        while output['usage']['completion_tokens'] == text_length:
+            stage += 1
+            if stage > 2:
+                print("model degeneration cannot be avoided.")
+                break
+            print("model degeneration detected, retrying...")
+            output = generate(model, backup_generation_config[stage-1])
         response = output['choices'][0]['text']
         return response
 
     generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
-    if len(generation) > 2 * text_length:
+    if len(generation) > text_length:
         stage = 0
         while utils.detect_degeneration(list(generation), model_version):
             stage += 1
@@ -139,7 +155,7 @@ def main():
         bos_token_id=1,
         eos_token_id=2,
         pad_token_id=0,
-        max_new_tokens=1024,
+        max_new_tokens=512,
         min_new_tokens=1,
         do_sample=True
     )
@@ -150,13 +166,39 @@ def main():
     epub_list = []
     save_list = []
     if args.data_path:
+        assert args.data_path.endswith(".epub")
         epub_list.append(args.data_path)
-        save_list.append(os.path.join(args.output_folder, os.path.basename(args.data_path)))
+        f = os.path.basename(args.data_path)
+        if args.translate_title:
+            prompt = consts.get_prompt(f[:-5], args.model_version)
+            output = get_model_response(
+                sakura_model.model,
+                sakura_model.tokenizer,
+                prompt,
+                sakura_model.cfg.model_version,
+                generation_config,
+                sakura_model.cfg.text_length,
+                sakura_model.cfg.llama_cpp,
+            )
+            f = output.strip() + '.epub'
+        save_list.append(os.path.join(args.output_folder, f))
     if args.data_folder:
         os.makedirs(args.output_folder, exist_ok=True)
         for f in os.listdir(args.data_folder):
             if f.endswith(".epub"):
                 epub_list.append(os.path.join(args.data_folder, f))
+                if args.translate_title:
+                    prompt = consts.get_prompt(f[:-5], args.model_version)
+                    output = get_model_response(
+                        sakura_model.model,
+                        sakura_model.tokenizer,
+                        prompt,
+                        sakura_model.cfg.model_version,
+                        generation_config,
+                        sakura_model.cfg.text_length,
+                        sakura_model.cfg.llama_cpp,
+                    )
+                    f = output.strip() + '.epub'
                 save_list.append(os.path.join(args.output_folder, f))
 
     for epub_path, save_path in zip(epub_list, save_list):

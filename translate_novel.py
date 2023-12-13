@@ -44,7 +44,7 @@ def get_novel_text_list(data_path, text_length):
         data_list.append(text)
     return data_raw, data_list
 
-def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, llama_cpp: bool):
+def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, llama_cpp: bool, use_llm_sharp: bool):
     backup_generation_config_stage2 = GenerationConfig(
             temperature=0.1,
             top_p=0.3,
@@ -53,7 +53,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=2 * text_length,
+            max_new_tokens=text_length,
             min_new_tokens=1,
             do_sample=True,
             repetition_penalty=1.0,
@@ -68,7 +68,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
             bos_token_id=1,
             eos_token_id=2,
             pad_token_id=0,
-            max_new_tokens=2 * text_length,
+            max_new_tokens=text_length,
             min_new_tokens=1,
             do_sample=True,
             repetition_penalty=1.0,
@@ -79,12 +79,50 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
     backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
     if llama_cpp:
-        output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
+        
+        def generate(model, generation_config):
+            if "frequency_penalty" in generation_config.__dict__.keys():
+                output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
+            else:
+                output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
+            return output
+        
+        stage = 0
+        output = generate(model, generation_config)
+        while output['usage']['completion_tokens'] == text_length:
+            stage += 1
+            if stage > 2:
+                print("model degeneration cannot be avoided.")
+                break
+            print("model degeneration detected, retrying...")
+            output = generate(model, backup_generation_config[stage-1])
         response = output['choices'][0]['text']
         return response
 
+    elif use_llm_sharp:
+        raise NotImplementedError
+        # import System
+        # import llm_sharp
+        # def generate(model, generation_config):
+        #     history = System.Collections.Generic.List[System.ValueTuple[System.String, System.String]]()
+        #     g = llm_sharp.LLM.Pretrained.GenerationConfig()
+        #     g.temperature = generation_config.__dict__['temperature']
+        #     g.top_p = generation_config.__dict__['top_p']
+        #     g.max_generated_tokens = generation_config.__dict__['max_new_tokens']
+        #     output = model.chat(history, prompt, g)
+        #     output_ret = ""
+        #     cnt = 0
+        #     for o in output:
+        #         output_ret += o
+        #         cnt += 1
+        #     add_token_cnt(cnt)
+        #     return output_ret
+            
+        # response = generate(model, generation_config)
+        # return response
+
     generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
-    if len(generation) > 2 * text_length:
+    if len(generation) > text_length:
         stage = 0
         while utils.detect_degeneration(list(generation), model_version):
             stage += 1
@@ -164,7 +202,7 @@ def main():
         bos_token_id=1,
         eos_token_id=2,
         pad_token_id=0,
-        max_new_tokens=1024,
+        max_new_tokens=512,
         min_new_tokens=1,
         do_sample=True
     )
