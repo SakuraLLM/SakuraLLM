@@ -48,7 +48,13 @@ class GenerateRequest(BaseModel):
     class Config:
         extra = "allow"
 
+class OpenAIChatCompletionRequest(BaseModel):
+    #TODO
+    pass
 
+class OpenAIChatCompletionResponse(BaseModel):
+    #TODO
+    pass
 
 class GenerateResponse(BaseModel):
     class Result(BaseModel):
