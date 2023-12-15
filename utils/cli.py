@@ -17,7 +17,7 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
                         default="SakuraLLM/Sakura-13B-LNovel-v0.8", help="model huggingface id or local path.")
     parser.add_argument("--use_gptq_model", action="store_true", help="whether your model is gptq quantized.")
     parser.add_argument("--model_version", type=str, default="0.8",
-                        help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8']")
+                        help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8', '0.9']")
     parser.add_argument("--trust_remote_code", action="store_true", help="whether to trust remote code.")
 
     parser.add_argument("--llama", action="store_true", help="whether your model is llama family.")
@@ -49,7 +49,7 @@ def args_validation(args) -> bool:
     if args.llama:
         from transformers import LlamaForCausalLM, LlamaTokenizer
 
-    if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8":
-        raise ValueError("If you use model version 0.5, 0.7 or 0.8, please add flag --trust_remote_code.")
+    if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9":
+        raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
 
     return True

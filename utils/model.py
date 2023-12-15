@@ -58,8 +58,8 @@ def load_model(args: SakuraModelConfig):
 
     if not args.llama_cpp and (args.use_gpu or args.n_gpu_layers != 0):
         logger.warning("You are using both use_gpu and n_gpu_layers flag without --llama_cpp.")
-        if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8":
-            raise ValueError("If you use model version 0.5, 0.7 or 0.8, please add flag --trust_remote_code.")
+        if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9":
+            raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
 
     if args.llama:
         from transformers import LlamaForCausalLM, LlamaTokenizer
@@ -101,13 +101,21 @@ def load_model(args: SakuraModelConfig):
 
     return (tokenizer, model)
 
+def get_llama_cpp_metadata(args: SakuraModelConfig):
+    file = Path(args.model_name_or_path)
+    filename = file.stem
+    metadata = filename.split("-")
+    model_version, model_quant = metadata[-2], metadata[-1]
+    model_name = "-".join(metadata[:-2])
+    return model_name, model_version, model_quant
 
 class SakuraModel:
     # typing
     class ModelResponse(BaseModel):
-        context_token: int
+        prompt_token: int
         new_token: int
         text: str
+        finish_reason: str
 
 
     def __init__(
@@ -140,15 +148,13 @@ class SakuraModel:
 
             else:
                 # FIXME(kuriko): for llama_cpp model, we cannot decide so hard coded here.
-                model_name = "llama_cpp"
-                model_version = "Unknown"
-                model_quant = "unknown"
+                model_name, model_version, model_quant = get_llama_cpp_metadata(self.cfg)
 
             self.cfg.model_name = model_name
             self.cfg.model_version = model_version
             self.cfg.model_quant = model_quant
         except:
-            logger.error("Some attrs are missing for this model {name|version|quant}, please check the model!")
+            logger.error("Some attrs are missing for this model {name|version|quant}, please check the model config!")
             exit(-1)
 
         return
@@ -167,7 +173,28 @@ class SakuraModel:
             logging.warning(f"ground_truth: {ground_truth}")
             logging.warning(f"current output: {output}")
         return ret
-
+    
+    def make_prompt(self, system, user):
+        if '0.9' in self.cfg.model_version:
+            prompt = f"<|im_start|>system\n{system}<|im_end|>\n<|im_start|>user\n{user}<|im_end|>\n<|im_start|>assistant\n"
+        elif '0.8' in self.cfg.model_version:
+            prompt = f"<reserved_106>{user}<reserved_107>"
+        else:
+            raise ValueError(f"Wrong model version{self.cfg.model_version}, please view https://github.com/SakuraLLM/Sakura-13B-Galgame")
+        return prompt
+    
+    def make_prompts_unstable(self, messages: list[dict[str, str]]) -> str:
+        prompt = ""
+        logger.debug(f"messages input is {str(messages)}")
+        if messages[0]['role'] == 'user' and len(messages) == 1:
+            prompt = self.make_prompt("", messages[0]['content'])
+        else:
+            if len(messages) == 2:
+                if messages[0]['role'] == 'system' and messages[1]['role'] == 'user':
+                    prompt = self.make_prompt(messages[0]['content'], messages[1]['content'])
+            else:
+                raise ValueError(f"Wrong messages format: {str(messages)}")
+        return prompt
 
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
@@ -255,10 +282,17 @@ class SakuraModel:
             if is_print_speed:
                 logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {input_tokens_len} tokens)')
 
+            # whether model stops because eos token or length limit
+            if new_tokens == generation_config.__dict__['max_new_tokens']:
+                finish_reason = "length"
+            else:
+                finish_reason = "stop"
+
             return self.ModelResponse(
-                context_token = input_tokens_len,
+                prompt_token = input_tokens_len,
                 new_token = new_tokens,
                 text = output,
+                finish_reason = finish_reason
             )
 
     def get_model_response_anti_degen(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
@@ -294,15 +328,20 @@ class SakuraModel:
 
         backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
-        generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
-        if len(generation) > 2 * text_length:
-            stage = 0
-            while utils.detect_degeneration(list(generation), model_version):
-                stage += 1
-                if stage > 2:
-                    print("model degeneration cannot be avoided.")
-                    break
-                generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=backup_generation_config[stage-1])[0]
-        response = tokenizer.decode(generation)
-        output = utils.split_response(response, model_version)
+        t0 = time.time()
+        if self.cfg.llama_cpp:
+            output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+        else:
+            output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
+        t1 = time.time()
+        stage = 0
+        while new_tokens == generation_config.__dict__['max_new_tokens']:
+            stage += 1
+            if stage > 2:
+                print("model degeneration cannot be avoided.")
+                break
+            if self.cfg.llama_cpp:
+                output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+            else:
+                output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
         return output

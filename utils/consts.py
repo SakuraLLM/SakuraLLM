@@ -21,8 +21,11 @@ def get_prompt(input, model_name:str, model_version:str, model_quant:str=None):
         prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"
         return prompt
 
-    if model_version == '0.5' or model_version == '0.8':
+    if model_version == '0.5' or "0.8" in model_version:
         prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"
+        return prompt
+    if "0.9" in model_version:
+        prompt = f"<|im_start|>system\n你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，不擅自添加原文中没有的代词。<|im_end|>\n<|im_start|>user\n将下面的日文文本翻译成中文：{input}<|im_end|>\n<|im_start|>assistant\n"
         return prompt
     if model_version == '0.7':
         prompt = f"<|im_start|>user\n将下面的日文文本翻译成中文：{input}<|im_end|>\n<|im_start|>assistant\n"
@@ -40,12 +43,12 @@ def get_prompt(input, model_name:str, model_version:str, model_quant:str=None):
 def get_test_case_by_model_version(model_name:str, model_version:str, model_quant:str):
     default_generation_config = GenerationConfig(
         num_beams=1,
-        max_new_tokens=1024,
+        max_new_tokens=20,
         min_new_tokens=1,
         do_sample=False,
     )
 
-    if model_name == "llama_cpp" or model_version == "0.8":
+    if model_name == "llama_cpp" or "0.8" in model_version or "0.9" in model_version:
         return ModelTestCase(
             model_version=model_version,
             generation_config=default_generation_config,
