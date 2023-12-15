@@ -1,0 +1,12 @@
+-r requirements/server.txt
+--extra-index-url https://download.pytorch.org/whl/cu121
+# --extra-index-url https://download.pytorch.org/whl/cu118
+torch>=2.1.0
+transformers==4.33.2
+scipy
+numpy
+
+# please setup env variables before pip install
+# Linux & macOS: CMAKE_ARGS="-xxx=on"
+# Windows: please refer to tutorials in readme.md(main branch) to use pre-built whl packages
+llama-cpp-python

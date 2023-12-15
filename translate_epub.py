@@ -1,5 +1,5 @@
+from dacite import from_dict
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
-from argparse import ArgumentParser
 import time
 import os, re
 import fnmatch
@@ -7,7 +7,11 @@ import glob
 import shutil
 import zipfile
 from tqdm import tqdm
-from sampler_hijack import hijack_samplers
+
+import utils
+import utils.cli
+import utils.model as M
+import utils.consts as consts
 
 def find_all_htmls(root_dir):
     html_files = []
@@ -51,7 +55,7 @@ def get_html_text_list(epub_path, text_length):
                 else:
                     groups = []
                     text = ''
-                    
+
         if text:
             data_list.append((text, groups, pre_end))
     # TEST:
@@ -59,52 +63,8 @@ def get_html_text_list(epub_path, text_length):
     #     print(f"{len(d[0])}", end=" ")
     return data_list, file_text
 
-def get_prompt(input, model_version):
-    if model_version == '0.5' or model_version == '0.8':
-        prompt = "<reserved_106>将下面的日文文本翻译成中文：" + input + "<reserved_107>"
-        return prompt
-    if model_version == '0.7':
-        prompt = f"<|im_start|>user\n将下面的日文文本翻译成中文：{input}<|im_end|>\n<|im_start|>assistant\n"
-        return prompt
-    if model_version == '0.1':
-        prompt = "Human: \n将下面的日文文本翻译成中文：" + input + "\n\nAssistant: \n"
-        return prompt
-    if model_version == '0.4':
-        prompt = "User: 将下面的日文文本翻译成中文：" + input + "\nAssistant: "
-        return prompt
-
-    raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
-
-def split_response(response, model_version):
-    response = response.replace("</s>", "")
-    if model_version == '0.5' or model_version == '0.8':
-        output = response.split("<reserved_107>")[1]
-        return output
-    if model_version == '0.7':
-        output = response.split("<|im_start|>assistant\n")[1]
-        return output
-    if model_version == '0.1':
-        output = response.split("\n\nAssistant: \n")[1]
-        return output
-    if model_version == '0.4':
-        output = response.split("\nAssistant: ")[1]
-        return output
-    
-    raise ValueError(f"Wrong model version{model_version}, please view https://huggingface.co/sakuraumi/Sakura-13B-Galgame")
-
-def detect_degeneration(generation: list, model_version, text_length):
-    if model_version != "0.8":
-        return False
-    i = generation.index(196)
-    generation = generation[i+1:]
-    if len(generation) >= text_length:
-        print("model degeneration detected, retrying...")
-        return True
-    else:
-        return False
 
 def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, llama_cpp: bool):
-
     backup_generation_config_stage2 = GenerationConfig(
             temperature=0.1,
             top_p=0.3,
@@ -161,50 +121,32 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
     generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=generation_config)[0]
     if len(generation) > text_length:
         stage = 0
-        while detect_degeneration(list(generation), model_version, text_length):
+        while utils.detect_degeneration(list(generation), model_version):
             stage += 1
             if stage > 2:
                 print("model degeneration cannot be avoided.")
                 break
             generation = model.generate(**tokenizer(prompt, return_tensors="pt").to(model.device), generation_config=backup_generation_config[stage-1])[0]
     response = tokenizer.decode(generation)
-    output = split_response(response, model_version)
+    output = utils.split_response(response, model_version)
     return output
 
 
 def main():
-    parser = ArgumentParser()
-    parser.add_argument("--model_name_or_path", type=str, default="SakuraLLM/Sakura-13B-LNovel-v0.8", help="model huggingface id or local path.")
-    parser.add_argument("--use_gptq_model", action="store_true", help="whether your model is gptq quantized.")
-    parser.add_argument("--model_version", type=str, default="0.8", help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8']")
-    parser.add_argument("--data_path", type=str, default="", help="file path of the epub you want to translate.")
-    parser.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
-    parser.add_argument("--translate_title", action='store_true', help='whether to translate the file names of the epubs')
-    parser.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
-    parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
-    parser.add_argument("--trust_remote_code", action="store_true", help="whether to trust remote code.")
-    parser.add_argument("--llama", action="store_true", help="whether your model is llama family.")
-    parser.add_argument("--llama_cpp", action="store_true", help="whether to use llama.cpp.")
-    parser.add_argument("--use_gpu", action="store_true", help="whether to use gpu when using llama.cpp.")
-    parser.add_argument("--n_gpu_layers", type=int, default=0, help="layers cnt when using gpu in llama.cpp")
-    args = parser.parse_args()
+    def extra_args(parser):
+        parser.add_argument("--data_path", type=str, default="", help="file path of the epub you want to translate.")
+        parser.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
+        parser.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
+        parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
 
-    if args.use_gptq_model:
-        from auto_gptq import AutoGPTQForCausalLM
-        
-    if args.llama_cpp:
-        if args.use_gptq_model:
-            raise ValueError("You are using both use_gptq_model and llama_cpp flag, which is not supported.")
-        from llama_cpp import Llama
-        
-    if args.llama:
-        from transformers import LlamaForCausalLM, LlamaTokenizer
-        
-    if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8":
-        
-        raise ValueError("If you use model version 0.5, 0.7 or 0.8, please add flag --trust_remote_code.")
+    args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
 
-    hijack_samplers()
+    import coloredlogs
+    coloredlogs.install(level="INFO")
+
+    cfg = from_dict(data_class=M.SakuraModelConfig, data=args.__dict__)
+    sakura_model = M.SakuraModel(cfg=cfg)
+
     generation_config = GenerationConfig(
         temperature=0.1,
         top_p=0.3,
@@ -218,31 +160,9 @@ def main():
         do_sample=True
     )
 
-    print("Loading model...")
-    if not args.llama_cpp:
-        if args.llama:
-            tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=args.trust_remote_code)
-        else:
-            tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=False, trust_remote_code=args.trust_remote_code)
-    else:
-        tokenizer = None
-
-    if args.use_gptq_model:
-        model = AutoGPTQForCausalLM.from_quantized(args.model_name_or_path, device="cuda:0", trust_remote_code=args.trust_remote_code)
-    elif args.llama:
-        model = LlamaForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
-    elif args.llama_cpp:
-        if args.use_gpu:
-            n_gpu = -1 if args.n_gpu_layers == 0 else args.n_gpu_layers
-        else:
-            n_gpu = 0
-        model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length)
-    else:
-        model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
-
     print("Start translating...")
     start = time.time()
-    
+
     epub_list = []
     save_list = []
     if args.data_path:
@@ -250,8 +170,16 @@ def main():
         epub_list.append(args.data_path)
         f = os.path.basename(args.data_path)
         if args.translate_title:
-            prompt = get_prompt(f[:-5], args.model_version)
-            output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length, args.llama_cpp)
+            prompt = consts.get_prompt(f[:-5], args.model_version)
+            output = get_model_response(
+                sakura_model.model,
+                sakura_model.tokenizer,
+                prompt,
+                sakura_model.cfg.model_version,
+                generation_config,
+                sakura_model.cfg.text_length,
+                sakura_model.cfg.llama_cpp,
+            )
             f = output.strip() + '.epub'
         save_list.append(os.path.join(args.output_folder, f))
     if args.data_folder:
@@ -260,11 +188,19 @@ def main():
             if f.endswith(".epub"):
                 epub_list.append(os.path.join(args.data_folder, f))
                 if args.translate_title:
-                    prompt = get_prompt(f[:-5], args.model_version)
-                    output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length, args.llama_cpp)
+                    prompt = consts.get_prompt(f[:-5], args.model_version)
+                    output = get_model_response(
+                        sakura_model.model,
+                        sakura_model.tokenizer,
+                        prompt,
+                        sakura_model.cfg.model_version,
+                        generation_config,
+                        sakura_model.cfg.text_length,
+                        sakura_model.cfg.llama_cpp,
+                    )
                     f = output.strip() + '.epub'
                 save_list.append(os.path.join(args.output_folder, f))
-    
+
     for epub_path, save_path in zip(epub_list, save_list):
         print(f"translating {epub_path}...")
         start_epub = time.time()
@@ -273,42 +209,57 @@ def main():
             shutil.rmtree('./temp')
         with zipfile.ZipFile(epub_path, 'r') as f:
             f.extractall('./temp')
-        
-        for html_path in find_all_htmls('./temp'):
-            print(f"\ttranslating {html_path}...")
-            start_html = time.time()
 
-            translated = ''
-            data_list, file_text = get_html_text_list(html_path, args.text_length)
-            if len(data_list) == 0:
-                    continue
-            for text, groups, pre_end in tqdm(data_list):
-                prompt = get_prompt(text, args.model_version)
-                output = get_model_response(model, tokenizer, prompt, args.model_version, generation_config, args.text_length, args.llama_cpp)
-                texts = output.strip().split('\n')
-                if len(texts) < len(groups):
-                    texts += [''] * (len(groups) - len(texts))
-                else:
-                    texts = texts[:len(groups)-1] + ['<br/>'.join(texts[len(groups)-1:])]
-                for t, match in zip(texts, groups):
-                    t = match.group(0).replace(match.group(2), t)
-                    translated += file_text[pre_end:match.start()] + t
-                    pre_end = match.end()
-
-            translated += file_text[data_list[-1][1][-1].end():]
-            with open(html_path, 'w', encoding='utf-8') as f:
-                f.write(translated)
-            
-            end_html = time.time()
-            print(f"\t{html_path} translated, used time: ", end_html-start_html)
-        
         with zipfile.ZipFile(save_path, 'w', zipfile.ZIP_DEFLATED) as f:
+            for html_path in find_all_htmls('./temp'):
+                print(f"\ttranslating {html_path}...")
+                start_html = time.time()
+
+                translated = ''
+                data_list, file_text = get_html_text_list(html_path, args.text_length)
+                if len(data_list) == 0:
+                        continue
+                for text, groups, pre_end in tqdm(data_list):
+                    prompt = consts.get_prompt(
+                        input=text,
+                        model_name=sakura_model.cfg.model_name,
+                        model_version=sakura_model.cfg.model_version,
+                        model_quant=sakura_model.cfg.model_quant,
+                    )
+                    #FIXME(kuriko): refactor this to sakura_model.completion()
+                    output = get_model_response(
+                        sakura_model.model,
+                        sakura_model.tokenizer,
+                        prompt,
+                        sakura_model.cfg.model_version,
+                        generation_config,
+                        sakura_model.cfg.text_length,
+                        sakura_model.cfg.llama_cpp,
+                    )
+                    texts = output.strip().split('\n')
+                    if len(texts) < len(groups):
+                        texts += [''] * (len(groups) - len(texts))
+                    else:
+                        texts = texts[:len(groups)-1] + ['<br/>'.join(texts[len(groups)-1:])]
+                    for t, match in zip(texts, groups):
+                        t = match.group(0).replace(match.group(2), t)
+                        translated += file_text[pre_end:match.start()] + t
+                        pre_end = match.end()
+
+                translated += file_text[data_list[-1][1][-1].end():]
+                with open(html_path, 'w', encoding='utf-8') as fout:
+                    fout.write(translated)
+
+                end_html = time.time()
+                print(f"\t{html_path} translated, used time: ", end_html-start_html)
+
             for file_path in glob.glob(f'./temp/**', recursive=True):
                 if not os.path.isdir(file_path):
                     relative_path = os.path.relpath(file_path, './temp')
                     f.write(file_path, relative_path)
+
         shutil.rmtree('./temp')
-                    
+
         end_epub = time.time()
         print(f"{epub_path} translated, used time: ", end_epub-start_epub)
 
