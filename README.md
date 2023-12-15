@@ -48,7 +48,10 @@
     - [x] `llama-cpp-python`
     - [x] `autogptq`
     - [ ] `llm-sharp`
-- [ ] 适配LunaTranslator和GalTransl
+- [ ] 适配翻译工具
+    - [ ] LunaTranslator
+    - [ ] GalTransl
+    - [ ] BallonsTranslator
 - [ ] 发布v0.9模型
 - [ ] ~7B模型测试
 - [ ] ~30B模型测试
