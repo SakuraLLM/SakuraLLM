@@ -138,6 +138,7 @@ def main():
         parser.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
         parser.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
         parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
+        parser.add_argument("--translate_title", action='store_true', help='whether to translate the file names of the epubs')
 
     args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
 
