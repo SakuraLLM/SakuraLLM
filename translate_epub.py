@@ -40,18 +40,20 @@ def get_html_text_list(epub_path, text_length):
         text = ''
         pre_end = 0
         for match in matches:
-            if len(text + match.group(2)) <= text_length:
-                new_text = clean_text(match.group(2))
+            match_text = clean_text(match.group(2))
+            # 第一次强制走if分支，确保一定有至少一条文本。
+            if len(text + match_text) <= text_length or text == '':
+                new_text = match_text
                 if new_text:
                     groups.append(match)
                     text += '\n' + new_text
             else:
                 data_list.append((text, groups, pre_end))
                 pre_end = groups[-1].end()
-                new_text = clean_text(match.group(2))
+                new_text = match_text
                 if new_text:
                     groups = [match]
-                    text = clean_text(match.group(2))
+                    text = match_text
                 else:
                     groups = []
                     text = ''
@@ -138,6 +140,7 @@ def main():
         parser.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
         parser.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
         parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
+        parser.add_argument("--translate_title", action='store_true', help='whether to translate the file names of the epubs')
 
     args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
 
@@ -265,6 +268,11 @@ def main():
 
     end = time.time()
     print("translation completed, used time: ", end-start)
+
+
+def test():
+    path = "./temp/item/xhtml/p-009.xhtml"
+    data_list, file_text = get_html_text_list(path, 512)
 
 if __name__ == "__main__":
     main()
