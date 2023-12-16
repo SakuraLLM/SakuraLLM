@@ -40,18 +40,20 @@ def get_html_text_list(epub_path, text_length):
         text = ''
         pre_end = 0
         for match in matches:
-            if len(text + match.group(2)) <= text_length:
-                new_text = clean_text(match.group(2))
+            match_text = clean_text(match.group(2))
+            # 第一次强制走if分支，确保一定有至少一条文本。
+            if len(text + match_text) <= text_length or text == '':
+                new_text = match_text
                 if new_text:
                     groups.append(match)
                     text += '\n' + new_text
             else:
                 data_list.append((text, groups, pre_end))
                 pre_end = groups[-1].end()
-                new_text = clean_text(match.group(2))
+                new_text = match_text
                 if new_text:
                     groups = [match]
-                    text = clean_text(match.group(2))
+                    text = match_text
                 else:
                     groups = []
                     text = ''
@@ -98,14 +100,14 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
     backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
     if llama_cpp:
-        
+
         def generate(model, generation_config):
             if "frequency_penalty" in generation_config.__dict__.keys():
                 output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
             else:
                 output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
             return output
-        
+
         stage = 0
         output = generate(model, generation_config)
         while output['usage']['completion_tokens'] == text_length:
@@ -266,6 +268,11 @@ def main():
 
     end = time.time()
     print("translation completed, used time: ", end-start)
+
+
+def test():
+    path = "./temp/item/xhtml/p-009.xhtml"
+    data_list, file_text = get_html_text_list(path, 512)
 
 if __name__ == "__main__":
     main()

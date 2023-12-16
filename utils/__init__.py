@@ -7,10 +7,10 @@ logger = logging.getLogger(__name__)
 
 def split_response(response, model_version):
     response = response.replace("</s>", "")
-    if model_version == '0.5' or model_version == '0.8':
+    if model_version == '0.5' or '0.8' in model_version:
         output = response.split("<reserved_107>")[1]
         return output
-    if model_version == '0.7':
+    if '0.7' in model_version or '0.9' in model_version:
         output = response.split("<|im_start|>assistant\n")[1]
         return output
     if model_version == '0.1':
@@ -24,6 +24,7 @@ def split_response(response, model_version):
 
 
 def detect_degeneration(generation: list, model_version):
+    #TODO: refactor this
     if model_version != "0.8":
         return False
     i = generation.index(196)
