@@ -173,7 +173,12 @@ def main():
         epub_list.append(args.data_path)
         f = os.path.basename(args.data_path)
         if args.translate_title:
-            prompt = consts.get_prompt(f[:-5], args.model_version)
+            prompt = consts.get_prompt(
+                input=f[:-5], 
+                model_name=sakura_model.cfg.model_name,
+                model_version=sakura_model.cfg.model_version,
+                model_quant=sakura_model.cfg.model_quant
+            )
             output = get_model_response(
                 sakura_model.model,
                 sakura_model.tokenizer,
@@ -191,7 +196,12 @@ def main():
             if f.endswith(".epub"):
                 epub_list.append(os.path.join(args.data_folder, f))
                 if args.translate_title:
-                    prompt = consts.get_prompt(f[:-5], args.model_version)
+                    prompt = consts.get_prompt(
+                        input=f[:-5], 
+                        model_name=sakura_model.cfg.model_name,
+                        model_version=sakura_model.cfg.model_version,
+                        model_quant=sakura_model.cfg.model_quant
+                    )
                     output = get_model_response(
                         sakura_model.model,
                         sakura_model.tokenizer,
