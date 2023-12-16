@@ -280,9 +280,5 @@ def main():
     print("translation completed, used time: ", end-start)
 
 
-def test():
-    path = "./temp/item/xhtml/p-009.xhtml"
-    data_list, file_text = get_html_text_list(path, 512)
-
 if __name__ == "__main__":
     main()
