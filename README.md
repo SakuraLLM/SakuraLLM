@@ -55,6 +55,7 @@
     - [ ] LunaTranslator
     - [ ] GalTransl
     - [ ] BallonsTranslator
+- [ ] 提供Python部署一键包
 - [ ] 发布v0.9模型
 - [ ] ~7B模型测试
 - [ ] ~30B模型测试
@@ -181,6 +182,6 @@
 
 # Copyright Notice
 
-v0.8版本模型的使用须遵守需要遵循[Apache 2.0](https://github.com/baichuan-inc/Baichuan2/blob/main/LICENSE)和[《Baichuan 2 模型社区许可协议》](https://huggingface.co/baichuan-inc/Baichuan2-7B-Base/resolve/main/Baichuan%202%E6%A8%A1%E5%9E%8B%E7%A4%BE%E5%8C%BA%E8%AE%B8%E5%8F%AF%E5%8D%8F%E8%AE%AE.pdf)。
+v0.8版本模型的使用须遵守[Apache 2.0](https://github.com/baichuan-inc/Baichuan2/blob/main/LICENSE)和[《Baichuan 2 模型社区许可协议》](https://huggingface.co/baichuan-inc/Baichuan2-7B-Base/resolve/main/Baichuan%202%E6%A8%A1%E5%9E%8B%E7%A4%BE%E5%8C%BA%E8%AE%B8%E5%8F%AF%E5%8D%8F%E8%AE%AE.pdf)。
 
 v0.9版本模型的使用须遵守[Qwen模型许可协议](https://github.com/QwenLM/Qwen/blob/main/Tongyi%20Qianwen%20LICENSE%20AGREEMENT)。
