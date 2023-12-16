@@ -100,14 +100,14 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
     backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
     if llama_cpp:
-        
+
         def generate(model, generation_config):
             if "frequency_penalty" in generation_config.__dict__.keys():
                 output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
             else:
                 output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
             return output
-        
+
         stage = 0
         output = generate(model, generation_config)
         while output['usage']['completion_tokens'] == text_length:

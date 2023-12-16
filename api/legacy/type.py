@@ -5,7 +5,7 @@ FloatOrInt = Union[float, int]
 
 class GenerateRequest(BaseModel):
     """Generate request class used in legacy api."""
-    
+
     prompt: str
     # auto_max_new_tokens: bool = False
     # max_tokens_second: int
@@ -53,7 +53,7 @@ class GenerateRequest(BaseModel):
 
 class OpenAIChatCompletionRequest(BaseModel):
     """Generate request class used in openai api."""
-    
+
     # OpenAI param
     messages: list[dict[str, str]]
     model: str = ""
@@ -62,7 +62,7 @@ class OpenAIChatCompletionRequest(BaseModel):
     seed: int = -1
     temperature: float | int
     top_p: float | int
-    
+
     stop: list[list[str]] = None        # Only transformers backend support
     stream: bool = False                # NotImplement
 
@@ -99,11 +99,11 @@ class OpenAIChatCompletionRequest(BaseModel):
             "num_beams": self.num_beams,
             "repetition_penalty": self.repetition_penalty
         }
-    
+
 
 class GenerateResponse(BaseModel):
     """Generate response class used in legacy api."""
-    
+
     class Result(BaseModel):
         new_token: int
         text: str
@@ -113,7 +113,7 @@ class GenerateResponse(BaseModel):
 
 class OpenAIChatCompletionResponse(BaseModel):
     """Generate response class used in openai api."""
-    
+
     class Choice(BaseModel):
         class Message(BaseModel):
             content: str
@@ -125,7 +125,7 @@ class OpenAIChatCompletionResponse(BaseModel):
         completion_tokens: int
         prompt_tokens: int
         total_tokens: int
-        
+
     choices: List[Choice]
     created: int
     id: str

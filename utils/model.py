@@ -173,7 +173,7 @@ class SakuraModel:
             logging.warning(f"ground_truth: {ground_truth}")
             logging.warning(f"current output: {output}")
         return ret
-    
+
     def make_prompt(self, system, user):
         if '0.9' in self.cfg.model_version:
             prompt = f"<|im_start|>system\n{system}<|im_end|>\n<|im_start|>user\n{user}<|im_end|>\n<|im_start|>assistant\n"
@@ -182,7 +182,7 @@ class SakuraModel:
         else:
             raise ValueError(f"Wrong model version{self.cfg.model_version}, please view https://github.com/SakuraLLM/Sakura-13B-Galgame")
         return prompt
-    
+
     def make_prompts_unstable(self, messages: list[dict[str, str]]) -> str:
         prompt = ""
         logger.debug(f"messages input is {str(messages)}")
