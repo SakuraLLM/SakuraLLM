@@ -26,13 +26,16 @@
 
 ## News
 
-1. 预览版v0.9.0pre2模型发布。该版本模型只是预览版本，目前可能仍存在问题。修复了上一预览版本短文本退化的问题。
+1. 预览版v0.9.0pre3模型发布。该版本模型只是预览版本，目前可能仍存在问题。增加了约30亿字(~2.5B tokens)领域内日文语料数据进行继续预训练。
 
-2. **网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译结果可供参考。你也可以自行部署模型并使用该网站生成机翻，目前已经支持v0.8与v0.9模型，且提供了llama.cpp一键包。**
+2. **Sakura API已经支持OpenAI格式，现在可以通过OpenAI库或者OpenAI API Reference上的请求形式与Server交互。**
+一个使用OpenAI库与Sakura模型交互的例子详见[openai_example.py](https://github.com/SakuraLLM/Sakura-13B-Galgame/blob/main/tests/example_openai.py)。
+
+4. 网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译结果可供参考。你也可以自行部署模型并使用该网站生成机翻，目前已经支持v0.8与v0.9模型，且提供了llama.cpp一键包。
   
    轻小说机翻机器人网站是一个自动生成轻小说机翻并分享的网站。你可以浏览日文网络小说，或者上传Epub/Txt文件，并生成机翻。
 
-3. **[LunaTranslator](https://github.com/HIllya51/LunaTranslator)已经支持Sakura API，可以通过本地部署API后端，并在LunaTranslator中配置Sakura API来使用Sakura模型翻译Galgame。**
+5. [LunaTranslator](https://github.com/HIllya51/LunaTranslator)已经支持Sakura API，可以通过本地部署API后端，并在LunaTranslator中配置Sakura API来使用Sakura模型翻译Galgame。
 
    LunaTranslator是一个Galgame翻译工具，支持剪贴板、OCR、HOOK，支持40余种翻译引擎。
 
@@ -40,7 +43,7 @@
 |   版本  | 全量模型 | GPTQ 8bit量化 | GPTQ 4bit量化 | GPTQ 3bit量化 | GGUF与量化 | AWQ量化
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
-| 20231125-v0.9.0pre2 | 🤗 [Sakura-13B-LNovel-v0.9.0pre2](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre2-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2-GGUF) | - |
+| 20231125-v0.9.0pre3 | - | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre3-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3-GGUF) | - |
 
 目前仍为实验版本，翻译质量在文风与流畅度上强于GPT-3.5，但词汇量逊于GPT-3.5. 个人使用推荐GPT4.
 
