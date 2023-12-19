@@ -20,7 +20,9 @@ extra_query = {
     'num_beams': 1,
     'repetition_penalty': 1.0,
 }
-
+models_list = client.models.list()
+print(models_list)
+print(models_list.data[0].model_version)
 chat_completion = client.chat.completions.create(
     model="sukinishiro",
     messages=[

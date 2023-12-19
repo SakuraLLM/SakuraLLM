@@ -71,6 +71,9 @@ app.include_router(legacy_router)
 from api.openai.v1 import router as openai_router
 app.include_router(openai_router)
 
+from api.openai.v1.chat import router as openai_chat_router
+app.include_router(openai_chat_router)
+
 from api.core import router as core_router
 app.include_router(core_router)
 

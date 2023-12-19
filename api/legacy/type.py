@@ -58,10 +58,10 @@ class OpenAIChatCompletionRequest(BaseModel):
     messages: list[dict[str, str]]
     model: str = ""
     frequency_penalty: float | int = 0.0
-    max_tokens: int
+    max_tokens: int = 512
     seed: int = -1
-    temperature: float | int
-    top_p: float | int
+    temperature: float | int = 0.1
+    top_p: float | int = 0.3
 
     stop: list[list[str]] = None        # Only transformers backend support
     stream: bool = False                # NotImplement
@@ -133,26 +133,17 @@ class OpenAIChatCompletionResponse(BaseModel):
     object: str
     usage: Usage
 
-'''
-{
-  "choices": [
-    {
-      "finish_reason": "stop",
-      "index": 0,
-      "message": {
-        "content": "The 2020 World Series was played in Texas at Globe Life Field in Arlington.",
-        "role": "assistant"
-      }
-    }
-  ],
-  "created": 1677664795,
-  "id": "chatcmpl-7QyqpwdfhqwajicIEznoc6Q47XAyW",
-  "model": "gpt-3.5-turbo-0613",
-  "object": "chat.completion",
-  "usage": {
-    "completion_tokens": 17,
-    "prompt_tokens": 57,
-    "total_tokens": 74
-  }
-}
-'''
+class OpenAIChatModelsResponse(BaseModel):
+    """Model class used in openai api."""
+    class OpenAIChatModel(BaseModel):
+        id: str
+        created: int | str
+        object: str
+        owned_by: str
+        model_name: str
+        model_version: str
+        model_quant: str
+        model_name_or_path: str
+
+    object: str = 'list',
+    data: List[OpenAIChatModel]
