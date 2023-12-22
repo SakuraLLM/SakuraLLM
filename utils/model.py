@@ -191,13 +191,17 @@ class SakuraModel:
         logger.debug(f"messages input is {str(messages)}")
         if messages[0]['role'] == 'user' and len(messages) == 1:
             prompt = self.make_prompt("", messages[0]['content'])
+            src_text = messages[0]['content'].replace("将下面的日文文本翻译成中文：", "")
         else:
             if len(messages) == 2:
                 if messages[0]['role'] == 'system' and messages[1]['role'] == 'user':
                     prompt = self.make_prompt(messages[0]['content'], messages[1]['content'])
+                    src_text = messages[1]['content'].replace("将下面的日文文本翻译成中文：", "")
+                else:
+                    raise ValueError(f"Wrong messages format: {str(messages)}")
             else:
                 raise ValueError(f"Wrong messages format: {str(messages)}")
-        return prompt
+        return prompt, src_text
 
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
@@ -279,6 +283,8 @@ class SakuraModel:
 
             # FIXME(kuriko): a temporary solution to avoid empty output in llama.cpp
             if len(output) == 0:
+                generation_config.__dict__['temperature'] = 1.0
+                generation_config.__dict__['top_p'] = 1.0
                 logger.error(f"Model output is empty, retrying ({i}/3)..., This is a very rare situation, please report to devs")
                 continue
 
@@ -296,6 +302,13 @@ class SakuraModel:
                 new_token = new_tokens,
                 text = output,
                 finish_reason = finish_reason
+            )
+
+        return self.ModelResponse(
+                prompt_token = input_tokens_len,
+                new_token = new_tokens,
+                text = "模型生成出错，这是一个非常罕见的问题。原文为：" + generation_config.__dict__['src_text'],
+                finish_reason = "stop"
             )
 
     def get_model_response_anti_degen(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):

@@ -28,7 +28,8 @@ async def get_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletionR
     generation_config = GenerationConfig(**data.compatible_with_backend())
 
     model = state.get_model()
-    prompt = model.make_prompts_unstable(data.messages)
+    prompt, src_text = model.make_prompts_unstable(data.messages)
+    generation_config.__dict__['src_text'] = src_text
     logger.info(f"translate: {prompt}")
     output = await model.completion_async(prompt, generation_config)
     # FIXME(kuriko): only for testing, remember to comment this out.
