@@ -83,10 +83,11 @@ def load_model(args: SakuraModelConfig):
     if args.use_gptq_model:
         model = AutoGPTQForCausalLM.from_quantized(
             args.model_name_or_path,
-            device="cuda:0",
+            device_map="auto",
             trust_remote_code=args.trust_remote_code,
             use_safetensors=False,
             use_triton=False,
+            low_cpu_mem_usage=True,
         )
     elif args.llama:
         model = LlamaForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code)
