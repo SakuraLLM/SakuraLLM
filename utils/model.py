@@ -93,9 +93,11 @@ def load_model(args: SakuraModelConfig):
     elif args.llama_cpp:
         if args.use_gpu:
             n_gpu = -1 if args.n_gpu_layers == 0 else args.n_gpu_layers
+            offload_kqv = True
         else:
             n_gpu = 0
-        model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length)
+            offload_kqv = False
+        model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length, offload_kqv=offload_kqv)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code, use_safetensors=False)
 
