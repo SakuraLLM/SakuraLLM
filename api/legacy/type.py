@@ -100,6 +100,8 @@ class OpenAIChatCompletionRequest(BaseModel):
             "repetition_penalty": self.repetition_penalty
         }
 
+    def is_stream(self):
+      return self.stream
 
 class GenerateResponse(BaseModel):
     """Generate response class used in legacy api."""
@@ -132,6 +134,24 @@ class OpenAIChatCompletionResponse(BaseModel):
     model: str
     object: str
     usage: Usage
+
+class OpenAIChatCompletionStreamResponse(BaseModel):
+    """Generate response class used in openai api in stream mode."""
+
+    class Choice(BaseModel):
+        class Message(BaseModel):
+            role: Optional[str] = None
+            content: Optional[str] = None
+        index: int
+        delta: Message
+        logprobs: None = None
+        finish_reason: Optional[str] = None
+    id: str
+    object: str
+    created: int
+    model: str
+    system_fingerprint: str
+    choices: List[Choice]
 
 class OpenAIChatModelsResponse(BaseModel):
     """Model class used in openai api."""

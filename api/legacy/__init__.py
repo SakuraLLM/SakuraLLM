@@ -21,12 +21,12 @@ router = APIRouter(
     prefix="/api/v1",
 )
 
-async def get_output(data: GenerateRequest) -> GenerateResponse:
+def get_output(data: GenerateRequest) -> GenerateResponse:
     logger.debug(f"Incoming request: \n{data.model_dump()}")
     generation_config = GenerationConfig(**data.model_dump())
 
     logger.info(f"translate: {data.prompt}")
-    output = await state.get_model().completion_async(data.prompt, generation_config)
+    output = state.get_model().completion(data.prompt, generation_config)
     # FIXME(kuriko): only for testing, remember to comment this out.
     # await asyncio.sleep(600)
 
@@ -42,17 +42,17 @@ async def get_output(data: GenerateRequest) -> GenerateResponse:
 
 
 @router.post("/generate")
-async def completions(req: Request, data: GenerateRequest):
-    ret = await get_output(data)
+def completions(req: Request, data: GenerateRequest):
+    ret = get_output(data)
     json_compatible_item_data = jsonable_encoder(ret)
     return JSONResponse(content=json_compatible_item_data)
 
 
 @router.post("/stream/generate")
-async def completions(req: Request, data: GenerateRequest):
-    async def generator():
+def completions(req: Request, data: GenerateRequest):
+    def generator():
         try:
-            ret: GenerateResponse = await get_output(data)
+            ret: GenerateResponse = get_output(data)
             yield dict(data=ret.model_dump_json())
         except asyncio.CancelledError as e:
             logger.warning(f"Disconnected from client (via refresh/close) {req.client})")

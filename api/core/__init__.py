@@ -8,7 +8,7 @@ from utils.state import get_model
 router = APIRouter(prefix="/api/core")
 
 @router.get("/version")
-async def version():
+def version():
     cfg = get_model().get_cfg()
 
     config = {

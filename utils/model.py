@@ -1,22 +1,18 @@
 import time
-import asyncio
+import utils
+import logging
+import copy
+import traceback
 from pathlib import Path
 from threading import Lock
 # from asyncio import Lock
 from dataclasses import dataclass
 from pprint import pformat, pprint
-
 from pydantic import BaseModel
-
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 from sampler_hijack import hijack_samplers
-
 from typing import *
-
-import utils
 from utils import consts, log_generation_config
-
-import logging
 
 if TYPE_CHECKING:
     from transformers import LlamaForCausalLM, LlamaTokenizer
@@ -186,6 +182,31 @@ class SakuraModel:
             raise ValueError(f"Wrong model version{self.cfg.model_version}, please view https://github.com/SakuraLLM/Sakura-13B-Galgame")
         return prompt
 
+    def make_continue_prompt(self, role, value):
+        if '0.9' in self.cfg.model_version:
+            prompt = f"<|im_start|>{role}\n{value}<|im_end|>\n"
+        elif '0.8' in self.cfg.model_version:
+            try:
+                str_map = {"user": "<reserved_106>", "assistant": "<reserved_107>"}
+                prompt = f"{str_map[role]}{value}"
+            except KeyError as e:
+                prompt = ""
+                logger.warning(f"Role '{role}' of this model is not supported, ignored.")
+        else:
+            raise ValueError(f"Wrong model version{self.cfg.model_version}, please view https://github.com/SakuraLLM/Sakura-13B-Galgame")
+        return prompt
+
+    def make_end_prompt(self):
+        role = 'assistant'
+        if '0.9' in self.cfg.model_version:
+            prompt = f"<|im_start|>{role}\n"
+        elif '0.8' in self.cfg.model_version:
+            str_map = {"user": "<reserved_106>", "assistant": "<reserved_107>"}
+            prompt = f"{str_map[role]}"
+        else:
+            raise ValueError(f"Wrong model version{self.cfg.model_version}, please view https://github.com/SakuraLLM/Sakura-13B-Galgame")
+        return prompt
+
     def make_prompts_unstable(self, messages: list[dict[str, str]]) -> str:
         prompt = ""
         logger.debug(f"messages input is {str(messages)}")
@@ -202,6 +223,28 @@ class SakuraModel:
             else:
                 raise ValueError(f"Wrong messages format: {str(messages)}")
         return prompt, src_text
+
+    def check_messages(self, messages: list[dict[str, str]]) -> None:
+        _messages = copy.deepcopy(messages)
+        if _messages[-1]['role'] != 'user':
+            raise ValueError(f"Wrong messages format: {str(messages)}")
+        if _messages[0]['role'] == 'system':
+            _messages.pop(0)
+        for message in _messages:
+            if message['role'] == 'system':
+                raise ValueError(f"Wrong messages format: {str(messages)}")
+        if len(_messages) % 2 != 1:
+            raise ValueError(f"Wrong messages format: {str(messages)}")
+
+    def make_prompt_stable(self, messages: list[dict[str, str]]) -> str:
+        prompt = ""
+        logger.debug(f"MAKE_PROMPT_STABLE: input is {str(messages)}")
+        self.check_messages(messages)
+        for idx, message in enumerate(messages):
+            prompt += self.make_continue_prompt(message['role'], message['content'])
+        prompt += self.make_end_prompt()
+        logger.debug(f"MAKE_PROMPT_STABLE: prompt is {prompt}")
+        return prompt
 
     def get_max_text_length(self, length: int) -> int:
         return max(self.cfg.text_length, length)
@@ -220,20 +263,18 @@ class SakuraModel:
 
         return output
 
-    async def completion_async(self, prompt: str, generation_config: GenerationConfig, is_print_speed: bool = True) -> ModelResponse:
+    def completion_stream(self, messages: list[dict[str, str]], generation_config: GenerationConfig, is_print_speed: bool = True) -> ModelResponse:
         log_generation_config(generation_config)
 
-        loop = asyncio.get_running_loop()
-        output = await loop.run_in_executor(
-            None,
-            lambda: self.completion(
-                prompt=prompt,
-                generation_config=generation_config,
-                is_print_speed=is_print_speed,
-            )
-        )
+        for output, finish_reason in self.get_model_response_stream(
+            self.model,
+            self.tokenizer,
+            messages,
+            self.cfg.model_version,
+            generation_config,
+            is_print_speed):
 
-        return output
+            yield output, finish_reason
 
     def test_loaded(self) -> (str, ModelResponse):
         testcase = consts.get_test_case_by_model_version(self.cfg.model_name, self.cfg.model_version, self.cfg.model_quant)
@@ -257,6 +298,10 @@ class SakuraModel:
         new_tokens = output['usage']['completion_tokens']
         return response, (input_tokens_len, new_tokens)
 
+    def __llama_cpp_model_stream(self, model: "Llama", prompt: str, generation_config: GenerationConfig):
+        logger.debug(f"prompt is: {prompt}")
+        for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], stream=True):
+            yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
@@ -270,6 +315,50 @@ class SakuraModel:
         output = utils.split_response(response, model_version)
         return output, (input_tokens_len, new_tokens)
 
+    def __general_model_stream(self, model: ModelTypes, tokenizer: AutoTokenizer, messages: list[dict[str, str]], model_version: str, generation_config: GenerationConfig):
+
+        def parse_messages():
+            if messages[0]['role'] == "system":
+                _system = messages.pop(0)['content']
+            else:
+                _system = ""
+            _query = messages.pop(-1)['content']
+            return _system, messages, _query
+
+        position = 0
+        start = 0
+        token_cnt = 0
+        self.check_messages(messages)
+        user = messages[-1]
+        system, history, query = parse_messages()
+        print(user)
+        if "0.8" in self.cfg.model_version:
+            generation_config.user_token_id = 195
+            generation_config.assistant_token_id = 196
+            generation_config.pad_token_id = 0
+            generation_config.bos_token_id = 1
+            generation_config.eos_token_id = 2
+            model.generation_config.__dict__ = generation_config.__dict__
+            for response in model.chat(tokenizer, history + [user], stream=True, generation_config=generation_config):
+                token_cnt += 1
+                position = len(response)
+                yield response[start:position], None
+                start = position
+        elif "0.9" in self.cfg.model_version:
+            generation_config.chat_format = 'chatml'
+            generation_config.max_window_size = 6144
+            generation_config.pad_token_id = 151643
+            generation_config.eos_token_id = 151643
+            model.generation_config.__dict__ = generation_config.__dict__
+            for response in model.chat_stream(tokenizer, query, history=history, system=system, generation_config=generation_config):
+                token_cnt += 1
+                position = len(response)
+                yield response[start:position], None
+                start = position
+        if token_cnt == generation_config.__dict__['max_new_tokens']:
+            yield "", "length"
+        else:
+            yield "", "stop"
 
     def get_model_response(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
         for i in range(3):
@@ -310,6 +399,25 @@ class SakuraModel:
                 text = "模型生成出错，这是一个非常罕见的问题。原文为：" + generation_config.__dict__['src_text'],
                 finish_reason = "stop"
             )
+
+    def get_model_response_stream(self, model: ModelTypes, tokenizer: AutoTokenizer, messages: list[dict[str, str]], model_version: str, generation_config: GenerationConfig, is_print_speed:bool=True) -> ModelResponse:
+
+        with self.lock:  # using lock to prevent too many memory allocated on GPU
+            t0 = time.time()
+            try:
+                if self.cfg.llama_cpp:
+                    prompt = self.make_prompt_stable(messages)
+                    for output, finish_reason in self.__llama_cpp_model_stream(model, prompt, generation_config):
+                        yield output, finish_reason
+                else:
+                    self.check_messages(messages)
+                    for output, finish_reason in self.__general_model_stream(model, tokenizer, messages, model_version, generation_config):
+                        yield output, finish_reason
+            except Exception as e:
+                traceback.print_exc()
+                return
+            t1 = time.time()
+        return
 
     def get_model_response_anti_degen(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
         backup_generation_config_stage2 = GenerationConfig(

@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 @router.get("/models")
-async def get_model_info():
+def get_model_info():
     cfg = state.get_model().cfg
     # metadata = {
     #     "model_name": cfg.model_name,
