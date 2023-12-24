@@ -44,7 +44,7 @@ def get_novel_text_list(data_path, text_length):
         data_list.append(text)
     return data_raw, data_list
 
-def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, llama_cpp: bool, use_llm_sharp: bool):
+def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, llama_cpp: bool):
     backup_generation_config_stage2 = GenerationConfig(
             temperature=0.1,
             top_p=0.3,
@@ -99,8 +99,9 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
         response = output['choices'][0]['text']
         return response
 
-    elif use_llm_sharp:
-        raise NotImplementedError
+    # llm sharp backend
+    # elif use_llm_sharp:
+    #     raise NotImplementedError
         # import System
         # import llm_sharp
         # def generate(model, generation_config):
