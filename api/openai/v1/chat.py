@@ -57,7 +57,7 @@ def get_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletionRespons
         )
     )
 
-def get_stream_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletionStreamResponse:
+def get_stream_output(data: OpenAIChatCompletionRequest):
     logger.debug(f"Incoming request: \n{data.model_dump()}")
     logger.info(f"translate: {str(data.messages)}")
     generation_config = GenerationConfig(**data.compatible_with_backend())
@@ -74,7 +74,7 @@ def get_stream_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletion
                 message = OpenAIChatCompletionStreamResponse.Choice.Message()
             else:
                 message = OpenAIChatCompletionStreamResponse.Choice.Message(content=output)
-            yield OpenAIChatCompletionStreamResponse(
+            yield message, OpenAIChatCompletionStreamResponse(
                 id="114514",
                 object="chat.completion.chunk",
                 created=int(time.time()),
@@ -82,7 +82,7 @@ def get_stream_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletion
                 system_fingerprint="fp_1919810",
                 choices=[OpenAIChatCompletionStreamResponse.Choice(
                     index=0,
-                    delta=message,
+                    delta=None,
                     logprobs=None,
                     finish_reason=finish_reason
                 )]
@@ -108,8 +108,10 @@ def completions(req: Request, data: OpenAIChatCompletionRequest):
     def generator():
         try:
             if data.is_stream():
-                for output in get_stream_output(data):
+                for message, output in get_stream_output(data):
+                    message_json = jsonable_encoder(message, exclude_none=True)
                     json_compatible_item_data = jsonable_encoder(output)
+                    json_compatible_item_data['choices'][0]['delta'] = message_json
                     yield json.dumps(json_compatible_item_data, default=str, ensure_ascii=False)
             else:
                 ret = get_output(data)

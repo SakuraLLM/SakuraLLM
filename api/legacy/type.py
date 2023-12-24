@@ -143,7 +143,7 @@ class OpenAIChatCompletionStreamResponse(BaseModel):
             role: Optional[str] = None
             content: Optional[str] = None
         index: int
-        delta: Message
+        delta: Optional[Message] = None
         logprobs: None = None
         finish_reason: Optional[str] = None
     id: str
