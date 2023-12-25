@@ -123,7 +123,6 @@ def completions(req: Request, data: OpenAIChatCompletionRequest):
 
     return EventSourceResponse(
         generator(),
-        ping=15,
         media_type = "text/event-stream",
     )
 

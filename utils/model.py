@@ -232,9 +232,9 @@ class SakuraModel:
             _messages.pop(0)
         for message in _messages:
             if message['role'] == 'system':
-                raise ValueError(f"Wrong messages format: {str(messages)}")
+                logger.warning(f"Wrong messages format detected: {str(messages)}")
         if len(_messages) % 2 != 1:
-            raise ValueError(f"Wrong messages format: {str(messages)}")
+            logger.warning(f"Wrong messages format detected: {str(messages)}")
 
     def make_prompt_stable(self, messages: list[dict[str, str]]) -> str:
         prompt = ""
@@ -402,21 +402,17 @@ class SakuraModel:
 
     def get_model_response_stream(self, model: ModelTypes, tokenizer: AutoTokenizer, messages: list[dict[str, str]], model_version: str, generation_config: GenerationConfig, is_print_speed:bool=True) -> ModelResponse:
 
-        with self.lock:  # using lock to prevent too many memory allocated on GPU
-            t0 = time.time()
-            try:
-                if self.cfg.llama_cpp:
-                    prompt = self.make_prompt_stable(messages)
-                    for output, finish_reason in self.__llama_cpp_model_stream(model, prompt, generation_config):
-                        yield output, finish_reason
-                else:
-                    self.check_messages(messages)
-                    for output, finish_reason in self.__general_model_stream(model, tokenizer, messages, model_version, generation_config):
-                        yield output, finish_reason
-            except Exception as e:
-                traceback.print_exc()
-                return
-            t1 = time.time()
+        # with self.lock:  # using lock to prevent too many memory allocated on GPU
+        t0 = time.time()
+        if self.cfg.llama_cpp:
+            prompt = self.make_prompt_stable(messages)
+            for output, finish_reason in self.__llama_cpp_model_stream(model, prompt, generation_config):
+                yield output, finish_reason
+        else:
+            self.check_messages(messages)
+            for output, finish_reason in self.__general_model_stream(model, tokenizer, messages, model_version, generation_config):
+                yield output, finish_reason
+        t1 = time.time()
         return
 
     def get_model_response_anti_degen(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
