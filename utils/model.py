@@ -404,15 +404,20 @@ class SakuraModel:
 
         # with self.lock:  # using lock to prevent too many memory allocated on GPU
         t0 = time.time()
+        token_cnt = 0
         if self.cfg.llama_cpp:
             prompt = self.make_prompt_stable(messages)
             for output, finish_reason in self.__llama_cpp_model_stream(model, prompt, generation_config):
+                token_cnt += 1
                 yield output, finish_reason
         else:
             self.check_messages(messages)
             for output, finish_reason in self.__general_model_stream(model, tokenizer, messages, model_version, generation_config):
+                token_cnt += 1
                 yield output, finish_reason
         t1 = time.time()
+        if is_print_speed:
+                logger.info(f'Output generated in {(t1-t0):.2f} seconds ({token_cnt/(t1-t0):.2f} tokens/s, {token_cnt} tokens generated)')
         return
 
     def get_model_response_anti_degen(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int):
