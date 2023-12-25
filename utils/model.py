@@ -290,7 +290,7 @@ class SakuraModel:
         return prompt, test_output, output
 
     def __llama_cpp_model(self, model: "Llama", prompt: str, generation_config: GenerationConfig):
-        output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
+        output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
         response = output['choices'][0]['text']
         pprint(output)
 
@@ -300,7 +300,7 @@ class SakuraModel:
 
     def __llama_cpp_model_stream(self, model: "Llama", prompt: str, generation_config: GenerationConfig):
         logger.debug(f"prompt is: {prompt}")
-        for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], stream=True):
+        for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'], stream=True):
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
