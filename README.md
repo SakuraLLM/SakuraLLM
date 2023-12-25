@@ -59,11 +59,12 @@
     - [x] `autogptq`
     - [ ] `llm-sharp`
 - [ ] 适配翻译工具
-    - [ ] LunaTranslator
-    - [ ] GalTransl
+    - [ ] LunaTranslator(新API)
+    - [x] GalTransl
     - [ ] BallonsTranslator
 - [ ] 提供Python部署一键包
 - [ ] 发布v0.9模型
+- [ ] LoRA MoE模型测试
 - [ ] ~7B模型测试
 - [ ] ~30B模型测试
 
