@@ -106,26 +106,26 @@ def get_model_info():
 
 @router.post("/completions")
 def completions(req: Request, data: OpenAIChatCompletionRequest):
-    def generator():
-        try:
-            if data.is_stream():
+    if data.is_stream():
+        def generator():
+            try:
                 for message, output in get_stream_output(data):
                     message_json = jsonable_encoder(message, exclude_none=True)
                     json_compatible_item_data = jsonable_encoder(output)
                     json_compatible_item_data['choices'][0]['delta'] = message_json
                     yield json.dumps(json_compatible_item_data, default=str, ensure_ascii=False)
-            else:
-                ret = get_output(data)
-                json_compatible_item_data = jsonable_encoder(ret)
-                yield JSONResponse(content=json_compatible_item_data)
-        except asyncio.CancelledError as e:
-            logger.warning(f"Disconnected from client (via refresh/close) {req.client})")
-            raise e
+            except asyncio.CancelledError as e:
+                logger.warning(f"Disconnected from client (via refresh/close) {req.client})")
+                raise e
 
-    return EventSourceResponse(
-        generator(),
-        media_type = "text/event-stream",
-    )
+        return EventSourceResponse(
+            generator(),
+            media_type = "text/event-stream",
+        )
+    else:
+        ret = get_output(data)
+        json_compatible_item_data = jsonable_encoder(ret)
+        return JSONResponse(content=json_compatible_item_data)
 
 # @router.post("/stream/completions")
 # def completions(req: Request, data: OpenAIChatCompletionRequest):
