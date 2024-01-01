@@ -80,7 +80,7 @@ jobs:
         run: |
           BUILD_NUMBER="$(git rev-list --count HEAD)"
           SHORT_HASH="$(git rev-parse --short=7 HEAD)"
-          if [[ "${{ env.BRANCH_NAME }}" == "master" ]]; then
+          if [[ "${{ env.BRANCH_NAME }}" == "main" ]]; then
             echo "name=b${BUILD_NUMBER}" >> $GITHUB_OUTPUT
           else
             SAFE_NAME=$(echo "${{ env.BRANCH_NAME }}" | tr '/' '-')
