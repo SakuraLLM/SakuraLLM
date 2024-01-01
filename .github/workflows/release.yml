@@ -60,6 +60,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install wheel
           python -m pip install torch==2.1.0+cu${{ matrix.alias }} --index-url https://download.pytorch.org/whl/cu${{ matrix.alias }}
+          python -m pip install xformers==0.0.22.post7 --index-url https://download.pytorch.org/whl/cu${{ matrix.alias }}
           python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.40.2-py3-none-win_amd64.whl
           python -m pip install https://github.com/jllllll/AutoGPTQ/releases/download/v0.6.0/auto_gptq-0.6.0+cu${{ matrix.alias }}-cp310-cp310-win_amd64.whl
           python -m pip install https://github.com/turboderp/exllamav2/releases/download/v0.0.11/exllamav2-0.0.11+cu${{ matrix.alias }}-cp310-cp310-win_amd64.whl
