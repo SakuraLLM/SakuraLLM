@@ -30,7 +30,7 @@
 
 2. **[GalTransl](https://github.com/XD2333/GalTransl)已经支持Sakura API，可以通过本地部署API后端，在GalTransl中配置使用Sakura模型来翻译Galgame，制作内嵌式翻译补丁。**
 
-   GalTransl是一个galgame自动化翻译工具，用于制作内嵌式翻译补丁。
+   GalTransl是一个galgame自动化翻译工具，用于制作内嵌式翻译补丁。一个使用GalTransl和Sakura模型翻译的[示例](https://www.ai2moe.org/files/file/2271-%E6%88%AF%E7%94%BBgaltranslsakuragpt35%E7%88%B1%E4%B9%8B%E5%90%BB3-sexy-gpt%E7%BF%BB%E8%AF%91%E8%A1%A5%E4%B8%81uploadee5-mb/)
   
 3. 预览版v0.9.0pre3模型发布。该版本模型只是预览版本，目前可能仍存在问题。增加了约30亿字(~2.5B tokens)领域内日文语料数据进行继续预训练。
 
@@ -124,7 +124,7 @@
 
 - Galgame
 
-  TBD
+  [一个例子](https://www.ai2moe.org/files/file/2271-%E6%88%AF%E7%94%BBgaltranslsakuragpt35%E7%88%B1%E4%B9%8B%E5%90%BB3-sexy-gpt%E7%BF%BB%E8%AF%91%E8%A1%A5%E4%B8%81uploadee5-mb/)
   
 - 轻小说
 
@@ -172,6 +172,14 @@
 
 模型微调框架参考[BELLE](https://github.com/LianjiaTech/BELLE)或[LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory)，prompt构造参考推理部分。
 
+# 相关项目
+
+- [轻小说机翻机器人](https://books.fishhawk.top/)：轻小说翻译
+
+- [LunaTranslator](https://github.com/HIllya51/LunaTranslator)：Galgame在线翻译
+
+- [GalTransl](https://github.com/XD2333/GalTransl)：Galgame离线翻译，制作补丁
+
 # 致谢
 
 - [CjangCjengh](https://github.com/CjangCjengh)
@@ -191,6 +199,8 @@
 - [YYF233333](https://github.com/YYF233333)
 
 - [Isotr0py](https://github.com/Isotr0py)
+
+- [XD2333](https://github.com/XD2333)
 
 # Copyright Notice
 
