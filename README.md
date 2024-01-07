@@ -26,9 +26,11 @@
 
 ## News
 
-0. `0.9.0pre3`的GGUF模型仓库中更新了[AWQ4bit+Q4_KM量化模型](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3-GGUF/blob/main/sakura-13b-lnovel-v0.9.0pre3-awq4bit_Q4_K_M.gguf)，关于此类量化模型详见casper-hansen/AutoAWQ/pull/285。
+0.  **`0.9.0pre3`确认存在一定问题，请先使用更稳定的`0.9.0pre2`版本**
 
-     Pre: 预览版v0.9.0pre3模型发布。该版本模型只是预览版本，目前可能仍存在问题。增加了约30亿字(~2.5B tokens)领域内日文语料数据进行继续预训练。
+    `0.9.0pre3`的GGUF模型仓库中更新了[AWQ4bit+Q4_KM量化模型](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3-GGUF/blob/main/sakura-13b-lnovel-v0.9.0pre3-awq4bit_Q4_K_M.gguf)，关于此类量化模型详见casper-hansen/AutoAWQ/pull/285。
+
+     ~Pre: 预览版v0.9.0pre3模型发布。该版本模型只是预览版本，目前已经确认仍存在问题。增加了约30亿字(\~2.5B tokens)领域内日文语料数据进行继续预训练。~
 
 0. 感谢[Isotr0py](https://github.com/Isotr0py)提供运行模型的NoteBook仓库[SakuraLLM-Notebooks](https://github.com/Isotr0py/SakuraLLM-Notebooks)，可在[Colab](https://colab.research.google.com/)(免费T4\*1)与[Kaggle](https://www.kaggle.com/)(免费P100\*1或T4\*2)平台使用。**已经更新Kaggle平台的[使用教程](https://github.com/SakuraLLM/Sakura-13B-Galgame/wiki/%E7%99%BD%E5%AB%96Kaggle%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B)，可以白嫖一定时间的T4\*2。**
 
@@ -51,6 +53,7 @@
 |   版本  | 全量模型 | GPTQ 8bit量化 | GPTQ 4bit量化 | GPTQ 3bit量化 | GGUF与量化 | AWQ量化
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
+| 20231219-v0.9.0pre2 | 🤗 [Sakura-13B-LNovel-v0.9.0pre2](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre2-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2-GGUF) | - |
 | 20231219-v0.9.0pre3 | 🤗 [Sakura-13B-LNovel-v0.9.0pre3](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre3-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3-GGUF) | - |
 
 目前仍为实验版本，翻译质量在文风与流畅度上强于GPT-3.5，但词汇量逊于GPT-3.5. 个人使用推荐GPT4.
