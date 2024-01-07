@@ -84,7 +84,14 @@ class OpenAIChatCompletionRequest(BaseModel):
     class Config:
         extra = "allow"
 
-    def compatible_with_backend(self):
+    def compatible_with_backend(self, tokenizer: Optional[Any]):
+        if tokenizer:
+            if tokenizer.eos_token_id == 151643:
+                eos_token_id = tokenizer.im_end_id
+            else:
+                eos_token_id = tokenizer.eos_token_id
+        else:
+            eos_token_id = None
         return {
             "messages": self.messages,
             "model": self.model,
@@ -97,7 +104,8 @@ class OpenAIChatCompletionRequest(BaseModel):
             "seed": self.seed,
             "do_sample": self.do_sample,
             "num_beams": self.num_beams,
-            "repetition_penalty": self.repetition_penalty
+            "repetition_penalty": self.repetition_penalty,
+            "eos_token_id": eos_token_id
         }
 
     def is_stream(self):

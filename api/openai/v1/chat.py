@@ -23,9 +23,9 @@ router = APIRouter(
 
 def get_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletionResponse:
     logger.debug(f"Incoming request: \n{data.model_dump()}")
-    generation_config = GenerationConfig(**data.compatible_with_backend())
 
     model = state.get_model()
+    generation_config = GenerationConfig(**data.compatible_with_backend(model.tokenizer))
     prompt = model.make_prompt_stable(data.messages)
     src_text = data.messages[-1]['content'].replace("将下面的日文文本翻译成中文：", "")
     generation_config.__dict__['src_text'] = src_text
@@ -60,9 +60,9 @@ def get_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletionRespons
 def get_stream_output(data: OpenAIChatCompletionRequest):
     logger.debug(f"Incoming request: \n{data.model_dump()}")
     logger.info(f"translate: {str(data.messages)}")
-    generation_config = GenerationConfig(**data.compatible_with_backend())
-    logger.info(f"current generation config: \n{pformat(generation_config.to_diff_dict())}")
     model = state.get_model()
+    generation_config = GenerationConfig(**data.compatible_with_backend(model.tokenizer))
+    logger.info(f"current generation config: \n{pformat(generation_config.to_diff_dict())}")
     src_text = data.messages[-1]['content'].replace("将下面的日文文本翻译成中文：", "")
     generation_config.__dict__['src_text'] = src_text
     final_output = ""
