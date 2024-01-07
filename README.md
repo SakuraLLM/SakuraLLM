@@ -122,7 +122,7 @@
 
 - Finetuned by [SakuraUmi](https://github.com/pipixia244)
 - Finetuned on [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
-- Finetuned on [Qwen-14B-Chat](https://huggingface.co/Qwen/Qwen-14B)
+- Finetuned on [Qwen-14B-Chat](https://huggingface.co/Qwen/Qwen-14B-Chat)
 - Languages: Chinese/Japanese
 
 ## 效果
