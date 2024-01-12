@@ -361,7 +361,7 @@ class SakuraModel:
             yield "", "stop"
 
     def get_model_response(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig, text_length: int, is_print_speed:bool=True) -> ModelResponse:
-        for i in range(3):
+        for i in range(2):
             with self.lock:  # using lock to prevent too many memory allocated on GPU
                 t0 = time.time()
                 if self.cfg.llama_cpp:
@@ -371,11 +371,13 @@ class SakuraModel:
                 t1 = time.time()
 
             # FIXME(kuriko): a temporary solution to avoid empty output in llama.cpp
-            if len(output) == 0:
+            if len(output) == 0 and i == 0:
                 generation_config.__dict__['temperature'] = 1.0
                 generation_config.__dict__['top_p'] = 1.0
-                logger.error(f"Model output is empty, retrying ({i}/3)..., This is a very rare situation, please report to devs")
+                logger.warning(f"Model output is empty, retrying..., This is a very rare situation, please check your input or open an issue.")
                 continue
+            elif len(output) == 0:
+                logger.warning(f"Model output is empty. This is a very rare situation, please check your input or open an issue.")
 
             if is_print_speed:
                 logger.info(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {input_tokens_len} tokens)')
@@ -393,12 +395,13 @@ class SakuraModel:
                 finish_reason = finish_reason
             )
 
+        # 理论上不会有触发这条代码的情况
         return self.ModelResponse(
-                prompt_token = input_tokens_len,
-                new_token = new_tokens,
-                text = "模型生成出错，这是一个非常罕见的问题。原文为：" + generation_config.__dict__['src_text'],
-                finish_reason = "stop"
-            )
+            prompt_token = input_tokens_len,
+            new_token = new_tokens,
+            text = "",
+            finish_reason = "stop"
+        )
 
     def get_model_response_stream(self, model: ModelTypes, tokenizer: AutoTokenizer, messages: list[dict[str, str]], model_version: str, generation_config: GenerationConfig, is_print_speed:bool=True) -> ModelResponse:
 
