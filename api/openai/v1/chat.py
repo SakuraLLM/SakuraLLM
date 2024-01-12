@@ -69,9 +69,7 @@ def get_stream_output(data: OpenAIChatCompletionRequest):
     for idx, (output, finish_reason) in enumerate(model.completion_stream(data.messages, generation_config)):
         final_output += output
         try:
-            if idx == 0:
-                message = OpenAIChatCompletionStreamResponse.Choice.Message(role="assistant")
-            elif finish_reason:
+            if finish_reason:
                 message = OpenAIChatCompletionStreamResponse.Choice.Message()
             else:
                 message = OpenAIChatCompletionStreamResponse.Choice.Message(content=output)
