@@ -11,6 +11,8 @@
 # 介绍
 
 - 基于一系列开源大模型构建，在通用日文语料与轻小说/Galgame等领域的中日语料上进行继续预训练与微调，旨在提供性能接近GPT3.5且完全离线的Galgame/轻小说翻译大语言模型。
+  
+- 目前仍为实验版本，v0.9版本模型在文风、流畅度与准确性上均强于GPT-3.5，但词汇量略逊于GPT-3.5（主观评价）.
 
 - 同时提供了运行模型的API后端，适配OpenAI API格式。
 
@@ -22,46 +24,46 @@
 
 ## 快速开始
 
+### 教程：
+
 详见[本仓库Wiki](https://github.com/SakuraLLM/Sakura-13B-Galgame/wiki).
+
+### 模型下载：
+
+|   版本  | Transformers模型 | GGUF量化模型 | GPTQ 8bit量化 | GPTQ 4bit量化 | GPTQ 3bit量化 | AWQ量化
+|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+| 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
+| 20240111-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) | 🤗 [Sakura-13B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9-GGUF) | - | - | - | - |
 
 ## News
 
-0.  **`0.9.0pre3`确认存在一定问题，请先使用更稳定的`0.9.0pre2`版本**
+1.  **更新了0.9的第一个正式版模型`v0.9`。修复若干bug，清洗并增加了预训练与微调的数据量。更推荐使用正式版模型，它会比之前的pre版本更加稳定，质量更高。**
 
-    `0.9.0pre3`的GGUF模型仓库中更新了[AWQ4bit+Q4_KM量化模型](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3-GGUF/blob/main/sakura-13b-lnovel-v0.9.0pre3-awq4bit_Q4_K_M.gguf)，关于此类量化模型详见casper-hansen/AutoAWQ/pull/285。
+1.  [感谢fkiliver](https://github.com/fkiliver)提供了用来翻译Unity引擎游戏的工具[SakuraTranslator](https://github.com/fkiliver/SakuraTranslator)与翻译RPGMaker引擎游戏的工具[RPGMaker_LLaMA_Translator](https://github.com/fkiliver/RPGMaker_LLaMA_Translator)。
 
-     ~Pre: 预览版v0.9.0pre3模型发布。该版本模型只是预览版本，目前已经确认仍存在问题。增加了约30亿字(\~2.5B tokens)领域内日文语料数据进行继续预训练。~
+1.  感谢[Isotr0py](https://github.com/Isotr0py)提供运行模型的NoteBook仓库[SakuraLLM-Notebooks](https://github.com/Isotr0py/SakuraLLM-Notebooks)，可在[Colab](https://colab.research.google.com/)(免费T4\*1)与[Kaggle](https://www.kaggle.com/)(免费P100\*1或T4\*2)平台使用。**已经更新Kaggle平台的[使用教程](https://github.com/SakuraLLM/Sakura-13B-Galgame/wiki/%E7%99%BD%E5%AB%96Kaggle%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B)，可以白嫖一定时间的T4\*2。**
 
-0. 感谢[Isotr0py](https://github.com/Isotr0py)提供运行模型的NoteBook仓库[SakuraLLM-Notebooks](https://github.com/Isotr0py/SakuraLLM-Notebooks)，可在[Colab](https://colab.research.google.com/)(免费T4\*1)与[Kaggle](https://www.kaggle.com/)(免费P100\*1或T4\*2)平台使用。**已经更新Kaggle平台的[使用教程](https://github.com/SakuraLLM/Sakura-13B-Galgame/wiki/%E7%99%BD%E5%AB%96Kaggle%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B)，可以白嫖一定时间的T4\*2。**
-
-0. **[GalTransl](https://github.com/XD2333/GalTransl)已经支持Sakura API，可以通过本地部署API后端，在GalTransl中配置使用Sakura模型来翻译Galgame，制作内嵌式翻译补丁。**
-
-   GalTransl是一个galgame自动化翻译工具，用于制作内嵌式翻译补丁。一个使用GalTransl和Sakura模型翻译的[示例](https://www.ai2moe.org/files/file/2271-%E6%88%AF%E7%94%BBgaltranslsakuragpt35%E7%88%B1%E4%B9%8B%E5%90%BB3-sexy-gpt%E7%BF%BB%E8%AF%91%E8%A1%A5%E4%B8%81uploadee5-mb/)
-
-0. **Sakura API已经支持OpenAI格式，现在可以通过OpenAI库或者OpenAI API Reference上的请求形式与Server交互。**
+1.  **Sakura API已经支持OpenAI格式，现在可以通过OpenAI库或者OpenAI API Reference上的请求形式与Server交互。**
 一个使用OpenAI库与Sakura模型交互的例子详见[openai_example.py](https://github.com/SakuraLLM/Sakura-13B-Galgame/blob/main/tests/example_openai.py)。
 
-0. 网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译结果可供参考。你也可以自行部署模型并使用该网站生成机翻，目前已经支持v0.8与v0.9模型，且提供了llama.cpp一键包。
+## 已经接入模型的工具
+
+1. 网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译结果可供参考。你也可以自行部署模型并使用该网站生成机翻，目前已经支持v0.8与v0.9模型，且提供了llama.cpp一键包。
   
    轻小说机翻机器人网站是一个自动生成轻小说机翻并分享的网站。你可以浏览日文网络小说，或者上传Epub/Txt文件，并生成机翻。
 
-0. [LunaTranslator](https://github.com/HIllya51/LunaTranslator)已经支持Sakura API，可以通过本地部署API后端，并在LunaTranslator中配置Sakura API来使用Sakura模型进行Galgame实时翻译。
+1. [LunaTranslator](https://github.com/HIllya51/LunaTranslator)已经支持Sakura API，可以通过本地部署API后端，并在LunaTranslator中配置Sakura API来使用Sakura模型进行Galgame实时翻译。
 
    LunaTranslator是一个Galgame翻译工具，支持剪贴板、OCR、HOOK，支持40余种翻译引擎。
 
-## 模型下载：
-|   版本  | 全量模型 | GPTQ 8bit量化 | GPTQ 4bit量化 | GPTQ 3bit量化 | GGUF与量化 | AWQ量化
-|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
-| 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
-| 20231219-v0.9.0pre2 | 🤗 [Sakura-13B-LNovel-v0.9.0pre2](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre2-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre2-GGUF) | - |
-| 20231219-v0.9.0pre3 | 🤗 [Sakura-13B-LNovel-v0.9.0pre3](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3) | - | - | - | 🤗 [Sakura-13B-LNovel-v0.9.0pre3-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9.0pre3-GGUF) | - |
+1. [GalTransl](https://github.com/XD2333/GalTransl)已经支持Sakura API，可以通过本地部署API后端，在GalTransl中配置使用Sakura模型来翻译Galgame，制作内嵌式翻译补丁。
 
-目前仍为实验版本，翻译质量在文风与流畅度上强于GPT-3.5，但词汇量逊于GPT-3.5. 个人使用推荐GPT4.
+   GalTransl是一个galgame自动化翻译工具，用于制作内嵌式翻译补丁。一个使用GalTransl和Sakura模型翻译的[示例](https://www.ai2moe.org/files/file/2271-%E6%88%AF%E7%94%BBgaltranslsakuragpt35%E7%88%B1%E4%B9%8B%E5%90%BB3-sexy-gpt%E7%BF%BB%E8%AF%91%E8%A1%A5%E4%B8%81uploadee5-mb/)
 
 ## TODO
 - [x] 将`dev_server`分支合并到主分支，并将api格式改为openai like api格式。
 - [ ] 支持多种后端至v0.9
-    - [ ] `llama.cpp server`
+    - [x] `llama.cpp server`
     - [x] `llama-cpp-python`
     - [x] `autogptq`
     - [ ] `llm-sharp`
@@ -69,11 +71,12 @@
     - [ ] LunaTranslator(新API)
     - [x] GalTransl
     - [ ] BallonsTranslator
-- [ ] 提供Python部署一键包
-- [ ] 发布v0.9模型
-- [ ] LoRA MoE模型测试
+- [x] 提供Python部署一键包
+- [x] 发布v0.9模型
+- [ ] 发布v0.9.1模型
 - [ ] ~7B模型测试
 - [ ] ~30B模型测试
+- [ ] LoRA MoE模型测试
 
 # 显存需求
 
@@ -102,6 +105,8 @@
 
 # 日志
 
+`20240111`：上传第六版模型的第一个正式版。修复一系列问题，清洗并新增了大量预训练/微调数据。
+
 `20231125`: 上传第六版模型预览，改善数据集质量与格式，使用Qwen-14B-Chat模型进行继续预训练+微调，增加数据集。
 
 `20231026`：上传第五版模型`sakura-13b-2epoch-3.8M-1025-v0.8`，改善数据集质量与格式，修复之前版本模型无法正确解析\n的问题，使用Baichuan2-13B-Chat模型进行微调。
@@ -123,6 +128,7 @@
 - Finetuned by [SakuraUmi](https://github.com/pipixia244)
 - Finetuned on [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
 - Finetuned on [Qwen-14B-Chat](https://huggingface.co/Qwen/Qwen-14B-Chat)
+- Finetuned on [Sakura-13B-Base-v0.9.0](https://huggingface.co/SakuraLLM/Sakura-13B-Base-v0.9.0)
 - Languages: Chinese/Japanese
 
 ## 效果
@@ -171,7 +177,7 @@
 | max new token | 512 |
 | min new token | 1 |
 
-如出现退化，可增加`frequency_penalty`参数，并设置为大于0的某值，一般设置0.05~0.2即可。
+**如出现退化，可增加`frequency_penalty`参数，并设置为大于0的某值，一般设置0.05~0.2即可。**
 
 # 微调
 
