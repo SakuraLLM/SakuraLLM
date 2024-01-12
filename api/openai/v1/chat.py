@@ -69,6 +69,21 @@ def get_stream_output(data: OpenAIChatCompletionRequest):
     for idx, (output, finish_reason) in enumerate(model.completion_stream(data.messages, generation_config)):
         final_output += output
         try:
+            if idx == 0:
+                message = OpenAIChatCompletionStreamResponse.Choice.Message(role="assistant")
+                yield message, OpenAIChatCompletionStreamResponse(
+                    id="114514",
+                    object="chat.completion.chunk",
+                    created=int(time.time()),
+                    model=f"{model.cfg.model_name}-{model.cfg.model_version}-{model.cfg.model_quant}",
+                    system_fingerprint="fp_1919810",
+                    choices=[OpenAIChatCompletionStreamResponse.Choice(
+                        index=0,
+                        delta=None,
+                        logprobs=None,
+                        finish_reason=finish_reason
+                    )]
+                )
             if finish_reason:
                 message = OpenAIChatCompletionStreamResponse.Choice.Message()
             else:
