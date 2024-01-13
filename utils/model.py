@@ -18,11 +18,12 @@ if TYPE_CHECKING:
     from transformers import LlamaForCausalLM, LlamaTokenizer
     from llama_cpp import Llama
     from auto_gptq import AutoGPTQForCausalLM
+    from vllm import AsyncLLMEngine
 else:
     # FIXME(kuriko): try to making linting system happy
-    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = Any
+    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = AsyncLLMEngine = Any
 
-ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM
+ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM | AsyncLLMEngine
 
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,10 @@ class SakuraModelConfig:
     llama_cpp: bool = False
     use_gpu: bool = False
     n_gpu_layers: int = 0
+
+    # vllm
+    vllm: bool = False
+    tensor_parallel_size=1
 
     # read from config.json (model_name_or_path)
     model_name: str|None = None
@@ -63,6 +68,9 @@ def load_model(args: SakuraModelConfig):
     if args.llama_cpp:
         from llama_cpp import Llama
 
+    if args.vllm:
+        from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
+
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
 
@@ -76,7 +84,7 @@ def load_model(args: SakuraModelConfig):
     else:
         tokenizer = None
 
-    if args.use_gptq_model:
+    if args.use_gptq_model and not args.vllm:
         model = AutoGPTQForCausalLM.from_quantized(
             args.model_name_or_path,
             device_map="auto",
@@ -95,6 +103,13 @@ def load_model(args: SakuraModelConfig):
             n_gpu = 0
             offload_kqv = False
         model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length, offload_kqv=offload_kqv)
+    elif args.vllm:
+        # TODO: Support unstream situation
+        # TODO: Support gptq/awq quantization
+        # quantization = "gptq" if args.use_gptq_model else None
+        quantization = None
+        engine_args = AsyncEngineArgs(model=args.model_name_or_path, trust_remote_code=args.trust_remote_code, tensor_parallel_size=args.tensor_parallel_size, quantization=quantization)
+        model = AsyncLLMEngine.from_engine_args(engine_args)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code, use_safetensors=False)
 
@@ -303,6 +318,12 @@ class SakuraModel:
         for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'], stream=True):
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
+    def __vllm_model_stream(self, model: "vLLM", prompt: str, generation_config: GenerationConfig):
+        logger.debug(f"prompt is: {prompt}")
+        sampling_params = SamplingParams(max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
+        for output in model(prompt, sampling_params):
+            yield output['outputs'][0]['text'], output['outputs'][0]['finish_reason']
+
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
         input_tokens_len = input_tokens.input_ids.shape[-1]
@@ -411,6 +432,11 @@ class SakuraModel:
         if self.cfg.llama_cpp:
             prompt = self.make_prompt_stable(messages)
             for output, finish_reason in self.__llama_cpp_model_stream(model, prompt, generation_config):
+                token_cnt += 1
+                yield output, finish_reason
+        elif self.cfg.vllm:
+            prompt = self.make_prompt_stable(messages)
+            for output, finish_reason in self.__vllm_model_stream(model, prompt, generation_config):
                 token_cnt += 1
                 yield output, finish_reason
         else:
