@@ -28,11 +28,13 @@ ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausal
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SakuraModelConfig:
     # read from console
     model_name_or_path: str
     use_gptq_model: bool
+    use_awq_model: bool
     trust_remote_code: bool = False
     text_length: int = 512
 
@@ -44,7 +46,7 @@ class SakuraModelConfig:
 
     # vllm
     vllm: bool = False
-    tensor_parallel_size=1
+    tensor_parallel_size: int = 1
 
     # read from config.json (model_name_or_path)
     model_name: str|None = None
@@ -105,9 +107,12 @@ def load_model(args: SakuraModelConfig):
         model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length, offload_kqv=offload_kqv)
     elif args.vllm:
         # TODO: Support unstream situation
-        # TODO: Support gptq/awq quantization
-        # quantization = "gptq" if args.use_gptq_model else None
-        quantization = None
+        if args.use_gptq_model:
+            quantization = "gptq"
+        elif args.use_awq_model:
+            quantization = "awq"
+        else:
+            quantization = None
         engine_args = AsyncEngineArgs(model=args.model_name_or_path, trust_remote_code=args.trust_remote_code, tensor_parallel_size=args.tensor_parallel_size, quantization=quantization)
         model = AsyncLLMEngine.from_engine_args(engine_args)
     else:

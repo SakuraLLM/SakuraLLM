@@ -16,6 +16,7 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
     parser.add_argument("--model_name_or_path", type=str,
                         default="SakuraLLM/Sakura-13B-LNovel-v0.8", help="model huggingface id or local path.")
     parser.add_argument("--use_gptq_model", action="store_true", help="whether your model is gptq quantized.")
+    parser.add_argument("--use_awq_model", action="store_true", help="whether your model is awq quantized.")
     parser.add_argument("--model_version", type=str, default="0.8",
                         help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8', '0.9']")
     parser.add_argument("--trust_remote_code", action="store_true", help="whether to trust remote code.")
@@ -57,5 +58,8 @@ def args_validation(args) -> bool:
 
     if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9":
         raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
+
+    if args.use_gptq_model and args.use_awq_model:
+        raise ValueError("You are using both use_gptq_model and use_awq_model flag, please specify only one quantization.")
 
     return True
