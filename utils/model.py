@@ -70,7 +70,7 @@ def load_model(args: SakuraModelConfig):
         from llama_cpp import Llama
 
     if args.vllm:
-        from vllm import AsyncEngineArgs, AsyncLLMEngine, LLM, SamplingParams
+        from vllm import AsyncEngineArgs, AsyncLLMEngine, LLM
         from vllm.utils import Counter
 
         class MixLLMEngine(LLM):
@@ -345,12 +345,14 @@ class SakuraModel:
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
     def __vllm_model(self, model: "LLM", prompt: str, generation_config: GenerationConfig):
+        from vllm import SamplingParams
+
         logger.debug(f"prompt is: {prompt}")
         sampling_params = SamplingParams(
             max_tokens=generation_config.__dict__['max_new_tokens'],
             temperature=generation_config.__dict__['temperature'],
             top_p=generation_config.__dict__['top_p'],
-            repeat_penalty=generation_config.__dict__['repetition_penalty'],
+            repetition_penalty=generation_config.__dict__['repetition_penalty'],
             frequency_penalty=generation_config.__dict__['frequency_penalty'],
         )
         # need to unwrap the async engine for generation
@@ -362,18 +364,20 @@ class SakuraModel:
         return text, (input_tokens_len, new_tokens)
 
     def __vllm_model_stream(self, model: "AsyncLLMEngine", prompt: str, generation_config: GenerationConfig):
+        from vllm import SamplingParams
+
         logger.debug(f"prompt is: {prompt}")
         sampling_params = SamplingParams(
             max_tokens=generation_config.__dict__['max_new_tokens'],
             temperature=generation_config.__dict__['temperature'],
             top_p=generation_config.__dict__['top_p'],
-            repeat_penalty=generation_config.__dict__['repetition_penalty'],
+            repetition_penalty=generation_config.__dict__['repetition_penalty'],
             frequency_penalty=generation_config.__dict__['frequency_penalty'],
         )
         for output in model.async_engine.generate(prompt, sampling_params, request_id="Sakura"):
             output_text = output['outputs'][0]['text']
             finish_reason = output['outputs'][0]['finish_reason']
-            yield (output_text, finish_reason)
+            yield output_text, finish_reason
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
@@ -438,6 +442,8 @@ class SakuraModel:
                 t0 = time.time()
                 if self.cfg.llama_cpp:
                     output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+                elif self.cfg.vllm:
+                    output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
                 else:
                     output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
                 t1 = time.time()
