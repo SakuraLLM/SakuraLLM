@@ -26,6 +26,9 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
     parser.add_argument("--use_gpu", action="store_true", help="whether to use gpu when using llama.cpp.")
     parser.add_argument("--n_gpu_layers", type=int, default=0, help="layers cnt when using gpu in llama.cpp")
 
+    parser.add_argument("--vllm", action="store_true", help="whether to use vllm.")
+    parser.add_argument("--tensor_parallel_size", type=int, default=1, help="tensor parallel size when using gpu in vllm.")
+
     if add_extra_args_fn:
         add_extra_args_fn(parser)
 
@@ -48,6 +51,9 @@ def args_validation(args) -> bool:
 
     if args.llama:
         from transformers import LlamaForCausalLM, LlamaTokenizer
+
+    if args.vllm:
+        from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
 
     if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9":
         raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
