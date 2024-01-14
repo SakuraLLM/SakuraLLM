@@ -45,6 +45,7 @@ class SakuraModelConfig:
 
     # vllm
     vllm: bool = False
+    enforce_eager: bool = False
     tensor_parallel_size: int = 1
 
     # read from config.json (model_name_or_path)
@@ -127,7 +128,7 @@ def load_model(args: SakuraModelConfig):
             trust_remote_code=args.trust_remote_code,
             tensor_parallel_size=args.tensor_parallel_size,
             quantization=quantization,
-            gpu_memory_utilization=0.95
+            enforce_eager=args.enforce_eager,
         )
         engine = AsyncLLMEngine.from_engine_args(engine_args)
         model = MixLLMEngine(engine)

@@ -28,6 +28,7 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
     parser.add_argument("--n_gpu_layers", type=int, default=0, help="layers cnt when using gpu in llama.cpp")
 
     parser.add_argument("--vllm", action="store_true", help="whether to use vllm.")
+    parser.add_argument("--enforce_eager", action="store_true", help="enable eager mode in vllm.")
     parser.add_argument("--tensor_parallel_size", type=int, default=1, help="tensor parallel size when using gpu in vllm.")
 
     if add_extra_args_fn:
