@@ -9,7 +9,7 @@ from threading import Lock
 from dataclasses import dataclass
 from pprint import pformat, pprint
 from pydantic import BaseModel
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, PretrainedConfig
 from sampler_hijack import hijack_samplers
 from typing import *
 from utils import consts, log_generation_config
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from transformers import LlamaForCausalLM, LlamaTokenizer
     from llama_cpp import Llama
     from auto_gptq import AutoGPTQForCausalLM
-    from vllm import AsyncLLMEngine
+    from vllm import AsyncLLMEngine, LLM
 else:
     # FIXME(kuriko): try to making linting system happy
     Llama = AutoGPTQForCausalLM = LlamaForCausalLM = AsyncLLMEngine = Any
@@ -27,7 +27,6 @@ ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausal
 
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class SakuraModelConfig:
@@ -71,7 +70,18 @@ def load_model(args: SakuraModelConfig):
         from llama_cpp import Llama
 
     if args.vllm:
-        from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
+        from vllm import AsyncEngineArgs, AsyncLLMEngine, LLM, SamplingParams
+        from vllm.utils import Counter
+
+        class MixLLMEngine(LLM):
+            "an AsyncLLMEngine unwrapper for flexible generation"
+            def __init__(self, llm_engine: AsyncLLMEngine):
+                self.llm_engine = llm_engine.engine
+                self.async_engine = llm_engine
+                self.request_counter = Counter()
+            # TODO(Isotr0py): implement llama.cpp-like generate method
+            # def generate(self, sampling_params, stream=False):
+            #     raise NotImplementedError("Not implemented yet.")
 
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
@@ -106,15 +116,21 @@ def load_model(args: SakuraModelConfig):
             offload_kqv = False
         model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length, offload_kqv=offload_kqv)
     elif args.vllm:
-        # TODO: Support unstream situation
         if args.use_gptq_model:
             quantization = "gptq"
         elif args.use_awq_model:
             quantization = "awq"
         else:
             quantization = None
-        engine_args = AsyncEngineArgs(model=args.model_name_or_path, trust_remote_code=args.trust_remote_code, tensor_parallel_size=args.tensor_parallel_size, quantization=quantization)
-        model = AsyncLLMEngine.from_engine_args(engine_args)
+        engine_args = AsyncEngineArgs(
+            model=args.model_name_or_path,
+            trust_remote_code=args.trust_remote_code,
+            tensor_parallel_size=args.tensor_parallel_size,
+            quantization=quantization,
+            gpu_memory_utilization=0.95
+        )
+        engine = AsyncLLMEngine.from_engine_args(engine_args)
+        model = MixLLMEngine(engine)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code, use_safetensors=False)
 
@@ -154,9 +170,14 @@ class SakuraModel:
 
         try:
             if not cfg.llama_cpp:
-                model_name = self.model.config.sakura_name
-                model_version = self.model.config.sakura_version
-                model_quant = self.model.config.sakura_quant
+                if cfg.vllm:
+                    # vllm Engine doesn't have config attr, we need to reload config from pretrained
+                    config = PretrainedConfig.from_pretrained(self.cfg.model_name_or_path)
+                else:
+                    config = self.model.config
+                model_name = config.sakura_name
+                model_version = config.sakura_version
+                model_quant = config.sakura_quant
 
                 # FIXME(kuriko): Currently we only know quant version from terminal, we cannot depend on parsing `model_name_or_path`
                 # FIXME(kuriko): sakura_xxx is hard coded here, maybe we can find a better way.
@@ -323,11 +344,36 @@ class SakuraModel:
         for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'], stream=True):
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
-    def __vllm_model_stream(self, model: "vLLM", prompt: str, generation_config: GenerationConfig):
+    def __vllm_model(self, model: "LLM", prompt: str, generation_config: GenerationConfig):
         logger.debug(f"prompt is: {prompt}")
-        sampling_params = SamplingParams(max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
-        for output in model(prompt, sampling_params):
-            yield output['outputs'][0]['text'], output['outputs'][0]['finish_reason']
+        sampling_params = SamplingParams(
+            max_tokens=generation_config.__dict__['max_new_tokens'],
+            temperature=generation_config.__dict__['temperature'],
+            top_p=generation_config.__dict__['top_p'],
+            repeat_penalty=generation_config.__dict__['repetition_penalty'],
+            frequency_penalty=generation_config.__dict__['frequency_penalty'],
+        )
+        # need to unwrap the async engine for generation
+        output = model.generate(prompt, sampling_params)
+        request_output = output[0].outputs[0]
+        text = request_output.text
+        input_tokens_len = len(output[0].prompt_token_ids)
+        new_tokens = len(request_output.token_ids)
+        return text, (input_tokens_len, new_tokens)
+
+    def __vllm_model_stream(self, model: "AsyncLLMEngine", prompt: str, generation_config: GenerationConfig):
+        logger.debug(f"prompt is: {prompt}")
+        sampling_params = SamplingParams(
+            max_tokens=generation_config.__dict__['max_new_tokens'],
+            temperature=generation_config.__dict__['temperature'],
+            top_p=generation_config.__dict__['top_p'],
+            repeat_penalty=generation_config.__dict__['repetition_penalty'],
+            frequency_penalty=generation_config.__dict__['frequency_penalty'],
+        )
+        for output in model.async_engine.generate(prompt, sampling_params, request_id="Sakura"):
+            output_text = output['outputs'][0]['text']
+            finish_reason = output['outputs'][0]['finish_reason']
+            yield (output_text, finish_reason)
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
@@ -490,6 +536,8 @@ class SakuraModel:
         t0 = time.time()
         if self.cfg.llama_cpp:
             output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+        elif self.cfg.vllm:
+            output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
         else:
             output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
         t1 = time.time()
@@ -501,6 +549,8 @@ class SakuraModel:
                 break
             if self.cfg.llama_cpp:
                 output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+            elif self.cfg.vllm:
+                output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
             else:
                 output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
         return output
