@@ -47,6 +47,7 @@ class SakuraModelConfig:
     vllm: bool = False
     enforce_eager: bool = False
     tensor_parallel_size: int = 1
+    gpu_memory_utilization: float = 0.9
 
     # read from config.json (model_name_or_path)
     model_name: str|None = None
@@ -129,6 +130,7 @@ def load_model(args: SakuraModelConfig):
             tensor_parallel_size=args.tensor_parallel_size,
             quantization=quantization,
             enforce_eager=args.enforce_eager,
+            gpu_memory_utilization=args.gpu_memory_utilization,
         )
         engine = AsyncLLMEngine.from_engine_args(engine_args)
         model = MixLLMEngine(engine)
@@ -365,7 +367,16 @@ class SakuraModel:
         return text, (input_tokens_len, new_tokens)
 
     def __vllm_model_stream(self, model: "AsyncLLMEngine", prompt: str, generation_config: GenerationConfig):
+        import asyncio
+        import nest_asyncio
         from vllm import SamplingParams
+
+        # FIXME(Isotr0py): hard to code without nest_asyncio
+        nest_asyncio.apply()
+
+        async def await_generate(generator):
+            stream_outputs = [output async for output in generator]
+            return stream_outputs
 
         logger.debug(f"prompt is: {prompt}")
         sampling_params = SamplingParams(
@@ -375,10 +386,18 @@ class SakuraModel:
             repetition_penalty=generation_config.__dict__['repetition_penalty'],
             frequency_penalty=generation_config.__dict__['frequency_penalty'],
         )
-        for output in model.async_engine.generate(prompt, sampling_params, request_id="Sakura"):
-            output_text = output['outputs'][0]['text']
-            finish_reason = output['outputs'][0]['finish_reason']
-            yield output_text, finish_reason
+        generator = model.async_engine.generate(prompt, sampling_params, request_id="Sakura")
+        stream_outputs = asyncio.run(await_generate(generator))
+        # FIXME(Isotr0py): The outputs are collected after generation, it's not real 'streaming'
+        # TODO(Isotr0py): replace with llama.cpp-like streaming generation method
+        previous_output = ""
+        for output in stream_outputs:
+            output_text = output.outputs[0].text
+            finish_reason = output.outputs[0].finish_reason
+            # get new generated text
+            delta_text = output_text.removeprefix(previous_output)
+            previous_output = output_text
+            yield delta_text, finish_reason
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
