@@ -374,10 +374,6 @@ class SakuraModel:
         # FIXME(Isotr0py): hard to code without nest_asyncio
         nest_asyncio.apply()
 
-        async def await_generate(generator):
-            stream_outputs = [output async for output in generator]
-            return stream_outputs
-
         logger.debug(f"prompt is: {prompt}")
         sampling_params = SamplingParams(
             max_tokens=generation_config.__dict__['max_new_tokens'],
@@ -387,17 +383,18 @@ class SakuraModel:
             frequency_penalty=generation_config.__dict__['frequency_penalty'],
         )
         generator = model.async_engine.generate(prompt, sampling_params, request_id="Sakura")
-        stream_outputs = asyncio.run(await_generate(generator))
-        # FIXME(Isotr0py): The outputs are collected after generation, it's not real 'streaming'
         # TODO(Isotr0py): replace with llama.cpp-like streaming generation method
         previous_output = ""
-        for output in stream_outputs:
-            output_text = output.outputs[0].text
-            finish_reason = output.outputs[0].finish_reason
-            # get new generated text
-            delta_text = output_text.removeprefix(previous_output)
-            previous_output = output_text
-            yield delta_text, finish_reason
+        while True:
+            try:
+                output = asyncio.run(anext(generator))
+                output_text = output.outputs[0].text
+                finish_reason = output.outputs[0].finish_reason
+                delta_text = output_text.removeprefix(previous_output)
+                previous_output = output_text
+                yield delta_text, finish_reason
+            except StopAsyncIteration:
+                break
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
