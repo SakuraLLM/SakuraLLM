@@ -81,9 +81,25 @@ def load_model(args: SakuraModelConfig):
                 self.llm_engine = llm_engine.engine
                 self.async_engine = llm_engine
                 self.request_counter = Counter()
-            # TODO(Isotr0py): implement llama.cpp-like generate method
-            # def generate(self, sampling_params, stream=False):
-            #     raise NotImplementedError("Not implemented yet.")
+
+            def stream_generate(self, prompt, sampling_params):
+                import asyncio
+                import nest_asyncio
+
+                nest_asyncio.apply()
+                generator = self.async_engine.generate(prompt, sampling_params, request_id="Sakura")
+                while True:
+                    try:
+                        output = asyncio.run(anext(generator))
+                        yield output
+                    except StopAsyncIteration:
+                        break
+
+            def generate(self, prompt, sampling_params, stream=False):
+                if stream:
+                    return self.stream_generate(prompt, sampling_params)
+                else:
+                    return super(MixLLMEngine, self).generate(prompt, sampling_params)
 
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
@@ -367,12 +383,7 @@ class SakuraModel:
         return text, (input_tokens_len, new_tokens)
 
     def __vllm_model_stream(self, model: "AsyncLLMEngine", prompt: str, generation_config: GenerationConfig):
-        import asyncio
-        import nest_asyncio
         from vllm import SamplingParams
-
-        # FIXME(Isotr0py): hard to code without nest_asyncio
-        nest_asyncio.apply()
 
         logger.debug(f"prompt is: {prompt}")
         sampling_params = SamplingParams(
@@ -382,19 +393,13 @@ class SakuraModel:
             repetition_penalty=generation_config.__dict__['repetition_penalty'],
             frequency_penalty=generation_config.__dict__['frequency_penalty'],
         )
-        generator = model.async_engine.generate(prompt, sampling_params, request_id="Sakura")
-        # TODO(Isotr0py): replace with llama.cpp-like streaming generation method
         previous_output = ""
-        while True:
-            try:
-                output = asyncio.run(anext(generator))
-                output_text = output.outputs[0].text
-                finish_reason = output.outputs[0].finish_reason
-                delta_text = output_text.removeprefix(previous_output)
-                previous_output = output_text
-                yield delta_text, finish_reason
-            except StopAsyncIteration:
-                break
+        for output in model.generate(prompt, sampling_params, stream=True):
+            output_text = output.outputs[0].text
+            finish_reason = output.outputs[0].finish_reason
+            delta_text = output_text.removeprefix(previous_output)
+            previous_output = output_text
+            yield delta_text, finish_reason
 
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
