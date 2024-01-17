@@ -39,6 +39,8 @@
 
 1.  **更新了0.9的第一个正式版模型`v0.9`。修复若干bug，清洗并增加了预训练与微调的数据量。更推荐使用正式版模型，它会比之前的pre版本更加稳定，质量更高。**
 
+1. **增加了vllm模型后端的支持，详见**[#40](https://github.com/SakuraLLM/Sakura-13B-Galgame/pull/40)
+
 1.  [感谢fkiliver](https://github.com/fkiliver)提供了用来翻译Unity引擎游戏的工具[SakuraTranslator](https://github.com/fkiliver/SakuraTranslator)与翻译RPGMaker引擎游戏的工具[RPGMaker_LLaMA_Translator](https://github.com/fkiliver/RPGMaker_LLaMA_Translator)。
 
 1.  感谢[Isotr0py](https://github.com/Isotr0py)提供运行模型的NoteBook仓库[SakuraLLM-Notebooks](https://github.com/Isotr0py/SakuraLLM-Notebooks)，可在[Colab](https://colab.research.google.com/)(免费T4\*1)与[Kaggle](https://www.kaggle.com/)(免费P100\*1或T4\*2)平台使用。**已经更新Kaggle平台的[使用教程](https://github.com/SakuraLLM/Sakura-13B-Galgame/wiki/%E7%99%BD%E5%AB%96Kaggle%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2%E6%95%99%E7%A8%8B)，可以白嫖一定时间的T4\*2。**
@@ -62,13 +64,13 @@
 
 ## TODO
 - [x] 将`dev_server`分支合并到主分支，并将api格式改为openai like api格式。
-- [ ] 支持多种后端至v0.9
+- [x] 支持多种后端至v0.9
     - [x] `llama.cpp server`
     - [x] `llama-cpp-python`
     - [x] `autogptq`
-    - [ ] `llm-sharp`
+    - [x] `vllm`(同时支持gptq与awq模型)
 - [ ] 适配翻译工具
-    - [ ] LunaTranslator(新API)
+    - [x] LunaTranslator(新API)
     - [x] GalTransl
     - [ ] BallonsTranslator
 - [x] 提供Python部署一键包
@@ -102,24 +104,6 @@
 | 8bit | 21.1G | 23.4G |
 | 4bit | 14.9G | 17.4G |
 | 3bit | 13.7G | 15.5G |
-
-# 日志
-
-`20240111`：上传第六版模型的第一个正式版。修复一系列问题，清洗并新增了大量预训练/微调数据。
-
-`20231125`: 上传第六版模型预览，改善数据集质量与格式，使用Qwen-14B-Chat模型进行继续预训练+微调，增加数据集。
-
-`20231026`：上传第五版模型`sakura-13b-2epoch-3.8M-1025-v0.8`，改善数据集质量与格式，修复之前版本模型无法正确解析\n的问题，使用Baichuan2-13B-Chat模型进行微调。
-
-`20231011`：上传第四版模型`sakura-14b-2epoch-4.4M-1003-v0.7`，改用QWen-14B-Chat模型进行微调，针对较长文本进行优化，增加数据集。
-
-`20230918`：上传第三版模型的8bits量化版`sakura-13b-2epoch-2.6M-0917-v0.5-8bits`。
-
-`20230917`：上传第三版模型`sakura-13b-2epoch-2.6M-0917-v0.5`，改用Baichuan2-13B-Chat模型进行微调，翻译质量有所提高。
-
-`20230908`：上传第二版模型`sakura-13b-1epoch-2.6M-0903-v0.4`，使用Galgame和轻小说数据集进行微调，语法能力有所提高。感谢[CjangCjengh](https://github.com/CjangCjengh)大佬提供轻小说数据集。
-
-`20230827`：上传第一版模型`sakura-13b-2epoch-260k-0826-v0.1`
 
 # 模型详情
 
