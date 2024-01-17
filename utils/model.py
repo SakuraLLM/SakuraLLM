@@ -21,9 +21,10 @@ if TYPE_CHECKING:
     from vllm import AsyncLLMEngine, LLM
 else:
     # FIXME(kuriko): try to making linting system happy
-    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = AsyncLLMEngine = Any
+    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = MixLLMEngine = Any
 
-ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM | AsyncLLMEngine
+MixLLMEngine = Any
+ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM | MixLLMEngine
 
 
 logger = logging.getLogger(__name__)
@@ -78,19 +79,23 @@ def load_model(args: SakuraModelConfig):
         class MixLLMEngine(LLM):
             "an AsyncLLMEngine unwrapper for flexible generation"
             def __init__(self, llm_engine: AsyncLLMEngine):
-                self.llm_engine = llm_engine.engine
-                self.async_engine = llm_engine
-                self.request_counter = Counter()
-
-            def stream_generate(self, prompt, sampling_params):
                 import asyncio
                 import nest_asyncio
 
                 nest_asyncio.apply()
-                generator = self.async_engine.generate(prompt, sampling_params, request_id="Sakura")
+                self.llm_engine = llm_engine.engine
+                self.async_engine = llm_engine
+                self.request_counter = Counter()
+                self.loop = asyncio.new_event_loop()
+                self.req_id = 0
+
+            def stream_generate(self, prompt, sampling_params):
+                # NOTE(kuriko): when multi-requests come, the same `request-id` will cause a 500 internal error
+                self.req_id += 1
+                generator = self.async_engine.generate(prompt, sampling_params, request_id=f"Sakura-{self.req_id}")
                 while True:
                     try:
-                        output = asyncio.run(anext(generator))
+                        output = self.loop.run_until_complete(anext(generator))
                         yield output
                     except StopAsyncIteration:
                         break
@@ -363,7 +368,7 @@ class SakuraModel:
         for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'], stream=True):
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
-    def __vllm_model(self, model: "LLM", prompt: str, generation_config: GenerationConfig):
+    def __vllm_model(self, model: MixLLMEngine, prompt: str, generation_config: GenerationConfig):
         from vllm import SamplingParams
 
         logger.debug(f"prompt is: {prompt}")
@@ -382,7 +387,7 @@ class SakuraModel:
         new_tokens = len(request_output.token_ids)
         return text, (input_tokens_len, new_tokens)
 
-    def __vllm_model_stream(self, model: "AsyncLLMEngine", prompt: str, generation_config: GenerationConfig):
+    def __vllm_model_stream(self, model: MixLLMEngine, prompt: str, generation_config: GenerationConfig):
         from vllm import SamplingParams
 
         logger.debug(f"prompt is: {prompt}")
