@@ -16,6 +16,7 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
     parser.add_argument("--model_name_or_path", type=str,
                         default="SakuraLLM/Sakura-13B-LNovel-v0.8", help="model huggingface id or local path.")
     parser.add_argument("--use_gptq_model", action="store_true", help="whether your model is gptq quantized.")
+    parser.add_argument("--use_awq_model", action="store_true", help="whether your model is awq quantized.")
     parser.add_argument("--model_version", type=str, default="0.8",
                         help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8', '0.9']")
     parser.add_argument("--trust_remote_code", action="store_true", help="whether to trust remote code.")
@@ -25,6 +26,11 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
     parser.add_argument("--llama_cpp", action="store_true", help="whether to use llama.cpp.")
     parser.add_argument("--use_gpu", action="store_true", help="whether to use gpu when using llama.cpp.")
     parser.add_argument("--n_gpu_layers", type=int, default=0, help="layers cnt when using gpu in llama.cpp")
+
+    parser.add_argument("--vllm", action="store_true", help="whether to use vllm.")
+    parser.add_argument("--enforce_eager", action="store_true", help="enable eager mode in vllm.")
+    parser.add_argument("--tensor_parallel_size", type=int, default=1, help="tensor parallel size when using gpu in vllm.")
+    parser.add_argument("--gpu_memory_utilization", type=float, default=0.9, help="The ratio (between 0 and 1) of GPU memory for inference.")
 
     if add_extra_args_fn:
         add_extra_args_fn(parser)
@@ -49,7 +55,13 @@ def args_validation(args) -> bool:
     if args.llama:
         from transformers import LlamaForCausalLM, LlamaTokenizer
 
+    if args.vllm:
+        from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
+
     if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9":
         raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
+
+    if args.use_gptq_model and args.use_awq_model:
+        raise ValueError("You are using both use_gptq_model and use_awq_model flag, please specify only one quantization.")
 
     return True

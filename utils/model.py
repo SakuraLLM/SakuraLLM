@@ -9,7 +9,7 @@ from threading import Lock
 from dataclasses import dataclass
 from pprint import pformat, pprint
 from pydantic import BaseModel
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, PretrainedConfig
 from sampler_hijack import hijack_samplers
 from typing import *
 from utils import consts, log_generation_config
@@ -18,11 +18,13 @@ if TYPE_CHECKING:
     from transformers import LlamaForCausalLM, LlamaTokenizer
     from llama_cpp import Llama
     from auto_gptq import AutoGPTQForCausalLM
+    from vllm import AsyncLLMEngine, LLM
 else:
     # FIXME(kuriko): try to making linting system happy
-    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = Any
+    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = MixLLMEngine = Any
 
-ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM
+MixLLMEngine = Any
+ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM | MixLLMEngine
 
 
 logger = logging.getLogger(__name__)
@@ -32,6 +34,7 @@ class SakuraModelConfig:
     # read from console
     model_name_or_path: str
     use_gptq_model: bool
+    use_awq_model: bool
     trust_remote_code: bool = False
     text_length: int = 512
 
@@ -40,6 +43,12 @@ class SakuraModelConfig:
     llama_cpp: bool = False
     use_gpu: bool = False
     n_gpu_layers: int = 0
+
+    # vllm
+    vllm: bool = False
+    enforce_eager: bool = False
+    tensor_parallel_size: int = 1
+    gpu_memory_utilization: float = 0.9
 
     # read from config.json (model_name_or_path)
     model_name: str|None = None
@@ -63,6 +72,38 @@ def load_model(args: SakuraModelConfig):
     if args.llama_cpp:
         from llama_cpp import Llama
 
+    if args.vllm:
+        from vllm import AsyncEngineArgs, AsyncLLMEngine, LLM
+        from vllm.utils import Counter
+
+        class MixLLMEngine(LLM):
+            "an AsyncLLMEngine unwrapper for flexible generation"
+            def __init__(self, llm_engine: AsyncLLMEngine):
+                import asyncio
+
+                self.llm_engine = llm_engine.engine
+                self.async_engine = llm_engine
+                self.request_counter = Counter()
+                self.loop = asyncio.new_event_loop()
+                self.req_id = 0
+
+            def stream_generate(self, prompt, sampling_params):
+                # NOTE(kuriko): when multi-requests come, the same `request-id` will cause a 500 internal error
+                self.req_id += 1
+                generator = self.async_engine.generate(prompt, sampling_params, request_id=f"Sakura-{self.req_id}")
+                while True:
+                    try:
+                        output = self.loop.run_until_complete(anext(generator))
+                        yield output
+                    except StopAsyncIteration:
+                        break
+
+            def generate(self, prompt, sampling_params, stream=False):
+                if stream:
+                    return self.stream_generate(prompt, sampling_params)
+                else:
+                    return super(MixLLMEngine, self).generate(prompt, sampling_params)
+
     if args.use_gptq_model:
         from auto_gptq import AutoGPTQForCausalLM
 
@@ -76,7 +117,7 @@ def load_model(args: SakuraModelConfig):
     else:
         tokenizer = None
 
-    if args.use_gptq_model:
+    if args.use_gptq_model and not args.vllm:
         model = AutoGPTQForCausalLM.from_quantized(
             args.model_name_or_path,
             device_map="auto",
@@ -95,6 +136,23 @@ def load_model(args: SakuraModelConfig):
             n_gpu = 0
             offload_kqv = False
         model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length, offload_kqv=offload_kqv)
+    elif args.vllm:
+        if args.use_gptq_model:
+            quantization = "gptq"
+        elif args.use_awq_model:
+            quantization = "awq"
+        else:
+            quantization = None
+        engine_args = AsyncEngineArgs(
+            model=args.model_name_or_path,
+            trust_remote_code=args.trust_remote_code,
+            tensor_parallel_size=args.tensor_parallel_size,
+            quantization=quantization,
+            enforce_eager=args.enforce_eager,
+            gpu_memory_utilization=args.gpu_memory_utilization,
+        )
+        engine = AsyncLLMEngine.from_engine_args(engine_args)
+        model = MixLLMEngine(engine)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, device_map="auto", trust_remote_code=args.trust_remote_code, use_safetensors=False)
 
@@ -134,9 +192,14 @@ class SakuraModel:
 
         try:
             if not cfg.llama_cpp:
-                model_name = self.model.config.sakura_name
-                model_version = self.model.config.sakura_version
-                model_quant = self.model.config.sakura_quant
+                if cfg.vllm:
+                    # vllm Engine doesn't have config attr, we need to reload config from pretrained
+                    config = PretrainedConfig.from_pretrained(self.cfg.model_name_or_path)
+                else:
+                    config = self.model.config
+                model_name = config.sakura_name
+                model_version = config.sakura_version
+                model_quant = config.sakura_quant
 
                 # FIXME(kuriko): Currently we only know quant version from terminal, we cannot depend on parsing `model_name_or_path`
                 # FIXME(kuriko): sakura_xxx is hard coded here, maybe we can find a better way.
@@ -303,6 +366,44 @@ class SakuraModel:
         for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'], stream=True):
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
+    def __vllm_model(self, model: MixLLMEngine, prompt: str, generation_config: GenerationConfig):
+        from vllm import SamplingParams
+
+        logger.debug(f"prompt is: {prompt}")
+        sampling_params = SamplingParams(
+            max_tokens=generation_config.__dict__['max_new_tokens'],
+            temperature=generation_config.__dict__['temperature'],
+            top_p=generation_config.__dict__['top_p'],
+            repetition_penalty=generation_config.__dict__['repetition_penalty'],
+            frequency_penalty=generation_config.__dict__['frequency_penalty'],
+        )
+        # need to unwrap the async engine for generation
+        output = model.generate(prompt, sampling_params)
+        request_output = output[0].outputs[0]
+        text = request_output.text
+        input_tokens_len = len(output[0].prompt_token_ids)
+        new_tokens = len(request_output.token_ids)
+        return text, (input_tokens_len, new_tokens)
+
+    def __vllm_model_stream(self, model: MixLLMEngine, prompt: str, generation_config: GenerationConfig):
+        from vllm import SamplingParams
+
+        logger.debug(f"prompt is: {prompt}")
+        sampling_params = SamplingParams(
+            max_tokens=generation_config.__dict__['max_new_tokens'],
+            temperature=generation_config.__dict__['temperature'],
+            top_p=generation_config.__dict__['top_p'],
+            repetition_penalty=generation_config.__dict__['repetition_penalty'],
+            frequency_penalty=generation_config.__dict__['frequency_penalty'],
+        )
+        previous_output = ""
+        for output in model.generate(prompt, sampling_params, stream=True):
+            output_text = output.outputs[0].text
+            finish_reason = output.outputs[0].finish_reason
+            delta_text = output_text.removeprefix(previous_output)
+            previous_output = output_text
+            yield delta_text, finish_reason
+
     def __general_model(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str, model_version: str, generation_config: GenerationConfig):
         input_tokens = tokenizer(prompt, return_tensors="pt")
         input_tokens_len = input_tokens.input_ids.shape[-1]
@@ -366,6 +467,8 @@ class SakuraModel:
                 t0 = time.time()
                 if self.cfg.llama_cpp:
                     output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+                elif self.cfg.vllm:
+                    output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
                 else:
                     output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
                 t1 = time.time()
@@ -411,6 +514,11 @@ class SakuraModel:
         if self.cfg.llama_cpp:
             prompt = self.make_prompt_stable(messages)
             for output, finish_reason in self.__llama_cpp_model_stream(model, prompt, generation_config):
+                token_cnt += 1
+                yield output, finish_reason
+        elif self.cfg.vllm:
+            prompt = self.make_prompt_stable(messages)
+            for output, finish_reason in self.__vllm_model_stream(model, prompt, generation_config):
                 token_cnt += 1
                 yield output, finish_reason
         else:
@@ -459,6 +567,8 @@ class SakuraModel:
         t0 = time.time()
         if self.cfg.llama_cpp:
             output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+        elif self.cfg.vllm:
+            output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
         else:
             output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
         t1 = time.time()
@@ -470,6 +580,8 @@ class SakuraModel:
                 break
             if self.cfg.llama_cpp:
                 output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+            elif self.cfg.vllm:
+                output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
             else:
                 output, (input_tokens_len, new_tokens) = self.__general_model(model, tokenizer, prompt, model_version, generation_config)
         return output
