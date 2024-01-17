@@ -80,9 +80,7 @@ def load_model(args: SakuraModelConfig):
             "an AsyncLLMEngine unwrapper for flexible generation"
             def __init__(self, llm_engine: AsyncLLMEngine):
                 import asyncio
-                import nest_asyncio
 
-                nest_asyncio.apply()
                 self.llm_engine = llm_engine.engine
                 self.async_engine = llm_engine
                 self.request_counter = Counter()

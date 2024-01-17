@@ -1,4 +1,13 @@
-nest_asyncio
+-r requirements/server.txt
+--extra-index-url https://download.pytorch.org/whl/cu121
+# --extra-index-url https://download.pytorch.org/whl/cu118
+torch>=2.1.0
+transformers==4.33.2
+auto-gptq
+sentencepiece
+xformers
+scipy
+numpy
 
 # Only vllm with cu121 can be installed from pypi
 # If you need vllm+cu118, please download and install wheel 
