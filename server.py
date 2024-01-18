@@ -30,7 +30,15 @@ dependencies = [
     Depends(log_request),
 ]
 
-args = parse_args()
+def extra_args(parser: ArgumentParser):
+    server_group = parser.add_argument_group("Server")
+    server_group.add_argument("--listen", type=str, default="127.0.0.1:5000", help="listen address ip:port")
+    server_group.add_argument("--auth", type=str, help="user:pass, user & pass should not contain ':'")
+    server_group.add_argument("--no-auth", action="store_true", help="force disable auth")
+
+    return
+
+args = parse_args(add_extra_args_fn=extra_args)
 
 coloredlogs.install(level=args.logLevel.upper())
 logger = logging.getLogger(__name__)

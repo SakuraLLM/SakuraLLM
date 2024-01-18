@@ -173,5 +173,9 @@ class OpenAIChatModelsResponse(BaseModel):
         model_quant: str
         model_name_or_path: str
 
+        # NOTE(kuriko): disable `protected model_ warning` for pydantic v2
+        class Config:
+            protected_namespaces=()
+
     object: str = 'list',
     data: List[OpenAIChatModel]

@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from dacite import from_dict
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 import time
@@ -135,12 +136,13 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
 
 
 def main():
-    def extra_args(parser):
-        parser.add_argument("--data_path", type=str, default="", help="file path of the epub you want to translate.")
-        parser.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
-        parser.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
-        parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
-        parser.add_argument("--translate_title", action='store_true', help='whether to translate the file names of the epubs')
+    def extra_args(parser: ArgumentParser):
+        epub_group = parser.add_argument_group("Epub")
+        epub_group.add_argument("--data_path", type=str, default="", help="file path of the epub you want to translate.")
+        epub_group.add_argument("--data_folder", type=str, default="", help="folder path of the epubs you want to translate.")
+        epub_group.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
+        epub_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
+        epub_group.add_argument("--translate_title", action='store_true', help='whether to translate the file names of the epubs')
 
     args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
 
@@ -174,7 +176,7 @@ def main():
         f = os.path.basename(args.data_path)
         if args.translate_title:
             prompt = consts.get_prompt(
-                input=f[:-5], 
+                input=f[:-5],
                 model_name=sakura_model.cfg.model_name,
                 model_version=sakura_model.cfg.model_version,
                 model_quant=sakura_model.cfg.model_quant
@@ -197,7 +199,7 @@ def main():
                 epub_list.append(os.path.join(args.data_folder, f))
                 if args.translate_title:
                     prompt = consts.get_prompt(
-                        input=f[:-5], 
+                        input=f[:-5],
                         model_name=sakura_model.cfg.model_name,
                         model_version=sakura_model.cfg.model_version,
                         model_quant=sakura_model.cfg.model_quant
