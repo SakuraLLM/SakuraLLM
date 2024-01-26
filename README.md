@@ -18,6 +18,8 @@
 
 - 新建了[TG交流群](https://t.me/+QMDKZyO9GV1kNDA1)，欢迎交流讨论。
 
+**对于其他适配本模型的项目如使用非本项目提供的prompt格式进行翻译，不保证会获得与README中的说明一致的质量！**
+
 **如果使用模型翻译并发布，请在最显眼的位置标注机翻！！！！！开发者对于滥用本模型造成的一切后果不负任何责任。**
 
 **对于模型翻译的人称代词问题（错用，乱加，主宾混淆，男女不分等）和上下文理解问题，如果有好的想法或建议，欢迎提issue！**
@@ -139,6 +141,49 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
   TBD
 
 # 推理
+
+- openai api messages格式：
+
+  - v0.9
+    使用代码处理如下：
+    ```python
+    input_text_list = ['a', 'bb', 'ccc', ...] # 一系列上下文文本，每个元素代表一行的文本
+    raw_text = "\n".join(input_text_list)
+    messages=[
+        {
+            "role": "system",
+            "content": "你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，不擅自添加原文中没有的代词。"
+        },
+        {
+            "role": "user",
+            "content": "将下面的日文文本翻译成中文：" + raw_text
+        }
+    ]
+    ```
+- prompt格式：
+
+  - v0.9
+    文本格式如下：
+    ```
+    <|im_start|>system
+    你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，不擅自添加原文中没有的代词。<|im_end|>
+    <|im_start|>user
+    将下面的日文文本翻译成中文：日文第一行
+    日文第二行
+    日文第三行
+    ...
+    日文第n行<|im_end|>
+    <|im_start|>assistant
+    
+    ```
+    使用代码处理如下：
+    ```python
+    input_text_list = ['a', 'bb', 'ccc', ...] # 一系列上下文文本，每个元素代表一行的文本
+    raw_text = "\n".join(input_text_list)
+    prompt = "<|im_start|>system\n你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，不擅自添加原文中没有的代词。<|im_end|>\n" \ # system prompt
+            + "<|im_start|>user\n将下面的日文文本翻译成中文：" + raw_text + "<|im_end|>\n" \ # user prompt
+            + "<|im_start|>assistant\n" # assistant prompt start
+    ```
 
 - prompt构建：
 
