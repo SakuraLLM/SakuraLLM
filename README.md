@@ -24,6 +24,8 @@
 
 **对于模型翻译的人称代词问题（错用，乱加，主宾混淆，男女不分等）和上下文理解问题，如果有好的想法或建议，欢迎提issue！**
 
+### TODO：见https://github.com/SakuraLLM/Sakura-13B-Galgame/issues/42
+
 ## 快速开始
 
 ### 教程：
@@ -71,24 +73,6 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 1. [AiNiee](https://github.com/NEKOparapa/AiNiee-chatgpt)已经支持Sakura API，可以通过本地部署API后端，在AiNiee中使用Sakura模型进行翻译。
 
   AiNiee是一款基于【mtool】或【Translator++】，chatgpt自动批量翻译工具，主要是用来翻译各种RPG游戏。
-
-## TODO
-- [x] 将`dev_server`分支合并到主分支，并将api格式改为openai like api格式。
-- [x] 支持多种后端至v0.9
-    - [x] `llama.cpp server`
-    - [x] `llama-cpp-python`
-    - [x] `autogptq`
-    - [x] `vllm`(同时支持gptq与awq模型)
-- [ ] 适配翻译工具
-    - [x] LunaTranslator(新API)
-    - [x] GalTransl
-    - [ ] BallonsTranslator
-- [x] 提供Python部署一键包
-- [x] 发布v0.9模型
-- [ ] 发布v0.9.1模型
-- [ ] ~7B模型测试
-- [ ] ~30B模型测试
-- [ ] LoRA MoE模型测试
 
 # 显存需求
 
