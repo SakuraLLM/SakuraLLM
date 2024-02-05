@@ -43,6 +43,8 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 ## News
 
+1. **[KurikoMoe](https://github.com/kurikomoe)为LunaTranslator支持了流式输出：[release地址](https://github.com/kurikomoe/LunaTranslator/releases/tag/v2.36.3-stream-0.1.0)。注意：目前该模式下只能单独开启sakura翻译，不能同时开启其他翻译。**
+
 1.  **更新了0.9的正式版模型`v0.9b`。相比`v0.9`删除了一个可能导致污染的数据集。清洗并增加了预训练与微调的数据量。更推荐使用正式版模型，它会比之前的pre版本更加稳定，质量更高。**
 
 1. **增加了vllm模型后端的支持，详见**[#40](https://github.com/SakuraLLM/Sakura-13B-Galgame/pull/40)
@@ -58,7 +60,8 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
   
    轻小说机翻机器人网站是一个自动生成轻小说机翻并分享的网站。你可以浏览日文网络小说，或者上传Epub/Txt文件，并生成机翻。
 
-1. [LunaTranslator](https://github.com/HIllya51/LunaTranslator)已经支持Sakura API，可以通过本地部署API后端，并在LunaTranslator中配置Sakura API来使用Sakura模型进行Galgame实时翻译。
+1. [LunaTranslator](https://github.com/HIllya51/LunaTranslator)已经支持Sakura API，可以通过本地部署API后端，并在LunaTranslator中配置Sakura API来使用Sakura模型进行Galgame实时翻译。  
+    使用[KurikoMoe](https://github.com/kurikomoe/LunaTranslator/releases/tag/v2.36.3-stream-0.1.0)的版本可以支持流式输出。
 
    LunaTranslator是一个Galgame翻译工具，支持剪贴板、OCR、HOOK，支持40余种翻译引擎。
 
