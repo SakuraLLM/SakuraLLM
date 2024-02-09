@@ -201,7 +201,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 | max new token | 512 |
 | min new token | 1 |
 
-**如出现退化，可增加`frequency_penalty`参数，并设置为大于0的某值，一般设置0.05~0.2即可。**
+**如出现退化（退化的例子可参见[#35](https://github.com/SakuraLLM/Sakura-13B-Galgame/issues/35)与[#36](https://github.com/SakuraLLM/Sakura-13B-Galgame/issues/36)），可增加`frequency_penalty`参数，并设置为大于0的某值，一般设置0.1~0.2即可。**
 
 # 微调
 
