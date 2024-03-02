@@ -38,10 +38,13 @@
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
 | 20240111-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) | - | - | - | - |
+| 20240303-v0.10pre0 | 🤗 [Sakura-13B-Qwen2beta-v0.10pre0](https://huggingface.co/SakuraLLM/Sakura-13B-Qwen2beta-v0.10pre0) | 🤗 [Sakura-13B-Qwen2beta-v0.10pre0-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-Qwen2beta-v0.10pre0-GGUF) | - | - | - | - |
 
 p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.co`改成`hf-mirror.com`，使用hf镜像站下载。
 
 ## News
+
+1. **更新了0.10的测试版模型`v0.10pre0`，增加了术语表功能，新的prompt格式详见[推理部分](https://github.com/SakuraLLM/Sakura-13B-Galgame/edit/main/README.md#%E6%8E%A8%E7%90%86)的prompt格式部分。注意：此版本模型的结构为qwen2。**
 
 1. **[KurikoMoe](https://github.com/kurikomoe)为LunaTranslator支持了流式输出：[release地址](https://github.com/kurikomoe/LunaTranslator/releases/latest)。注意：目前该模式下只能单独开启sakura翻译，不能同时开启其他翻译。**
 
@@ -147,6 +150,33 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
     ]
     ```
 - prompt格式：
+
+  - v0.10pre0
+    代码处理如下：
+    ```python
+            gpt_dict = [{
+              "src": "原文1",
+              "dst": "译文1",
+              "info": "注释信息1",
+            },]
+            gpt_dict_text_list = []
+            for gpt in gpt_dict:
+                src = gpt['src']
+                dst = gpt['dst']
+                info = gpt['info'] if "info" in gpt.keys() else None
+                if info:
+                    single = f"{src}->{dst} #{info}"
+                else:
+                    single = f"{src}->{dst}"
+                gpt_dict_text_list.append(single)
+
+            gpt_dict_raw_text = "\n".join(gpt_dict_text_list)
+
+            user_prompt = "根据以下术语表：\n" + gpt_dict_raw_text + "\n" + "将下面的日文文本根据上述术语表的对应关系和注释翻译成中文：" + japanese
+            prompt = "<|im_start|>system\n你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，注意不要擅自添加原文中没有的代词，也不要擅自增加或减少换行。<|im_end|>\n" \ # system prompt
+            + "<|im_start|>user\n" + user_prompt + "<|im_end|>\n" \ # user prompt
+            + "<|im_start|>assistant\n" # assistant prompt start
+    ```
 
   - v0.9
     文本格式如下：
