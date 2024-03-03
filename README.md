@@ -44,7 +44,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 ## News
 
-1. **更新了0.10的测试版模型`v0.10pre0`，增加了术语表功能，新的prompt格式详见[推理部分](https://github.com/SakuraLLM/Sakura-13B-Galgame/edit/main/README.md#%E6%8E%A8%E7%90%86)的prompt格式部分。注意：此版本模型的结构为qwen2。**
+1. **更新了0.10的测试版模型`v0.10pre0`，增加了术语表功能，新的prompt格式详见[推理部分](https://github.com/SakuraLLM/Sakura-13B-Galgame?tab=readme-ov-file#%E6%8E%A8%E7%90%86)的prompt格式部分。注意：此版本模型的结构为qwen2。**
 
 1. **[KurikoMoe](https://github.com/kurikomoe)为LunaTranslator支持了流式输出：[release地址](https://github.com/kurikomoe/LunaTranslator/releases/latest)。注意：目前该模式下只能单独开启sakura翻译，不能同时开启其他翻译。**
 
