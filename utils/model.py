@@ -83,7 +83,7 @@ def load_model(args: SakuraModelConfig):
             '''Llama-style wrapper for ollama'''
             def __init__(self, model):
                 self.model = model
-                ollama.pull()
+                self.pull()
 
             def __call__(self, prompt, **kwargs):
                 return ollama.generate(self.model, prompt, **kwargs)
