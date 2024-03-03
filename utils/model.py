@@ -208,6 +208,12 @@ def get_llama_cpp_metadata(args: SakuraModelConfig):
     model_name = "-".join(metadata[:-2])
     return model_name, model_version, model_quant
 
+def get_ollama_metadata(args: SakuraModelConfig):
+    metadata = args.model_name_or_path.split("-")
+    model_version, model_quant = metadata[-2], metadata[-1]
+    model_name = "-".join(metadata[:-2])
+    return model_name, model_version, model_quant
+
 class SakuraModel:
     # typing
     class ModelResponse(BaseModel):
@@ -252,7 +258,12 @@ class SakuraModel:
 
             else:
                 # FIXME(kuriko): for llama_cpp model, we cannot decide so hard coded here.
-                model_name, model_version, model_quant = get_llama_cpp_metadata(self.cfg)
+                if self.cfg.llama_cpp:
+                    model_name, model_version, model_quant = get_llama_cpp_metadata(self.cfg)
+                elif self.cfg.ollama:
+                    model_name, model_version, model_quant = get_ollama_metadata(self.cfg)
+                else:
+                    pass
 
             self.cfg.model_name = model_name
             self.cfg.model_version = model_version
