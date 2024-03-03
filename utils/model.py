@@ -149,7 +149,7 @@ def load_model(args: SakuraModelConfig):
 
     logger.info("loading model ...")
 
-    if not args.llama_cpp:
+    if not (args.llama_cpp or args.ollama):
         if args.llama:
             tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=args.trust_remote_code)
         else:
