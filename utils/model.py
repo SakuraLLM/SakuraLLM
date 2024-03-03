@@ -23,8 +23,8 @@ else:
     # FIXME(kuriko): try to making linting system happy
     Llama = AutoGPTQForCausalLM = LlamaForCausalLM = MixLLMEngine = Any
 
-MixLLMEngine = Any
-ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM | MixLLMEngine
+MixLLMEngine = Ollama = Any
+ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM | MixLLMEngine | Ollama
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +50,9 @@ class SakuraModelConfig:
     tensor_parallel_size: int = 1
     gpu_memory_utilization: float = 0.9
 
+    # ollama
+    ollama: bool = False
+
     # read from config.json (model_name_or_path)
     model_name: str|None = None
     model_quant: str|None = None
@@ -71,6 +74,43 @@ def load_model(args: SakuraModelConfig):
 
     if args.llama_cpp:
         from llama_cpp import Llama
+
+    if args.ollama:
+        import ollama
+        from tqdm import tqdm
+
+        class Ollama:
+            '''Llama-style wrapper for ollama'''
+            def __init__(self, model):
+                self.model = model
+                ollama.pull()
+
+            def __call__(self, prompt, **kwargs):
+                return ollama.generate(self.model, prompt, **kwargs)
+
+            def pull(self):
+                current_digest, bars = "", {}
+                for progress in ollama.pull(self.model, stream=True):
+                    digest = progress.get("digest", "")
+                    if digest != current_digest and current_digest in bars:
+                        bars[current_digest].close()
+
+                    if not digest:
+                        print(progress.get("status"))
+                        continue
+
+                    if digest not in bars and (total := progress.get("total")):
+                        bars[digest] = tqdm(
+                            total=total,
+                            desc=f"pulling {digest[7:19]}",
+                            unit="B",
+                            unit_scale=True,
+                        )
+
+                    if completed := progress.get("completed"):
+                        bars[digest].update(completed - bars[digest].n)
+
+                    current_digest = digest
 
     if args.vllm:
         from vllm import AsyncEngineArgs, AsyncLLMEngine, LLM
@@ -136,6 +176,8 @@ def load_model(args: SakuraModelConfig):
             n_gpu = 0
             offload_kqv = False
         model = Llama(model_path=args.model_name_or_path, n_gpu_layers=n_gpu, n_ctx=4 * args.text_length, offload_kqv=offload_kqv)
+    elif args.ollama:
+        model = Ollama(args.model_name_or_path)
     elif args.vllm:
         if args.use_gptq_model:
             quantization = "gptq"
@@ -191,7 +233,7 @@ class SakuraModel:
         self.model = model
 
         try:
-            if not cfg.llama_cpp:
+            if not (cfg.llama_cpp or cfg.ollama):
                 if cfg.vllm:
                     # vllm Engine doesn't have config attr, we need to reload config from pretrained
                     config = PretrainedConfig.from_pretrained(self.cfg.model_name_or_path)
@@ -366,6 +408,42 @@ class SakuraModel:
         for output in model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'], stream=True):
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
+    def __ollama_model(
+        self, model: "Ollama", prompt: str, generation_config: GenerationConfig
+    ):
+        output = model(
+            prompt,
+            max_tokens=generation_config.__dict__["max_new_tokens"],
+            temperature=generation_config.__dict__["temperature"],
+            top_p=generation_config.__dict__["top_p"],
+            repeat_penalty=generation_config.__dict__["repetition_penalty"],
+            frequency_penalty=generation_config.__dict__["frequency_penalty"],
+        )
+        response = output["response"]
+        pprint(output)
+
+        # FIXME(Isotr0py): Due to the #2068 issue of ollama (https://github.com/ollama/ollama/issues/2068), prompt_eval_count may disappear.
+        # set input_tokens_len to None here temporarily.
+        input_tokens_len = None
+        new_tokens = output['eval_count']
+        return response, (input_tokens_len, new_tokens)
+
+    def __ollama_model_stream(
+        self, model: "Ollama", prompt: str, generation_config: GenerationConfig
+    ):
+        logger.debug(f"prompt is: {prompt}")
+        for output in model(
+            prompt,
+            max_tokens=generation_config.__dict__["max_new_tokens"],
+            temperature=generation_config.__dict__["temperature"],
+            top_p=generation_config.__dict__["top_p"],
+            repeat_penalty=generation_config.__dict__["repetition_penalty"],
+            frequency_penalty=generation_config.__dict__["frequency_penalty"],
+            stream=True,
+        ):
+            finish_reason = "stop" if output['done'] else None
+            yield output["resopnse"], finish_reason
+
     def __vllm_model(self, model: MixLLMEngine, prompt: str, generation_config: GenerationConfig):
         from vllm import SamplingParams
 
@@ -467,6 +545,8 @@ class SakuraModel:
                 t0 = time.time()
                 if self.cfg.llama_cpp:
                     output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+                elif self.cfg.ollama:
+                    output, (input_tokens_len, new_tokens) = self.__ollama_model(model, prompt, generation_config)
                 elif self.cfg.vllm:
                     output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
                 else:
@@ -514,6 +594,11 @@ class SakuraModel:
         if self.cfg.llama_cpp:
             prompt = self.make_prompt_stable(messages)
             for output, finish_reason in self.__llama_cpp_model_stream(model, prompt, generation_config):
+                token_cnt += 1
+                yield output, finish_reason
+        elif self.cfg.ollama:
+            prompt = self.make_prompt_stable(messages)
+            for output, finish_reason in self.__ollama_model_stream(model, prompt, generation_config):
                 token_cnt += 1
                 yield output, finish_reason
         elif self.cfg.vllm:
@@ -567,6 +652,8 @@ class SakuraModel:
         t0 = time.time()
         if self.cfg.llama_cpp:
             output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+        elif self.cfg.ollama:
+            output, (input_tokens_len, new_tokens) = self.__ollama_model(model, prompt, generation_config)
         elif self.cfg.vllm:
             output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
         else:
@@ -580,6 +667,8 @@ class SakuraModel:
                 break
             if self.cfg.llama_cpp:
                 output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
+            elif self.cfg.ollama:
+                output, (input_tokens_len, new_tokens) = self.__ollama_model(model, prompt, backup_generation_config[stage-1])
             elif self.cfg.vllm:
                 output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
             else:

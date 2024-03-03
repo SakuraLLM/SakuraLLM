@@ -32,6 +32,8 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
     parser.add_argument("--tensor_parallel_size", type=int, default=1, help="tensor parallel size when using gpu in vllm.")
     parser.add_argument("--gpu_memory_utilization", type=float, default=0.9, help="The ratio (between 0 and 1) of GPU memory for inference.")
 
+    parser.add_argument("--ollama", action="store_true", help="whether to use ollama.")
+
     if add_extra_args_fn:
         add_extra_args_fn(parser)
 
