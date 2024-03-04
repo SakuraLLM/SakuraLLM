@@ -85,8 +85,8 @@ def load_model(args: SakuraModelConfig):
                 self.model = model
                 self.pull()
 
-            def __call__(self, prompt, **kwargs):
-                return ollama.generate(self.model, prompt, **kwargs)
+            def __call__(self, prompt, stream=False, **kwargs):
+                return ollama.generate(self.model, prompt, stream=stream, options=kwargs)
 
             def pull(self):
                 current_digest, bars = "", {}
@@ -424,7 +424,7 @@ class SakuraModel:
     ):
         output = model(
             prompt,
-            max_tokens=generation_config.__dict__["max_new_tokens"],
+            num_ctx=generation_config.__dict__["max_new_tokens"],
             temperature=generation_config.__dict__["temperature"],
             top_p=generation_config.__dict__["top_p"],
             repeat_penalty=generation_config.__dict__["repetition_penalty"],
@@ -433,9 +433,9 @@ class SakuraModel:
         response = output["response"]
         pprint(output)
 
-        # FIXME(Isotr0py): Due to the #2068 issue of ollama (https://github.com/ollama/ollama/issues/2068), prompt_eval_count may disappear.
-        # set input_tokens_len to None here temporarily.
-        input_tokens_len = None
+        # FIXME(Isotr0py): According to the #2068 issue of ollama (https://github.com/ollama/ollama/issues/2068), 
+        # prompt_eval_count may disappear.
+        input_tokens_len = output["prompt_eval_count"]
         new_tokens = output['eval_count']
         return response, (input_tokens_len, new_tokens)
 
@@ -445,15 +445,15 @@ class SakuraModel:
         logger.debug(f"prompt is: {prompt}")
         for output in model(
             prompt,
-            max_tokens=generation_config.__dict__["max_new_tokens"],
+            stream=True,
+            num_ctx=generation_config.__dict__["max_new_tokens"],
             temperature=generation_config.__dict__["temperature"],
             top_p=generation_config.__dict__["top_p"],
             repeat_penalty=generation_config.__dict__["repetition_penalty"],
             frequency_penalty=generation_config.__dict__["frequency_penalty"],
-            stream=True,
         ):
             finish_reason = "stop" if output['done'] else None
-            yield output["resopnse"], finish_reason
+            yield output["response"], finish_reason
 
     def __vllm_model(self, model: MixLLMEngine, prompt: str, generation_config: GenerationConfig):
         from vllm import SamplingParams
