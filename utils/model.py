@@ -19,11 +19,12 @@ if TYPE_CHECKING:
     from llama_cpp import Llama
     from auto_gptq import AutoGPTQForCausalLM
     from vllm import AsyncLLMEngine, LLM
+    Ollama = "Ollama"
+    MixLLMEngine = "MixLLMEngine"
 else:
     # FIXME(kuriko): try to making linting system happy
-    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = MixLLMEngine = Any
+    Llama = AutoGPTQForCausalLM = LlamaForCausalLM = MixLLMEngine = Ollama = Any
 
-MixLLMEngine = Ollama = Any
 ModelTypes = AutoGPTQForCausalLM | Llama | LlamaForCausalLM | AutoModelForCausalLM | MixLLMEngine | Ollama
 
 
@@ -420,7 +421,7 @@ class SakuraModel:
             yield output['choices'][0]['text'], output['choices'][0]['finish_reason']
 
     def __ollama_model(
-        self, model: "Ollama", prompt: str, generation_config: GenerationConfig
+        self, model: Ollama, prompt: str, generation_config: GenerationConfig
     ):
         output = model(
             prompt,
@@ -433,7 +434,7 @@ class SakuraModel:
         response = output["response"]
         pprint(output)
 
-        # FIXME(Isotr0py): According to the #2068 issue of ollama (https://github.com/ollama/ollama/issues/2068), 
+        # FIXME(Isotr0py): According to the #2068 issue of ollama (https://github.com/ollama/ollama/issues/2068),
         # prompt_eval_count may disappear.
         input_tokens_len = output["prompt_eval_count"]
         new_tokens = output['eval_count']
