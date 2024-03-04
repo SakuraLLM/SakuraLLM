@@ -1,5 +1,5 @@
 from typing import *
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 FloatOrInt = Union[float, int]
 
@@ -173,6 +173,10 @@ class OpenAIChatModelsResponse(BaseModel):
         model_version: str
         model_quant: str
         model_name_or_path: str
+
+        model_config = ConfigDict(
+            protected_namespaces=()
+        )
 
     object: str = 'list',
     data: List[OpenAIChatModel]
