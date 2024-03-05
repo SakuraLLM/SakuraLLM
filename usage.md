@@ -24,8 +24,12 @@ python server.py \
 ### server.py 相关参数及说明
 <!-- // 这部分写一下推理引擎用到了哪些参数，由于早期设计问题，server.py 没有对参数归类，导致混杂在一起了。 -->
 ```shell
+# 通用参数
 --model_name_or_path: GGUF 模型路径
 --model_version: 0.9, 0.8
+--no-auth: 强制禁用身份验证
+
+# llama.cpp 特有参数
 --llama_cpp: 启动 llama.cpp 推理引擎
 --use_gpu: llama.cpp 使用 GPU 进行推理
 --n_gpu_layers: 加载至 GPU 的模型层数
@@ -62,10 +66,10 @@ Transformers 模型（包括 GPTQ 4bit 量化与 AWQ 量化）。
    ```
 
 ### 使用例子
-以运行 [SakuraLLM/Sakura-13B-Qwen2beta-v0.10pre0](https://huggingface.co/SakuraLLM/Sakura-13B-Qwen2beta-v0.10pre0) 模型为例：
+以运行 [SakuraLLM/Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) 模型为例：
 ```python
 python server.py \
-    --model_name_or_path SakuraLLM/Sakura-13B-Qwen2beta-v0.10pre0 \
+    --model_name_or_path SakuraLLM/Sakura-13B-LNovel-v0.9 \
     --vllm \
     --model_version 0.9 \
     --trust_remote_code \
@@ -77,8 +81,15 @@ python server.py \
 ### server.py 相关参数及说明
 <!-- // 这部分写一下推理引擎用到了哪些参数，由于早期设计问题，server.py 没有对参数归类，导致混杂在一起了。 -->
 ```shell
+# 通用参数
 --model_name_or_path: transformers 模型 tag
 --model_version: 0.9, 0.8
+--use_gptq_model: 使用 GPTQ 量化模型
+--use_awq_model: 使用 AWQ 量化模型
+--trust_remote_code: 允许不安全代码
+--no-auth: 强制禁用身份验证
+
+# vllm 特有参数
 --vllm: 启动 vllm 推理引擎
 --enforce_eager: 启用 eager 模式，可减少显存用量
 --tensor_parallel_size: tensor parallel 的规模，一般取可用的 GPU 数量
@@ -126,7 +137,11 @@ python server.py \
 ### server.py 相关参数及说明
 <!-- // 这部分写一下 ollama 模型用到了哪些参数，由于早期设计问题，server.py 没有对参数归类，导致混杂在一起了。 -->
 ```shell
+# 通用参数
 --model_name_or_path: ollama 模型 tag
 --model_version: 0.9
+--no-auth: 强制禁用身份验证
+
+# ollama 特有参数
 --ollama: 启动 ollama 推理引擎
 ```
