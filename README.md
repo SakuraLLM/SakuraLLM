@@ -125,7 +125,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
   
 - 轻小说
 
-  网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.8-4bit)，站内有大量模型翻译的轻小说可供参考。
+  网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.9b-Q4_K_M)，站内有大量模型翻译的轻小说可供参考。
 
 - PPL/BLEU/Human
 
