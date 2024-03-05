@@ -1,7 +1,10 @@
 import multiprocessing
+import os
 import subprocess
-import ollama
 import time
+from pathlib import Path
+
+import ollama
 from tqdm import tqdm
 
 
@@ -9,9 +12,12 @@ class Ollama:
     '''Llama-style wrapper for ollama'''
     def __init__(self, model):
         self.model = model
-        self.start()
-        time.sleep(5)  # wait for ollama serve to start
-        self.pull()
+        if self.check_ollama():
+            self.start()
+            time.sleep(5)
+            self.pull()
+        else:
+            raise FileNotFoundError("ollama app not found. Have you installed it?")
 
     def __call__(self, prompt, stream=False, **kwargs):
         return ollama.generate(self.model, prompt, stream=stream, options=kwargs)
@@ -40,11 +46,22 @@ class Ollama:
         proc = multiprocessing.Process(target=ollama_serve)
         proc.start()
 
+    def check_ollama(self):
+        env_paths = os.environ["PATH"]
+        if os.name == "nt":
+            ollama_bin = "ollama.exe"
+            env_paths = env_paths.split(";")
+        elif os.name == "posix":
+            ollama_bin = "ollama"
+            env_paths = env_paths.split(":")
+        for path in env_paths:
+            ollama_path = Path(path).joinpath(ollama_bin)
+            if ollama_path.exists():
+                return True
+        return False
+
 
 def ollama_serve():
-    try:
-        p = subprocess.Popen(["ollama", "serve"], stdout=subprocess.PIPE)
-        for line in p.stdout:
-            print(line.decode(), end='')
-    except FileNotFoundError:
-        raise FileNotFoundError("ollama app not found. Have you installed it?")
+    p = subprocess.Popen(["ollama", "serve"], stdout=subprocess.PIPE)
+    for line in p.stdout:
+        print(line.decode(), end='')
