@@ -646,7 +646,7 @@ class SakuraModel:
             if self.cfg.llama_cpp:
                 output, (input_tokens_len, new_tokens) = self.__llama_cpp_model(model, prompt, generation_config)
             elif self.cfg.ollama:
-                output, (input_tokens_len, new_tokens) = self.__ollama_model(model, prompt, backup_generation_config[stage-1])
+                output, (input_tokens_len, new_tokens) = self.__ollama_model(model, prompt, generation_config)
             elif self.cfg.vllm:
                 output, (input_tokens_len, new_tokens) = self.__vllm_model(model, prompt, generation_config)
             else:
