@@ -80,8 +80,10 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 1. [AiNiee](https://github.com/NEKOparapa/AiNiee-chatgpt)已经支持Sakura API，可以通过本地部署API后端，在AiNiee中使用Sakura模型进行翻译。
 
-  AiNiee是一款基于【mtool】或【Translator++】，chatgpt自动批量翻译工具，主要是用来翻译各种RPG游戏。
+   AiNiee是一款基于【mtool】或【Translator++】，chatgpt自动批量翻译工具，主要是用来翻译各种RPG游戏。
 
+1. [manga-image-translator](https://github.com/zyddnys/manga-image-translator)已经支持Sakura API，可以通过本地部署API后端，使用Sakura自动翻译漫画。
+1. [BallonsTranslator](https://github.com/dmMaze/BallonsTranslator)已经支持Sakura API，可以通过本地部署API后端，使用Sakura翻译漫画。
 # 显存需求
 
 下面的表格显示了使用不同量化和不同格式的模型时显存占用的大小。如果你的显卡显存不满足上述需求，可以尝试同时使用CPU与GPU进行推理。
