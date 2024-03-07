@@ -7,6 +7,10 @@ from pathlib import Path
 import ollama
 from tqdm import tqdm
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Ollama:
     '''Llama-style wrapper for ollama'''
@@ -17,7 +21,8 @@ class Ollama:
             time.sleep(5)
             self.pull()
         else:
-            raise FileNotFoundError("ollama app not found. Have you installed it?")
+            logger.error("ollama executable not found in path. Have you installed it?")
+            exit(-1)
 
     def __call__(self, prompt, stream=False, **kwargs):
         return ollama.generate(self.model, prompt, stream=stream, options=kwargs)

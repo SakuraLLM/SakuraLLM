@@ -402,7 +402,12 @@ class SakuraModel:
 
         # FIXME(Isotr0py): According to the #2068 issue of ollama (https://github.com/ollama/ollama/issues/2068),
         # prompt_eval_count may disappear.
-        input_tokens_len = output["prompt_eval_count"]
+        if "prompt_eval_count" not in output:
+            # FIXME(kuriko): Just guessing the token count, anti-degen may fail
+            input_tokens_len = len(prompt) // 2
+            logger.warning(f"prompt_eval_count is missing, guessing count: {input_tokens_len}")
+        else:
+            input_tokens_len = output["prompt_eval_count"]
         new_tokens = output['eval_count']
         return response, (input_tokens_len, new_tokens)
 

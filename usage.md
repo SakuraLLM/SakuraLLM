@@ -46,7 +46,7 @@ vLLM 是一个快速且易于使用的 LLM 分布式推理和服务库。
 5. 与 HuggingFace Transformers 模型无缝集成。
 
 劣势：
-1. Sakura13B v0.9 与 v0.10 仅能运行全量模型，显存用量高于 llama.cpp 与 ollama。
+1. Sakura13B v0.9 与 v0.10 仅能运行全量模型（目前 SakuraLLM 未提供量化模型），显存用量高于 llama.cpp 与 ollama。
 2. 仅支持 4bit 量化，且量化存在 bug，效果不如直接运行全量模型。
 3. 由于存在部分依赖冲突，依赖安装相对繁琐。
 
@@ -112,7 +112,7 @@ python server.py \
 <!-- // 这部分写 ollama 支持加载哪些模型，如果是非 SakuraLLM 支持的格式的话，哪些地方能找到第三方维护的转换后的格式。 -->
 ollama 私有格式模型，可从 GGUF 和 PyTorch/Safetensors 格式模型进行转换，转换方法参见 [issue #49](https://github.com/SakuraLLM/Sakura-13B-Galgame/issues/49) 与 [ollama 文档](https://github.com/ollama/ollama/blob/main/docs/import.md)。
 
-Sakura 相关模型地址：
+Sakura 相关模型地址（第三方维护）：
 - [onekuma/sakura-13b-lnovel-v0.9b-q2_k](https://registry.ollama.ai/onekuma/sakura-13b-lnovel-v0.9b-q2_k/tags)
 
 ### 前置需求
@@ -138,7 +138,7 @@ python server.py \
 <!-- // 这部分写一下 ollama 模型用到了哪些参数，由于早期设计问题，server.py 没有对参数归类，导致混杂在一起了。 -->
 ```shell
 # 通用参数
---model_name_or_path: ollama 模型 tag
+--model_name_or_path: ollama 模型 tag (不支持文件路径)
 --model_version: 0.9
 --no-auth: 强制禁用身份验证
 
