@@ -36,15 +36,20 @@
 
 ### 模型下载：
 
-|   版本  | Transformers模型 | GGUF量化模型 | GPTQ 8bit量化 | GPTQ 4bit量化 | GPTQ 3bit量化 | AWQ量化
+|   发布时间-底模-参数量-版本  | Transformers模型 | GGUF量化模型 | GPTQ 8bit量化 | GPTQ 4bit量化 | GPTQ 3bit量化 | AWQ量化
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
-| 20231026-v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
-| 20240111-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) | - | - | - | - |
-| 20240303-v0.10pre0 | 🤗 [Sakura-13B-Qwen2beta-v0.10pre0](https://huggingface.co/SakuraLLM/Sakura-13B-Qwen2beta-v0.10pre0) | 🤗 [Sakura-13B-Qwen2beta-v0.10pre0-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-Qwen2beta-v0.10pre0-GGUF) | - | - | - | - |
+| 20231026-Baichuan2 13B v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
+| 20240111-Qwen-14B-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) | - | - | - | - |
+| 20240116-Qwen-7B-v0.9 | - | 🤗 [Sakura-7B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-LNovel-v0.9-GGUF) | - | - | - | - |
+| 20240213-Qwen1.5-14B-v0.9 | 🤗 [Sakura-14B-Qwen2beta-v0.9](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9) | - | - | - | - |
+| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1) | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) | - | - | - |
+| 20240303-Qwen1.5-14B-v0.10pre0 | 🤗 [Sakura-14B-Qwen2beta-v0.10pre0](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.10pre0) | 🤗 [Sakura-14B-Qwen2beta-v0.10pre0-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.10pre0-GGUF) | - | - | - | - |
 
 p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.co`改成`hf-mirror.com`，使用hf镜像站下载。
 
 ## News
+
+1. **更新了基于Qwen1.5底模的`v0.9`版本模型，包括14B和1.8B两个版本。注意：此版本模型的结构为Qwen2. 同时补充更新了基于Qwen 7B的`v0.9`版本模型。**
 
 1. **更新了0.10的测试版模型`v0.10pre0`，增加了术语表功能，新的prompt格式详见[推理部分](https://github.com/SakuraLLM/Sakura-13B-Galgame?tab=readme-ov-file#%E6%8E%A8%E7%90%86)的prompt格式部分。注意：此版本模型的结构为qwen2。**
 
