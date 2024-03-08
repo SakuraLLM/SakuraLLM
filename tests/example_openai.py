@@ -5,7 +5,7 @@ from openai import OpenAI
 # client = OpenAI(api_key="114514", base_url=f"http://{auth}@localhost:5000/v1")
 
 # Not using auth
-api_base_url = "http://localhost:8080/v1"
+api_base_url = "http://localhost:5000/v1"
 client = OpenAI(api_key="114514", base_url=api_base_url) # api_key随便填无所谓，base_url填写服务器IP和端口并添加/v1
 
 input_text = """先程から何度も込められているため息に、確実に実体験からくる言葉だと分かって周としては胸が痛い。彼女にとって好意も悪意も向けられるのを慣れすぎている事が透けて見えて、やるせなさに唇を嚙んでしまう。

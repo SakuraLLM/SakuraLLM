@@ -35,6 +35,14 @@ def get_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletionRespons
     # await asyncio.sleep(600)
 
     logger.info(f"answer: {output}")
+
+    prompt_tokens = output.prompt_token
+    new_tokens = output.new_token
+
+    total_tokens = None
+    if prompt_tokens is not None:
+        total_tokens = new_tokens + prompt_tokens
+
     return OpenAIChatCompletionResponse(
         choices=[
             OpenAIChatCompletionResponse.Choice(
@@ -51,9 +59,9 @@ def get_output(data: OpenAIChatCompletionRequest) -> OpenAIChatCompletionRespons
         model=f"{model.cfg.model_name}-{model.cfg.model_version}-{model.cfg.model_quant}",
         object="chat.completion",
         usage=OpenAIChatCompletionResponse.Usage(
-            completion_tokens=output.new_token,
-            prompt_tokens=output.prompt_token,
-            total_tokens=output.new_token + output.prompt_token
+            completion_tokens=new_tokens,
+            prompt_tokens=prompt_tokens,
+            total_tokens=total_tokens,
         )
     )
 
