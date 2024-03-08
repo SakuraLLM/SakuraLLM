@@ -133,8 +133,9 @@ class OpenAIChatCompletionResponse(BaseModel):
         message: Message
     class Usage(BaseModel):
         completion_tokens: int
-        prompt_tokens: int
-        total_tokens: int
+        # FIXME(kuriko): prompt_tokens may be None
+        prompt_tokens: int|None
+        total_tokens: int|None
 
     choices: List[Choice]
     created: int

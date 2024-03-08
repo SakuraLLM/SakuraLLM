@@ -184,7 +184,7 @@ def get_ollama_metadata(args: SakuraModelConfig):
 class SakuraModel:
     # typing
     class ModelResponse(BaseModel):
-        prompt_token: int
+        prompt_token: int|None
         new_token: int
         text: str
         finish_reason: str
@@ -403,9 +403,8 @@ class SakuraModel:
         # FIXME(Isotr0py): According to the #2068 issue of ollama (https://github.com/ollama/ollama/issues/2068),
         # prompt_eval_count may disappear.
         if "prompt_eval_count" not in output:
-            # FIXME(kuriko): Just guessing the token count, anti-degen may fail
-            input_tokens_len = len(prompt) // 2
-            logger.warning(f"prompt_eval_count is missing, guessing count: {input_tokens_len}")
+            # NOTE(kuriko): Under most cases, input_tokens_len is not used.
+            input_tokens_len = None
         else:
             input_tokens_len = output["prompt_eval_count"]
         new_tokens = output['eval_count']
