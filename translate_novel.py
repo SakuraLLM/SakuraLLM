@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from dacite import from_dict
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 import time
@@ -79,14 +80,14 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
     backup_generation_config = [backup_generation_config_stage2, backup_generation_config_stage3]
 
     if llama_cpp:
-        
+
         def generate(model, generation_config):
             if "frequency_penalty" in generation_config.__dict__.keys():
                 output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'], frequency_penalty=generation_config.__dict__['frequency_penalty'])
             else:
                 output = model(prompt, max_tokens=generation_config.__dict__['max_new_tokens'], temperature=generation_config.__dict__['temperature'], top_p=generation_config.__dict__['top_p'], repeat_penalty=generation_config.__dict__['repetition_penalty'])
             return output
-        
+
         stage = 0
         output = generate(model, generation_config)
         while output['usage']['completion_tokens'] == text_length:
@@ -118,7 +119,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
         #         cnt += 1
         #     add_token_cnt(cnt)
         #     return output_ret
-            
+
         # response = generate(model, generation_config)
         # return response
 
@@ -181,11 +182,12 @@ def get_compare_text(source_text, translated_text):
 
 
 def main():
-    def extra_args(parser):
-        parser.add_argument("--data_path", type=str, default="data.txt", help="file path of the text you want to translate.")
-        parser.add_argument("--output_path", type=str, default="data_translated.txt", help="save path of the text model translated.")
-        parser.add_argument("--compare_text", action="store_true", help="whether to output with both source text and translated text in order to compare.")
-        parser.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
+    def extra_args(parser: ArgumentParser):
+        novel_group = parser.add_argument_group("Novel")
+        novel_group.add_argument("--data_path", type=str, default="data.txt", help="file path of the text you want to translate.")
+        novel_group.add_argument("--output_path", type=str, default="data_translated.txt", help="save path of the text model translated.")
+        novel_group.add_argument("--compare_text", action="store_true", help="whether to output with both source text and translated text in order to compare.")
+        novel_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
 
     args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
 

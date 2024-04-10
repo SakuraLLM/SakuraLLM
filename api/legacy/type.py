@@ -1,7 +1,9 @@
 from typing import *
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict
 
 FloatOrInt = Union[float, int]
+
 
 class GenerateRequest(BaseModel):
     """Generate request class used in legacy api."""
@@ -39,6 +41,7 @@ class GenerateRequest(BaseModel):
     # guidance_scale: float | int = 1
     # negative_prompt: str = ""
     seed: int
+
     # add_bos_token: bool = True
     # truncation_length: float | int = 2048
     # ban_eos_token: bool = False
@@ -63,11 +66,11 @@ class OpenAIChatCompletionRequest(BaseModel):
     temperature: float | int = 0.1
     top_p: float | int = 0.3
 
-    stop: list[list[str]] = None        # Only transformers backend support
-    stream: bool = False                # NotImplement
+    stop: list[list[str]] = None  # Only transformers backend support
+    stream: bool = False  # NotImplement
 
     # presence_penalty: float | int     # extra param
-    n: int = 1                          # extra param
+    n: int = 1  # extra param
 
     # logit_bias: dict                  # won't support
     # response_format: dict[str, str]   # won't support
@@ -109,7 +112,8 @@ class OpenAIChatCompletionRequest(BaseModel):
         }
 
     def is_stream(self):
-      return self.stream
+        return self.stream
+
 
 class GenerateResponse(BaseModel):
     """Generate response class used in legacy api."""
@@ -128,14 +132,16 @@ class OpenAIChatCompletionResponse(BaseModel):
         class Message(BaseModel):
             content: str
             role: str
+
         finish_reason: str
         index: int
         message: Message
+
     class Usage(BaseModel):
         completion_tokens: int
         # FIXME(kuriko): prompt_tokens may be None
-        prompt_tokens: int|None
-        total_tokens: int|None
+        prompt_tokens: int | None
+        total_tokens: int | None
 
     choices: List[Choice]
     created: int
@@ -144,6 +150,7 @@ class OpenAIChatCompletionResponse(BaseModel):
     object: str
     usage: Usage
 
+
 class OpenAIChatCompletionStreamResponse(BaseModel):
     """Generate response class used in openai api in stream mode."""
 
@@ -151,10 +158,12 @@ class OpenAIChatCompletionStreamResponse(BaseModel):
         class Message(BaseModel):
             role: Optional[str] = None
             content: Optional[str] = None
+
         index: int
         delta: Optional[Message] = None
         logprobs: None = None
         finish_reason: Optional[str] = None
+
     id: str
     object: str
     created: int
@@ -162,8 +171,10 @@ class OpenAIChatCompletionStreamResponse(BaseModel):
     system_fingerprint: str
     choices: List[Choice]
 
+
 class OpenAIChatModelsResponse(BaseModel):
     """Model class used in openai api."""
+
     class OpenAIChatModel(BaseModel):
         id: str
         created: int | str
@@ -173,6 +184,11 @@ class OpenAIChatModelsResponse(BaseModel):
         model_version: str
         model_quant: str
         model_name_or_path: str
+
+        # NOTE(kuriko): disable `protected model_ warning` for pydantic v2
+        model_config = ConfigDict(
+            protected_namespaces=()
+        )
 
     object: str = 'list',
     data: List[OpenAIChatModel]
