@@ -50,7 +50,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 ## News
 
-1. **更新了使用Importance Matrix进行量化的Sakura-14B-Qwen2beta-v0.9-GGUF模型。[模型地址](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF/blob/main/sakura-14b-qwen2betabase-v0.9-iq4_xs.gguf)**
+1. **更新了使用Importance Matrix进行量化的Sakura-14B-Qwen2beta-v0.9-GGUF模型。[模型地址](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF/blob/main/sakura-14b-qwen2beta-v0.9-iq4_xs.gguf)**
 
 1. **更新了基于Qwen1.5底模的`v0.9`版本模型，包括14B和1.8B两个版本。注意：此版本模型的结构为Qwen2. 同时补充更新了基于Qwen 7B的`v0.9`版本模型。**
 
