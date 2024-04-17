@@ -1,7 +1,10 @@
 <div align="center">
 <h1>
-  Sakura-13B-Galgame
+  SakuraLLM
 </h1>
+<center>
+  <b>Sakura</b>: <b><ins>S</ins></b>FT <ins><b>A</b></ins>nd RLHF models using <ins><b>K</b></ins>nowledge of <ins><b>U</b></ins>niversal Character and <ins><b>R</b></ins>elationship <ins><b>A</b></ins>ttributes for Japanese to Chinese Translation in Light Novel & Galgame Domain.
+</center>
 </div>
 
 <p align="center">
