@@ -63,8 +63,8 @@ jobs:
           python -m pip install xformers==0.0.22.post7 --index-url https://download.pytorch.org/whl/cu${{ matrix.alias }}
           python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.40.2-py3-none-win_amd64.whl
           python -m pip install https://github.com/jllllll/AutoGPTQ/releases/download/v0.6.0/auto_gptq-0.6.0+cu${{ matrix.alias }}-cp310-cp310-win_amd64.whl
-          python -m pip install https://github.com/turboderp/exllamav2/releases/download/v0.0.11/exllamav2-0.0.11+cu${{ matrix.alias }}-cp310-cp310-win_amd64.whl
-          python -m pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu${{ matrix.alias }}
+          python -m pip install https://github.com/turboderp/exllamav2/releases/download/v0.0.19/exllamav2-0.0.19+cu${{ matrix.alias }}-cp310-cp310-win_amd64.whl
+          python -m pip install llama-cpp-python -i https://sakurallm.github.io/llama-cpp-python/whl/cu${{ matrix.alias }}
           python -m pip install -r requirements/actions.txt
           python -m pip install pyinstaller
 
