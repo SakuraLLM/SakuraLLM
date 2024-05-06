@@ -81,10 +81,10 @@ jobs:
           BUILD_NUMBER="$(git rev-list --count HEAD)"
           SHORT_HASH="$(git rev-parse --short=7 HEAD)"
           if [[ "${{ env.BRANCH_NAME }}" == "main" ]]; then
-            echo "name=b${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
             SAFE_NAME=$(echo "${{ env.BRANCH_NAME }}" | tr '/' '-')
-            echo "name=${SAFE_NAME}-b${BUILD_NUMBER}-${SHORT_HASH}" >> $GITHUB_OUTPUT
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
       - name: Pack artifacts
         id: pack_artifacts
@@ -120,10 +120,10 @@ jobs:
           BUILD_NUMBER="$(git rev-list --count HEAD)"
           SHORT_HASH="$(git rev-parse --short=7 HEAD)"
           if [[ "${{ env.BRANCH_NAME }}" == "main" ]]; then
-            echo "name=b${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
             SAFE_NAME=$(echo "${{ env.BRANCH_NAME }}" | tr '/' '-')
-            echo "name=${SAFE_NAME}-b${BUILD_NUMBER}-${SHORT_HASH}" >> $GITHUB_OUTPUT
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Download artifacts
