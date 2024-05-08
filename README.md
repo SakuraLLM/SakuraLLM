@@ -40,24 +40,25 @@
 
 ### 模型下载：
 
-|   发布时间-底模-参数量-版本  | Transformers模型 | GGUF量化模型 | GPTQ 8bit量化 | GPTQ 4bit量化 | GPTQ 3bit量化 | AWQ量化
-|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
-| 20231026-Baichuan2 13B v0.8 | 🤗 [Sakura-13B-LNovel-v0.8](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8) | 🤗 [Sakura-13B-LNovel-v0_8-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.8-GGUF) | 🤗 [Sakura-13B-LNovel-v0_8-8bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-8bit) | 🤗 [Sakura-13B-LNovel-v0_8-4bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-4bit) | 🤗 [Sakura-13B-LNovel-v0_8-3bit](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-3bit) | 🤗 [Sakura-13B-LNovel-v0_8-AWQ](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0_8-AWQ) |
-| 20240111-Qwen-14B-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) | - | - | - | - |
-| 20240116-Qwen-7B-v0.9 | - | 🤗 [Sakura-7B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-LNovel-v0.9-GGUF) | - | - | - | - |
-| 20240213-Qwen1.5-14B-v0.9 | 🤗 [Sakura-14B-Qwen2beta-v0.9](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9) | 🤗 [Sakura-14B-Qwen2beta-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF) | - | - | - |
-| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1) | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) | - | - | - |
-| 20240303-Qwen1.5-14B-v0.10pre0 | 🤗 [Sakura-14B-Qwen2beta-v0.10pre0](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.10pre0) | 🤗 [Sakura-14B-Qwen2beta-v0.10pre0-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.10pre0-GGUF) | - | - | - | - |
+| 参数量 | 发布时间-底模-版本  | Transformers模型 | GGUF量化模型 |
+|:-------:|:-------:|:-------:|:-------:|
+| 32B | 20240508-Qwen1.5-32B-v0.9 | - | 🤗 [Sakura-32B-Qwen2beta-v0.9](https://huggingface.co/SakuraLLM/Sakura-32B-Qwen2beta-v0.9-GGUF) |
+|     | 20240508-Qwen1.5-32B-v0.10pre1 | - | - |
+| 14B | 20240111-Qwen-14B-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) |
+|     | 20240213-Qwen1.5-14B-v0.9 | 🤗 [Sakura-14B-Qwen2beta-v0.9](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9) | 🤗 [Sakura-14B-Qwen2beta-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF) |
+| 7B  | 20240116-Qwen-7B-v0.9 | - | 🤗 [Sakura-7B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-LNovel-v0.9-GGUF) |
+| 1.8B| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1) | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) |
+
 
 p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.co`改成`hf-mirror.com`，使用hf镜像站下载。
 
 ## News
 
-1. **更新了使用Importance Matrix进行量化的Sakura-14B-Qwen2beta-v0.9-GGUF模型。[模型地址](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF/blob/main/sakura-14b-qwen2beta-v0.9-iq4_xs.gguf)**
+1. **更新了基于Qwen1.5-32B底模的v0.9与v0.10pre1版本的GGUF模型。其中v0.10pre1版本为v0.10的预览版，具备术语表功能，相比上一版本优化翻译质量，同时使用新的prompt格式，详见[推理部分](https://github.com/SakuraLLM/Sakura-13B-Galgame?tab=readme-ov-file#%E6%8E%A8%E7%90%86)的prompt格式部分。**
+
+1. **更新了使用Importance Matrix进行量化的Sakura-14B-Qwen2beta-v0.9-GGUF模型。[模型地址](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF/blob/main/sakura-14b-qwen2beta-v0.9-iq4_xs_ver2.gguf)**
 
 1. **更新了基于Qwen1.5底模的`v0.9`版本模型，包括14B和1.8B两个版本。注意：此版本模型的结构为Qwen2. 同时补充更新了基于Qwen 7B的`v0.9`版本模型。**
-
-1. **更新了0.10的测试版模型`v0.10pre0`，增加了术语表功能，新的prompt格式详见[推理部分](https://github.com/SakuraLLM/Sakura-13B-Galgame?tab=readme-ov-file#%E6%8E%A8%E7%90%86)的prompt格式部分。注意：此版本模型的结构为qwen2。**
 
 1.  **更新了0.9的正式版模型`v0.9b`。清洗并增加了预训练与微调的数据量。更推荐使用正式版模型，它会比之前的pre版本更加稳定，质量更高。**
 
@@ -99,7 +100,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 下面的表格显示了使用不同量化和不同格式的模型时显存占用的大小。如果你的显卡显存不满足上述需求，可以尝试同时使用CPU与GPU进行推理。
 
-- llama.cpp GGUF模型（使用v0.9.0pre1模型进行测试，v0.8模型与其类似）
+- llama.cpp GGUF模型（使用Qwen-14B v0.9模型进行测试）
 
 |  模型量化类型  | 模型大小 | 推荐显存大小 |
 |:-------:|:-------:|:-------:|
@@ -111,23 +112,15 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 | Q3_K_M | 7.2G | 16G |
 | Q2_K | 6.1G | 12G |
 
-- transformers autogptq模型（使用v0.8版本进行测试）
-
-|  模型量化类型 | 推理显存(ctx约600) | 推理显存(ctx约1800) |
-|:-------:|:-------:|:-------:|
-| 全量 | 超出游戏显卡显存范围  | 超出游戏显卡显存范围  |
-| 8bit | 21.1G | 23.4G |
-| 4bit | 14.9G | 17.4G |
-| 3bit | 13.7G | 15.5G |
-
 # 模型详情
 
 ## 描述
 
 - Finetuned by [SakuraUmi](https://github.com/pipixia244)
 - Finetuned on [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
-- Finetuned on [Qwen-14B-Chat](https://huggingface.co/Qwen/Qwen-14B-Chat)
-- Finetuned on [Sakura-13B-Base-v0.9.0](https://huggingface.co/SakuraLLM/Sakura-13B-Base-v0.9.0)
+- Continual Pre-trained on [Qwen model series](https://github.com/QwenLM/Qwen)
+- Continual Pre-trained on [Qwen1.5 model series](https://github.com/QwenLM/Qwen1.5)
+- Finetuned on Sakura-Base model series
 - Languages: Chinese/Japanese
 
 ## 效果
@@ -138,7 +131,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
   
 - 轻小说
 
-  网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.9b-Q4_K_M)，站内有大量模型翻译的轻小说可供参考。
+  网站：[轻小说机翻机器人](https://books.fishhawk.top/)已接入Sakura模型(v0.9)，站内有大量模型翻译的轻小说可供参考。
 
 - PPL/BLEU/Human
 
@@ -166,7 +159,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
     ```
 - prompt格式：
 
-  - v0.10pre0
+  - v0.10pre1
     代码处理如下：
     ```python
             gpt_dict = [{
@@ -187,8 +180,8 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
             gpt_dict_raw_text = "\n".join(gpt_dict_text_list)
 
-            user_prompt = "根据以下术语表：\n" + gpt_dict_raw_text + "\n" + "将下面的日文文本根据上述术语表的对应关系和注释翻译成中文：" + japanese
-            prompt = "<|im_start|>system\n你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，注意不要擅自添加原文中没有的代词，也不要擅自增加或减少换行。<|im_end|>\n" \ # system prompt
+            user_prompt = "根据以下术语表（可以为空）：\n" + gpt_dict_raw_text + "\n\n" + "将下面的日文文本根据上述术语表的对应关系和备注翻译成中文：" + japanese
+            prompt = "<|im_start|>system\n你是一个轻小说翻译模型，可以流畅通顺地使用给定的术语表以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，注意不要混淆使役态和被动态的主语和宾语，不要擅自添加原文中没有的代词，也不要擅自增加或减少换行。<|im_end|>\n" \ # system prompt
             + "<|im_start|>user\n" + user_prompt + "<|im_end|>\n" \ # user prompt
             + "<|im_start|>assistant\n" # assistant prompt start
     ```
