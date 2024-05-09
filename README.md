@@ -42,12 +42,12 @@
 
 | 参数量 | 发布时间-底模-版本  | Transformers模型 | GGUF量化模型 |
 |:-------:|:-------:|:-------:|:-------:|
-| 32B | 20240508-Qwen1.5-32B-v0.9 | - | 🤗 [Sakura-32B-Qwen2beta-v0.9](https://huggingface.co/SakuraLLM/Sakura-32B-Qwen2beta-v0.9-GGUF) |
-|     | 20240508-Qwen1.5-32B-v0.10pre1 | - | - |
+| 32B | 20240508-Qwen1.5-32B-v0.9 | - | 🤗 [Sakura-32B-Qwen2beta-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-32B-Qwen2beta-v0.9-GGUF) |
+|     | 20240508-Qwen1.5-32B-v0.10pre1 | - | 🤗 [Sakura-32B-Qwen2beta-v0.10pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-32B-Qwen2beta-v0.10pre1-GGUF) |
 | 14B | 20240111-Qwen-14B-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9) | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) |
 |     | 20240213-Qwen1.5-14B-v0.9 | 🤗 [Sakura-14B-Qwen2beta-v0.9](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9) | 🤗 [Sakura-14B-Qwen2beta-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF) |
 | 7B  | 20240116-Qwen-7B-v0.9 | - | 🤗 [Sakura-7B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-LNovel-v0.9-GGUF) |
-| 1.8B| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1) | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) |
+| 1.8B| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1) | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1-GGUF](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) |
 
 
 p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.co`改成`hf-mirror.com`，使用hf镜像站下载。
