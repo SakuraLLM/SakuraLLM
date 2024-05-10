@@ -143,11 +143,44 @@ def main():
         epub_group.add_argument("--output_folder", type=str, default="", help="save folder path of the epubs model translated.")
         epub_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
         epub_group.add_argument("--translate_title", action='store_true', help='whether to translate the file names of the epubs')
+        epub_group.add_argument("--gpt_dict_path", type=str, default=None, help="whether to use glossary dict to translate.")
 
     args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
 
     import coloredlogs
     coloredlogs.install(level="INFO")
+
+    with open(args.gpt_dict_path, 'r', encoding='utf-8') as f:
+        raw_data = f.readlines()
+
+        gpt_dict_data = list()
+        for raw_data_line in raw_data:
+            raw_data_line = raw_data_line.strip()
+            if raw_data_line == "":
+                continue
+            src, temp = raw_data_line.split("->")
+            if "#" in temp:
+                dst, info = temp.split("#")
+                src, dst, info = src.strip(), dst.strip(), info.strip()
+                dict_temp = {
+                    "src": src,
+                    "dst": dst,
+                    "info": info
+                }
+            else:
+                dst = temp.strip()
+                dict_temp = {
+                    "src": src,
+                    "dst": dst
+                }
+            gpt_dict_data.append(dict_temp)
+
+    def get_gpt_dict(ja: str):
+        temp = list()
+        for dict_data_simple in gpt_dict_data:
+            if dict_data_simple['src'] in ja:
+                temp.append(dict_data_simple)
+        return temp
 
     cfg = from_dict(data_class=M.SakuraModelConfig, data=args.__dict__)
     sakura_model = M.SakuraModel(cfg=cfg)
@@ -160,7 +193,7 @@ def main():
         bos_token_id=1,
         eos_token_id=2,
         pad_token_id=0,
-        max_new_tokens=512,
+        max_new_tokens=args.text_length,
         min_new_tokens=1,
         do_sample=True
     )
@@ -175,11 +208,13 @@ def main():
         epub_list.append(args.data_path)
         f = os.path.basename(args.data_path)
         if args.translate_title:
+            temp_gpt_dict = get_gpt_dict(f[:-5])
             prompt = consts.get_prompt(
                 input=f[:-5],
                 model_name=sakura_model.cfg.model_name,
                 model_version=sakura_model.cfg.model_version,
-                model_quant=sakura_model.cfg.model_quant
+                model_quant=sakura_model.cfg.model_quant,
+                gpt_dict=temp_gpt_dict
             )
             output = get_model_response(
                 sakura_model.model,
@@ -198,11 +233,13 @@ def main():
             if f.endswith(".epub"):
                 epub_list.append(os.path.join(args.data_folder, f))
                 if args.translate_title:
+                    temp_gpt_dict = get_gpt_dict(f[:-5])
                     prompt = consts.get_prompt(
                         input=f[:-5],
                         model_name=sakura_model.cfg.model_name,
                         model_version=sakura_model.cfg.model_version,
-                        model_quant=sakura_model.cfg.model_quant
+                        model_quant=sakura_model.cfg.model_quant,
+                        gpt_dict=temp_gpt_dict
                     )
                     output = get_model_response(
                         sakura_model.model,
@@ -235,11 +272,14 @@ def main():
                 if len(data_list) == 0:
                         continue
                 for text, groups, pre_end in tqdm(data_list):
+                    temp_gpt_dict = get_gpt_dict(text)
+                    print(f"{len(temp_gpt_dict)=}")
                     prompt = consts.get_prompt(
                         input=text,
                         model_name=sakura_model.cfg.model_name,
                         model_version=sakura_model.cfg.model_version,
                         model_quant=sakura_model.cfg.model_quant,
+                        gpt_dict=temp_gpt_dict
                     )
                     #FIXME(kuriko): refactor this to sakura_model.completion()
                     output = get_model_response(
