@@ -56,7 +56,7 @@ class SakuraModelConfig:
     # read from config.json (model_name_or_path)
     model_name: str | None = None
     model_quant: str | None = None
-    model_version: str = "0.8"  # Can be also read from terminal, double check this.
+    model_version: str = "0.9"  # Can be also read from terminal, double check this.
 
 
 def load_model(args: SakuraModelConfig) -> (Any, ModelTypes):
@@ -66,8 +66,9 @@ def load_model(args: SakuraModelConfig) -> (Any, ModelTypes):
 
     if not args.llama_cpp and (args.use_gpu or args.n_gpu_layers != 0):
         logger.warning("You are using both use_gpu and n_gpu_layers flag without --llama_cpp.")
-        if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9":
-            raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
+        if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9 0.10":
+            args.trust_remote_code = True
+            # raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
 
     logger.info("loading model ...")
 
@@ -164,6 +165,8 @@ class SakuraModel:
                 # FIXME(kuriko): for llama_cpp model, we cannot decide so hard coded here.
                 if self.cfg.llama_cpp:
                     model_name, model_version, model_quant = model.get_metadata(self.cfg)
+                    if cfg.model_version:
+                        model_version = cfg.model_version
                 elif self.cfg.ollama:
                     model_name, model_version, model_quant = model.get_metadata(self.cfg)
                 else:
@@ -207,7 +210,7 @@ class SakuraModel:
         return prompt
 
     def make_continue_prompt(self, role, value):
-        if '0.9' in self.cfg.model_version:
+        if '0.9' in self.cfg.model_version or '0.10' in self.cfg.model_version:
             prompt = f"<|im_start|>{role}\n{value}<|im_end|>\n"
         elif '0.8' in self.cfg.model_version:
             try:
@@ -224,7 +227,7 @@ class SakuraModel:
 
     def make_end_prompt(self):
         role = 'assistant'
-        if '0.9' in self.cfg.model_version:
+        if '0.9' in self.cfg.model_version or '0.10' in self.cfg.model_version:
             prompt = f"<|im_start|>{role}\n"
         elif '0.8' in self.cfg.model_version:
             str_map = {"user": "<reserved_106>", "assistant": "<reserved_107>"}
@@ -523,11 +526,11 @@ class SakuraModel:
                 position = len(response)
                 yield response[start:position], None
                 start = position
-        elif "0.9" in self.cfg.model_version:
+        elif "0.9" in self.cfg.model_version or "0.10" in self.cfg.model_version:
             generation_config.chat_format = 'chatml'
             generation_config.max_window_size = 6144
             generation_config.pad_token_id = 151643
-            generation_config.eos_token_id = 151643
+            generation_config.eos_token_id = 151645
             model.generation_config.__dict__ = generation_config.__dict__
             for response in model.chat_stream(tokenizer, query, history=history, system=system,
                                               generation_config=generation_config):

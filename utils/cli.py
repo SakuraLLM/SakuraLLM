@@ -17,7 +17,7 @@ def parse_args(do_validation:bool=False, add_extra_args_fn:any=None):
 
     # Model Version
     parser.add_argument("--model_version", type=str, default="0.8",
-                        help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8', '0.9']")
+                        help="model version written on huggingface readme, now we have ['0.1', '0.4', '0.5', '0.7', '0.8', '0.9', '0.10']")
 
     # Model Quant Method
     quant_method_group = parser.add_argument_group("Quant Methods")
@@ -72,8 +72,9 @@ def args_validation(args) -> bool:
     if args.vllm:
         from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
 
-    if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9":
-        raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
+    if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9 0.10":
+        args.trust_remote_code = True
+        # raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
 
     if args.use_gptq_model and args.use_awq_model:
         raise ValueError("You are using both use_gptq_model and use_awq_model flag, please specify only one quantization.")

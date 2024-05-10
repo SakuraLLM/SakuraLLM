@@ -10,7 +10,7 @@ def split_response(response, model_version):
     if model_version == '0.5' or '0.8' in model_version:
         output = response.split("<reserved_107>")[1]
         return output
-    if '0.7' in model_version or '0.9' in model_version:
+    if '0.7' in model_version or '0.9' in model_version or '0.10' in model_version:
         output = response.split("<|im_start|>assistant\n")[1]
         return output
     if model_version == '0.1':
