@@ -6,7 +6,7 @@ hypercorn
 coloredlogs
 dacite
 
-transformers==4.33.2
+transformers
 sentencepiece
 accelerate
 scipy
