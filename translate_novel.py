@@ -3,6 +3,7 @@ from dacite import from_dict
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 import time
 import re
+import os
 from tqdm import tqdm
 
 import utils
@@ -13,6 +14,8 @@ import utils.consts as consts
 
 total_token = 0
 generation_time = 0
+generation_config = None
+sakura_model = None
 def add_token_cnt(cnt):
     global total_token
     total_token += cnt
@@ -179,13 +182,52 @@ def get_compare_text(source_text, translated_text):
         output_text = output_text.strip()
         return output_text
 
+def handle(output_path, data_path, text_length, compare_text):
+    global sakura_model
+    global generation_config
+    with open(output_path, 'w', encoding='utf-8') as f_w:
+        start = time.time()
 
+        data_raw, data_list = get_novel_text_list(data_path, text_length)
+        data = ""
+        for d in tqdm(data_list):
+            prompt = consts.get_prompt(
+                input=d,
+                model_name=sakura_model.cfg.model_name,
+                model_version=sakura_model.cfg.model_version,
+                model_quant=sakura_model.cfg.model_quant,
+            )
+            #FIXME(kuriko): refactor this to sakura_model.completion()
+            output = get_model_response(
+                sakura_model.model,
+                sakura_model.tokenizer,
+                prompt,
+                sakura_model.cfg.model_version,
+                generation_config,
+                sakura_model.cfg.text_length,
+                sakura_model.cfg.llama_cpp,
+            )
+            data += output.strip() + "\n"
+
+        end = time.time()
+        print("translation completed, used time: ", generation_time, end-start, ", total tokens: ", total_token, ", speed: ", total_token/(end-start), " token/s")
+
+        print("saving...")
+        if compare_text:
+            f_w.write(get_compare_text(data_raw, data))
+        else:
+            f_w.write(data)
 
 def main():
+    global sakura_model
+    global generation_config
     def extra_args(parser: ArgumentParser):
         novel_group = parser.add_argument_group("Novel")
         novel_group.add_argument("--data_path", type=str, default="data.txt", help="file path of the text you want to translate.")
         novel_group.add_argument("--output_path", type=str, default="data_translated.txt", help="save path of the text model translated.")
+        novel_group.add_argument("--data_folder", type=str, default="", help="folder path of the text you want to translate.")
+        novel_group.add_argument("--output_folder", type=str, default="", help="save folder path of the text model translated.")
+        novel_group.add_argument("--shutdown", type=int, default=0, help="value: 1. shutdown after translate is completed, 0: no shutdown")
         novel_group.add_argument("--compare_text", action="store_true", help="whether to output with both source text and translated text in order to compare.")
         novel_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
 
@@ -211,39 +253,15 @@ def main():
     )
 
     print("translating...")
-    with open(args.output_path, 'w', encoding='utf-8') as f_w:
-        start = time.time()
-
-        data_raw, data_list = get_novel_text_list(args.data_path, args.text_length)
-        data = ""
-        for d in tqdm(data_list):
-            prompt = consts.get_prompt(
-                input=d,
-                model_name=sakura_model.cfg.model_name,
-                model_version=sakura_model.cfg.model_version,
-                model_quant=sakura_model.cfg.model_quant,
-            )
-            #FIXME(kuriko): refactor this to sakura_model.completion()
-            output = get_model_response(
-                sakura_model.model,
-                sakura_model.tokenizer,
-                prompt,
-                sakura_model.cfg.model_version,
-                generation_config,
-                sakura_model.cfg.text_length,
-                sakura_model.cfg.llama_cpp,
-            )
-            data += output.strip() + "\n"
-
-        end = time.time()
-        print("translation completed, used time: ", generation_time, end-start, ", total tokens: ", total_token, ", speed: ", total_token/(end-start), " token/s")
-
-        print("saving...")
-        if args.compare_text:
-            f_w.write(get_compare_text(data_raw, data))
-        else:
-            f_w.write(data)
-
+    if args.data_folder:
+        os.makedirs(args.output_folder, exist_ok=True)
+        for f in os.listdir(args.data_folder):
+            if f.endswith(".txt") or f.endswith(".srt"):
+                handle(os.path.join(args.output_folder, f), os.path.join(args.data_folder, f), args.text_length, args.compare_text)
+    else:
+        handle(args.output_path, args.data_path, args.text_length, args.compare_text)
+    if args.shutdown == 1:
+        os.system("/usr/bin/shutdown")
     print("completed.")
 
 if __name__ == "__main__":
