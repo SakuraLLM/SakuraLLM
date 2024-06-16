@@ -225,13 +225,27 @@ def main():
         novel_group = parser.add_argument_group("Novel")
         novel_group.add_argument("--data_path", type=str, default="data.txt", help="file path of the text you want to translate.")
         novel_group.add_argument("--output_path", type=str, default="data_translated.txt", help="save path of the text model translated.")
-        novel_group.add_argument("--data_folder", type=str, default="", help="folder path of the text you want to translate.")
-        novel_group.add_argument("--output_folder", type=str, default="", help="save folder path of the text model translated.")
-        novel_group.add_argument("--shutdown", type=int, default=0, help="value: 1. shutdown after translate is completed, 0: no shutdown")
+
+        novel_group.add_argument("--data_folder", type=str, required=False, help="folder path of the text you want to translate.")
+        novel_group.add_argument("--output_folder", type=str, required=False, help="save folder path of the text model translated.")
+
+        novel_group.add_argument("--shutdown", action="store_true", help="shutdown after translate is completed")
+
         novel_group.add_argument("--compare_text", action="store_true", help="whether to output with both source text and translated text in order to compare.")
         novel_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
 
     args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
+
+    is_batch_process = False
+    if args.data_folder and args.output_folder:
+        is_batch_process = True
+        print(f"Using batch mode:\n"
+              f"Input Folder:  {args.data_folder}\n"
+              f"Output Folder: {args.output_folder}")
+    else:
+        print(f"Using normal mode:\n"
+              f"Input File:  {args.data_path}\n"
+              f"Output File: {args.output_path}")
 
     import coloredlogs
     coloredlogs.install(level="INFO")
@@ -253,7 +267,7 @@ def main():
     )
 
     print("translating...")
-    if args.data_folder:
+    if is_batch_process:
         os.makedirs(args.output_folder, exist_ok=True)
         for f in os.listdir(args.data_folder):
             if f.endswith(".txt") or f.endswith(".srt"):
