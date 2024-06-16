@@ -38,6 +38,8 @@
 
 详见[本仓库Wiki](https://github.com/SakuraLLM/Sakura-13B-Galgame/wiki).
 
+部分使用方法：[usage.md](https://github.com/SakuraLLM/SakuraLLM/blob/main/usage.md)
+
 ### 模型下载：
 
 | 参数量 | 发布时间-底模-版本  | Transformers模型 | GGUF量化模型 |
