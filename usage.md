@@ -9,6 +9,26 @@
 <!-- // 这部分写支持加载哪些模型，如果是非 SakuraLLM 支持的格式的话，哪些地方能找到第三方维护的转换后的格式。 -->
 GGUF 量化模型。
 
+### 常见问题
+llama 模式启动后提示不支持 qwen2，报错为：unknown model architecture: 'qwen2'
+
+相关 issue: https://github.com/SakuraLLM/SakuraLLM/issues/92 https://github.com/SakuraLLM/SakuraLLM/issues/71
+
+原因，旧版本 llama_cpp_python 不支持 qwen2，需要按照 cuda 版本更新，如果没有按照 cuda 版本更新可能会不使用显卡。
+
+```shell
+# 卸载原有旧版本 llama-cpp-python
+pip uninstall llama-cpp-python
+
+# 安装新版，cuda-version 为 cu121、cu122、cu123、cu124，python 版本仅支持 3.10、3.11、3.12
+pip install llama-cpp-python
+--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/
+
+#假设为 cuda 12.1
+pip install llama-cpp-python
+--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
+```
+
 ### 使用例子
 以运行 [sakura-13b-lnovel-v0.9b-Q4_K_M.gguf](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) 模型为例：
 ```python
