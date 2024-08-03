@@ -4,6 +4,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 import time
 import re
 from tqdm import tqdm
+from pathlib import Path
 
 import utils
 import utils.cli
@@ -19,20 +20,22 @@ def get_subtitle_text_list(data_path):
     data_list = list()
     subs = pysubs2.load(data_path)
     subs.sort()
-# combaine subtitles with same timestamps
-    for i in range(len(subs)):
+    # combaine subtitles with same timestamps
+    for i in range(1, len(subs)):
         if (subs[i].start == subs[i-1].start):
             if (subs[i].end == subs[i-1].end):
                 subs[i].text = " ".join((subs[i-1].text, subs[i].text))
                 subs[i-1].text = ""
     subs.remove_miscellaneous_events()
-# combaine same subtitle line to timestamps
-    for j in range(len(subs)):
+
+    # combaine same subtitle line to timestamps
+    for j in range(1, len(subs)):
         if (subs[j].text == subs[j-1].text):
             if (subs[j].start == subs[j-1].end):
                 subs[j].start = subs[j-1].start
                 subs[j-1].text = ""
     subs.remove_miscellaneous_events()
+
     for k in range(len(subs)):
         text = subs[k].text
         text = re.sub(r"\\N", " ", text)
@@ -51,16 +54,23 @@ def set_styles(subs):
     return subs
 
 def save_subtitle(subs, data_path, data, lang_code):
+    data_path = Path(data_path)
     data = data.strip()
     data = data.split("\n")
     subs = set_styles(subs)
+
     for i in range(len(subs)):
         subs[i].text = data[i] + "\\N{\\fs12}" + subs[i].text
-    subs.save(data_path[:-3] + lang_code + ".ass")
+
+    subs.save(data_path.stem + lang_code + ".ass")
+
     for j in range(len(subs)):
         new = subs[j].text
         subs[j].text = new.split("\\N")[0]
-    subs.save(data_path[:-3] + lang_code + ".srt")
+
+    subs.save(data_path.stem + lang_code + ".srt")
+    return
+
 
 total_token = 0
 generation_time = 0
@@ -190,7 +200,7 @@ def get_model_response(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, pr
 
 def main():
     def extra_args(parser: ArgumentParser):
-        novel_group = parser.add_argument_group("Novel")
+        novel_group = parser.add_argument_group("Subtitles")
         novel_group.add_argument("--data_path", type=str, default="", help="file path of the subtitle you want to translate.")
         novel_group.add_argument("--save_traditional", default=False, action="store_true", help="whether to save Traditional Chinese subtitle.")
         novel_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
