@@ -5,3 +5,5 @@ sse-starlette  # Server Side Event Support
 hypercorn
 coloredlogs
 dacite
+pysubs2
+opencc
