@@ -62,13 +62,13 @@ def save_subtitle(subs, data_path, data, lang_code):
     for i in range(len(subs)):
         subs[i].text = data[i] + "\\N{\\fs12}" + subs[i].text
 
-    subs.save(data_path.stem + lang_code + ".ass")
+    subs.save(str(data_path.parent.joinpath(data_path.stem)) + "." + lang_code + "+jpn.ass")
 
     for j in range(len(subs)):
         new = subs[j].text
         subs[j].text = new.split("\\N")[0]
 
-    subs.save(data_path.stem + lang_code + ".srt")
+    subs.save(str(data_path.parent.joinpath(data_path.stem)) + "." + lang_code + ".srt")
     return
 
 
