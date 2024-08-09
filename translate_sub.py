@@ -55,20 +55,26 @@ def set_styles(subs):
 
 def save_subtitle(subs, data_path, data, lang_code):
     data_path = Path(data_path)
+
     data = data.strip()
     data = data.split("\n")
+
     subs = set_styles(subs)
 
     for i in range(len(subs)):
         subs[i].text = data[i] + "\\N{\\fs12}" + subs[i].text
 
-    subs.save(str(data_path.parent.joinpath(data_path.stem)) + "." + lang_code + "+jpn.ass")
+    output_file_stem = data_path.stem
+
+    output_file = f"{output_file_stem}.{lang_code}jpn.ass"
+    subs.save(data_path.parent / output_file)
 
     for j in range(len(subs)):
         new = subs[j].text
         subs[j].text = new.split("\\N")[0]
 
-    subs.save(str(data_path.parent.joinpath(data_path.stem)) + "." + lang_code + ".srt")
+    output_file = f"{output_file_stem}.{lang_code}.srt"
+    subs.save(data_path.parent / output_file)
     return
 
 
