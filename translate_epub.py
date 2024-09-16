@@ -210,7 +210,7 @@ def main():
         if args.translate_title:
             temp_gpt_dict = get_gpt_dict(f[:-5])
             prompt = consts.get_prompt(
-                input=f[:-5],
+                raw_jp_text=f[:-5],
                 model_name=sakura_model.cfg.model_name,
                 model_version=sakura_model.cfg.model_version,
                 model_quant=sakura_model.cfg.model_quant,
@@ -235,7 +235,7 @@ def main():
                 if args.translate_title:
                     temp_gpt_dict = get_gpt_dict(f[:-5])
                     prompt = consts.get_prompt(
-                        input=f[:-5],
+                        raw_jp_text=f[:-5],
                         model_name=sakura_model.cfg.model_name,
                         model_version=sakura_model.cfg.model_version,
                         model_quant=sakura_model.cfg.model_quant,
@@ -275,7 +275,7 @@ def main():
                     temp_gpt_dict = get_gpt_dict(text)
                     print(f"{len(temp_gpt_dict)=}")
                     prompt = consts.get_prompt(
-                        input=text,
+                        raw_jp_text=text,
                         model_name=sakura_model.cfg.model_name,
                         model_version=sakura_model.cfg.model_version,
                         model_quant=sakura_model.cfg.model_quant,
