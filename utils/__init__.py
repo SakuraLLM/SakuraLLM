@@ -2,21 +2,23 @@ import logging
 from pprint import pprint, pformat
 from transformers import GenerationConfig
 
+from utils.version_checker import is_version_compatible
+
 logger = logging.getLogger(__name__)
 
 
 def split_response(response, model_version):
     response = response.replace("</s>", "")
-    if model_version == '0.5' or '0.8' in model_version:
+    if is_version_compatible(model_version, ["0.5", "0.8"]):
         output = response.split("<reserved_107>")[1]
         return output
-    if '0.7' in model_version or '0.9' in model_version or '0.10' in model_version:
+    if is_version_compatible(model_version, ["0.7", "0.9", "0.10"]):
         output = response.split("<|im_start|>assistant\n")[1]
         return output
-    if model_version == '0.1':
+    if is_version_compatible(model_version, ["0.1"]):
         output = response.split("\n\nAssistant: \n")[1]
         return output
-    if model_version == '0.4':
+    if is_version_compatible(model_version, ["0.4"]):
         output = response.split("\nAssistant: ")[1]
         return output
 
@@ -25,7 +27,7 @@ def split_response(response, model_version):
 
 def detect_degeneration(generation: list, model_version):
     #TODO: refactor this
-    if model_version != "0.8":
+    if not is_version_compatible(model_version, ["0.8"]):
         return False
     i = generation.index(196)
     generation = generation[i+1:]

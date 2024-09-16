@@ -11,7 +11,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, 
 
 import utils
 from sampler_hijack import hijack_samplers
-from utils import consts, log_generation_config
+from utils import consts, log_generation_config, is_version_compatible
 
 if TYPE_CHECKING:
     from transformers import LlamaForCausalLM, LlamaTokenizer
@@ -66,9 +66,8 @@ def load_model(args: SakuraModelConfig) -> (Any, ModelTypes):
 
     if not args.llama_cpp and (args.use_gpu or args.n_gpu_layers != 0):
         logger.warning("You are using both use_gpu and n_gpu_layers flag without --llama_cpp.")
-        if args.trust_remote_code is False and args.model_version in "0.5 0.7 0.8 0.9 0.10":
+        if args.trust_remote_code is False and is_version_compatible(args.model_version, ["0.5", "0.7", "0.8", "0.9", "0.10"]):
             args.trust_remote_code = True
-            # raise ValueError("If you use model version 0.5, 0.7, 0.8 or 0.9, please add flag --trust_remote_code.")
 
     logger.info("loading model ...")
 
