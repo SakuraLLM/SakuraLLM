@@ -8,9 +8,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('url', type=str, default='http://127.0.0.1:5000')
-parser.add_argument('--auth', type=str, default='sakura:itsmygo')
-parser.add_argument('--prefix', type=int, default=None)
+parser.add_argument('url', type=str, nargs='*', default='http://127.0.0.1:5000')
+parser.add_argument('--auth', type=str, nargs='*', default='sakura:itsmygo')
+parser.add_argument('--prefix', type=int, nargs='*', default=None)
 
 args = parser.parse_args()
 logger.info(args)
