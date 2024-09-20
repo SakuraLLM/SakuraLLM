@@ -150,37 +150,40 @@ def main():
     import coloredlogs
     coloredlogs.install(level="INFO")
 
-    with open(args.gpt_dict_path, 'r', encoding='utf-8') as f:
-        raw_data = f.readlines()
+    gpt_dict_data = []
+    if args.gpt_dict_path:
+      with open(args.gpt_dict_path, 'r', encoding='utf-8') as f:
+          raw_data = f.readlines()
 
-        gpt_dict_data = list()
-        for raw_data_line in raw_data:
-            raw_data_line = raw_data_line.strip()
-            if raw_data_line == "":
-                continue
-            src, temp = raw_data_line.split("->")
-            if "#" in temp:
-                dst, info = temp.split("#")
-                src, dst, info = src.strip(), dst.strip(), info.strip()
-                dict_temp = {
-                    "src": src,
-                    "dst": dst,
-                    "info": info
-                }
-            else:
-                dst = temp.strip()
-                dict_temp = {
-                    "src": src,
-                    "dst": dst
-                }
-            gpt_dict_data.append(dict_temp)
+          for raw_data_line in raw_data:
+              raw_data_line = raw_data_line.strip()
+              if raw_data_line == "":
+                  continue
+              src, temp = raw_data_line.split("->")
+              if "#" in temp:
+                  dst, info = temp.split("#")
+                  src, dst, info = src.strip(), dst.strip(), info.strip()
+                  dict_temp = {
+                      "src": src,
+                      "dst": dst,
+                      "info": info
+                  }
+              else:
+                  dst = temp.strip()
+                  dict_temp = {
+                      "src": src,
+                      "dst": dst
+                  }
+              gpt_dict_data.append(dict_temp)
 
     def get_gpt_dict(ja: str):
-        temp = list()
+        # FIXME(kuriko): for non gpt_dict version model, currently gpt dict is an empty list,
+        #   but using `None` should be a better choice.
+        ret = []
         for dict_data_simple in gpt_dict_data:
             if dict_data_simple['src'] in ja:
-                temp.append(dict_data_simple)
-        return temp
+                ret.append(dict_data_simple)
+        return ret
 
     cfg = from_dict(data_class=M.SakuraModelConfig, data=args.__dict__)
     sakura_model = M.SakuraModel(cfg=cfg)
