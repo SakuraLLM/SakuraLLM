@@ -451,7 +451,7 @@ class SakuraModel:
                 token_cnt += 1
                 yield output, finish_reason
         else:
-            for output, finish_reason in self.__general_model_stream(model, tokenizer, prompt, model_version,
+            for output, finish_reason in self.__general_model_stream_prompt(model, tokenizer, prompt, model_version,
                                                                      generation_config):
                 token_cnt += 1
                 yield output, finish_reason
