@@ -77,7 +77,7 @@ def get_stream_output(data: OpenAIChatCompletionRequest):
         stream_iterator = model.completion_stream(data.messages, generation_config)
     else:
         logger.info(f"prompt: {str(data.prompt)}")
-        stream_iterator = model.completion_stream(data.prompt, generation_config)
+        stream_iterator = model.completion_stream_prompt(data.prompt, generation_config)
     final_output = ""
     for idx, (output, finish_reason) in enumerate(stream_iterator):
         final_output += output

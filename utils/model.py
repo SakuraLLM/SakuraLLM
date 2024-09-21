@@ -307,11 +307,11 @@ class SakuraModel:
                 is_print_speed):
             yield output, finish_reason
 
-    def completion_stream(self, prompt: str, generation_config: GenerationConfig,
+    def completion_stream_prompt(self, prompt: str, generation_config: GenerationConfig,
                           is_print_speed: bool = True) -> ModelResponse:
         log_generation_config(generation_config)
 
-        for output, finish_reason in self.__get_model_response_stream(
+        for output, finish_reason in self.__get_model_response_stream_prompt(
                 self.model,
                 self.tokenizer,
                 prompt,
@@ -430,7 +430,7 @@ class SakuraModel:
                 f"{(t1 - t0):.2f} seconds ({token_cnt / (t1 - t0):.2f} tokens/s, {token_cnt} tokens generated)")
         return
 
-    def __get_model_response_stream(self,
+    def __get_model_response_stream_prompt(self,
                                     model: ModelTypes, tokenizer: AutoTokenizer,
                                     prompt: str,
                                     model_version: str, generation_config: GenerationConfig,
@@ -588,7 +588,7 @@ class SakuraModel:
         else:
             yield "", "stop"
 
-    def __general_model_stream(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str,
+    def __general_model_stream_prompt(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str,
                                model_version: str, generation_config: GenerationConfig):
         position = 0
         start = 0
