@@ -188,6 +188,13 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
             prompt = "<|im_start|>system\n你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，不擅自添加原文中没有的代词。<|im_end|>\n" \ # system prompt
             + "<|im_start|>user\n" + user_prompt + "<|im_end|>\n" \ # user prompt
             + "<|im_start|>assistant\n" # assistant prompt start
+
+            # 如果术语表为空，也可以使用如下prompt（在术语表为空时更加推荐）
+            user_prompt = "将下面的日文文本翻译成中文：" + japanese
+            prompt = "<|im_start|>system\n你是一个轻小说翻译模型，可以流畅通顺地以日本轻小说的风格将日文翻译成简体中文，并联系上下文正确使用人称代词，不擅自添加原文中没有的代词。<|im_end|>\n" \ # system prompt
+            + "<|im_start|>user\n" + user_prompt + "<|im_end|>\n" \ # user prompt
+            + "<|im_start|>assistant\n" # assistant prompt start
+    
     ```
 
   - v0.9
