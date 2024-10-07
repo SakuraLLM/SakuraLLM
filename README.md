@@ -55,7 +55,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 ## News
 
-1. **更新了基于Qwen2.5-14B的v1.0pre1预览测试版本模型[Sakura-14B-Qwen2.5-v1.0pre1](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0pre1-GGUF)，支持术语表(GPT字典)，prompt格式参见[下方说明](https://github.com/SakuraLLM/SakuraLLM#%E6%8E%A8%E7%90%86)。**
+1. **更新了基于Qwen2.5-14B的v1.0pre1预览测试版本模型[Sakura-14B-Qwen2.5-v1.0pre1](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0pre1-GGUF)，改善质量，支持术语表(GPT字典)，提高控制符保留能力，prompt格式参见[下方说明](https://github.com/SakuraLLM/SakuraLLM#%E6%8E%A8%E7%90%86)。**
 
 1. **更新了基于Qwen1.5-7B的[Galtransl](https://huggingface.co/SakuraLLM/GalTransl-v1)模型，为视觉小说翻译任务专项优化。对视觉小说脚本中的行内换行、控制符、ruby注音等符号具有较好的保留能力。适配[GalTransl视觉小说翻译工具](https://github.com/xd2333/GalTransl)并调优，支持GPT字典（[字典写法见此](https://github.com/xd2333/GalTransl/wiki/GPT%E5%AD%97%E5%85%B8%E2%80%90sakura-galtransl)）。**
 
