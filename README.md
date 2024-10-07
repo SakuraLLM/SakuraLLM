@@ -39,13 +39,15 @@
 ### 模型下载：
 
 | 参数量 | 发布时间-底模-版本  | 模型 |
-|:-------:|:-------:|:-------:|
+|:-------:|:-------|:-------|
 | 32B | 20240508-Qwen1.5-32B-v0.9 | 🤗 [Sakura-32B-Qwen2beta-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-32B-Qwen2beta-v0.9-GGUF) |
 |     | 20240508-Qwen1.5-32B-v0.10pre1 | 🤗 [Sakura-32B-Qwen2beta-v0.10pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-32B-Qwen2beta-v0.10pre1-GGUF) |
 | 14B | 20240111-Qwen-14B-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) |
 |     | 20240213-Qwen1.5-14B-v0.9 | 🤗 [Sakura-14B-Qwen2beta-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF) |
+|     | 20240516-Qwen1.5-14B-v0.9.2 | 🤗 [Sakura-14B-Qwen2beta-v0.9.2-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9.2-GGUF)
+|(最新)| **20241007-Qwen2.5-14B-v1.0pre1** | 🤗 [Sakura-14B-Qwen2.5-v1.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0pre1-GGUF)
 | 7B  | 20240116-Qwen-7B-v0.9 | 🤗 [Sakura-7B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-LNovel-v0.9-GGUF) |
-|     | 20240531-Qwen1.5-7B-Galtransl-v1.5 | 🤗 [Galtransl-v1.5](https://huggingface.co/SakuraLLM/GalTransl-7B-v1.5) |
+|     | 20240531-Qwen1.5-7B-Galtransl-v2.6 | 🤗 [Galtransl-v2.6](https://huggingface.co/SakuraLLM/GalTransl-7B-v2.6) |
 | 1.8B| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1-GGUF](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) |
 
 
@@ -53,15 +55,9 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 ## News
 
-1. **更新了基于Qwen1.5-7B的[Galtransl-v1](https://huggingface.co/SakuraLLM/GalTransl-v1)模型，为视觉小说翻译任务专项优化。对视觉小说脚本中的行内换行、控制符、ruby注音等符号具有较好的保留能力。适配[GalTransl视觉小说翻译工具](https://github.com/xd2333/GalTransl)并调优，支持GPT字典（[字典写法见此](https://github.com/xd2333/GalTransl/wiki/GPT%E5%AD%97%E5%85%B8%E2%80%90sakura-galtransl)）。**
+1. **更新了基于Qwen2.5-14B的v1.0pre1预览测试版本模型[Sakura-14B-Qwen2.5-v1.0pre1](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0pre1-GGUF)，支持术语表(GPT字典)，prompt格式参见[下方说明](https://github.com/SakuraLLM/SakuraLLM#%E6%8E%A8%E7%90%86)。**
 
-1. **更新了基于Qwen1.5-32B底模的v0.9版本和v0.10pre1版本的GGUF模型。两个版本均于20240515再次更新，仓库名与文件名均未改变，需要重新下载。其中v0.10pre1版本v0.10的预览版，具备术语表功能，相比上一版本优化翻译质量，同时使用新的prompt格式，详见[推理部分](https://github.com/SakuraLLM/Sakura-13B-Galgame?tab=readme-ov-file#%E6%8E%A8%E7%90%86)的prompt格式部分。**
-
-1. **更新了使用Importance Matrix进行量化的Sakura-14B-Qwen2beta-v0.9-GGUF模型。[模型地址](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF/blob/main/sakura-14b-qwen2beta-v0.9-iq4_xs_ver2.gguf)**
-
-1. **更新了基于Qwen1.5底模的`v0.9`版本模型，包括14B和1.8B两个版本。注意：此版本模型的结构为Qwen2. 同时补充更新了基于Qwen 7B的`v0.9`版本模型。**
-
-1.  **更新了0.9的正式版模型`v0.9b`。清洗并增加了预训练与微调的数据量。更推荐使用正式版模型，它会比之前的pre版本更加稳定，质量更高。**
+1. **更新了基于Qwen1.5-7B的[Galtransl](https://huggingface.co/SakuraLLM/GalTransl-v1)模型，为视觉小说翻译任务专项优化。对视觉小说脚本中的行内换行、控制符、ruby注音等符号具有较好的保留能力。适配[GalTransl视觉小说翻译工具](https://github.com/xd2333/GalTransl)并调优，支持GPT字典（[字典写法见此](https://github.com/xd2333/GalTransl/wiki/GPT%E5%AD%97%E5%85%B8%E2%80%90sakura-galtransl)）。**
 
 1. **增加了vllm模型后端的支持，详见**[#40](https://github.com/SakuraLLM/Sakura-13B-Galgame/pull/40)
 
