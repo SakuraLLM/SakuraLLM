@@ -48,7 +48,8 @@
 |(最新)| **20241008-Qwen2.5-14B-v1.0** | 🤗 [Sakura-14B-Qwen2.5-v1.0-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF)
 | 7B  | 20240116-Qwen-7B-v0.9 | 🤗 [Sakura-7B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-LNovel-v0.9-GGUF) |
 |     | 20240531-Qwen1.5-7B-Galtransl-v2.6 | 🤗 [Galtransl-v2.6](https://huggingface.co/SakuraLLM/GalTransl-7B-v2.6) |
-| 1.8B| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1-GGUF](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) |
+| ~2B | 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1-GGUF](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) |
+|     | **20241012-Qwen2.5-1.5B-v1.0** | 🤗 [Sakura-1.5B-Qwen2.5-v1.0-GGUF](https://huggingface.co/SakuraLLM/Sakura-1.5B-Qwen2.5-v1.0-GGUF) |
 
 
 p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.co`改成`hf-mirror.com`，使用hf镜像站下载。
