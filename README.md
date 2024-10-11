@@ -45,7 +45,7 @@
 | 14B | 20240111-Qwen-14B-v0.9 | 🤗 [Sakura-13B-LNovel-v0.9b-GGUF](https://huggingface.co/SakuraLLM/Sakura-13B-LNovel-v0.9b-GGUF) |
 |     | 20240213-Qwen1.5-14B-v0.9 | 🤗 [Sakura-14B-Qwen2beta-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9-GGUF) |
 |     | 20240516-Qwen1.5-14B-v0.9.2 | 🤗 [Sakura-14B-Qwen2beta-v0.9.2-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2beta-v0.9.2-GGUF)
-|(最新)| **20241007-Qwen2.5-14B-v1.0pre1** | 🤗 [Sakura-14B-Qwen2.5-v1.0pre1-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0pre1-GGUF)
+|(最新)| **20241008-Qwen2.5-14B-v1.0** | 🤗 [Sakura-14B-Qwen2.5-v1.0-GGUF](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF)
 | 7B  | 20240116-Qwen-7B-v0.9 | 🤗 [Sakura-7B-LNovel-v0.9-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-LNovel-v0.9-GGUF) |
 |     | 20240531-Qwen1.5-7B-Galtransl-v2.6 | 🤗 [Galtransl-v2.6](https://huggingface.co/SakuraLLM/GalTransl-7B-v2.6) |
 | 1.8B| 20240214-Qwen1.5-1.8B-v0.9.1 | 🤗 [Sakura-1B8-Qwen2beta-v0.9.1-GGUF](https://huggingface.co/SakuraLLM/Sakura-1B8-Qwen2beta-v0.9.1-GGUF) |
@@ -55,7 +55,11 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 ## News
 
-1. **更新了基于Qwen2.5-14B的v1.0pre1预览测试版本模型[Sakura-14B-Qwen2.5-v1.0pre1](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0pre1-GGUF)，改善质量，支持术语表(GPT字典)，提高控制符保留能力，prompt格式参见[下方说明](https://github.com/SakuraLLM/SakuraLLM#%E6%8E%A8%E7%90%86)。**
+1. **更新了基于Qwen2.5-14B的v1.0正式版模型[Sakura-14B-Qwen2.5-v1.0](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF)，prompt格式参见[下方说明](https://github.com/SakuraLLM/SakuraLLM#%E6%8E%A8%E7%90%86)。主要改进：**
+    - 改善翻译质量，提高翻译准确率，尤其是人称的准确率。
+    - 支持术语表(GPT字典)，以保持专有名词和人称的一致性。
+    - 提高部分简单控制符的保留能力，尤其是单行内存在`\n`的情况下保留`\n`的能力。降低行数与原文不一致的概率。
+    - 由于底模使用GQA，推理速度和显存占用显著改善，可实现更快的多线程推理。
 
 1. **更新了基于Qwen1.5-7B的[Galtransl](https://huggingface.co/SakuraLLM/GalTransl-v1)模型，为视觉小说翻译任务专项优化。对视觉小说脚本中的行内换行、控制符、ruby注音等符号具有较好的保留能力。适配[GalTransl视觉小说翻译工具](https://github.com/xd2333/GalTransl)并调优，支持GPT字典（[字典写法见此](https://github.com/xd2333/GalTransl/wiki/GPT%E5%AD%97%E5%85%B8%E2%80%90sakura-galtransl)）。**
 
