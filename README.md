@@ -59,7 +59,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
     - 改善翻译质量，提高翻译准确率，尤其是人称的准确率。
     - 支持术语表(GPT字典)，以保持专有名词和人称的一致性。
     - 提高部分简单控制符的保留能力，尤其是单行内存在`\n`的情况下保留`\n`的能力。降低行数与原文不一致的概率。
-    - 由于底模使用GQA，推理速度和显存占用显著改善，可实现更快的多线程推理。
+    - 由于底模使用GQA，推理速度和显存占用显著改善，可实现更快的多线程推理。关于多线程推理，可参考[Sakura启动器GUI使用教程](https://books.fishhawk.top/forum/656d60530286f15e3384fcf8)或[SakuraLLMServer](https://github.com/neavo/SakuraLLMServer)。
 
 1. **更新了基于Qwen1.5-7B的[Galtransl](https://huggingface.co/SakuraLLM/GalTransl-v1)模型，为视觉小说翻译任务专项优化。对视觉小说脚本中的行内换行、控制符、ruby注音等符号具有较好的保留能力。适配[GalTransl视觉小说翻译工具](https://github.com/xd2333/GalTransl)并调优，支持GPT字典（[字典写法见此](https://github.com/xd2333/GalTransl/wiki/GPT%E5%AD%97%E5%85%B8%E2%80%90sakura-galtransl)）。**
 
