@@ -58,7 +58,8 @@ class OpenAIChatCompletionRequest(BaseModel):
     """Generate request class used in openai api."""
 
     # OpenAI param
-    messages: list[dict[str, str]]
+    messages: list[dict[str, str]] = None
+    prompt: str = None
     model: str = ""
     frequency_penalty: float | int = 0.0
     max_tokens: int = 512
