@@ -239,7 +239,7 @@ def main():
     data = ""
     for d in tqdm(data_list):
         prompt = consts.get_prompt(
-            input=d,
+            raw_jp_text=d,
             model_name=sakura_model.cfg.model_name,
             model_version=sakura_model.cfg.model_version,
             model_quant=sakura_model.cfg.model_quant,
