@@ -3,6 +3,7 @@ from dacite import from_dict
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 import time
 import re
+import os
 from tqdm import tqdm
 
 import utils
@@ -13,6 +14,8 @@ import utils.consts as consts
 
 total_token = 0
 generation_time = 0
+generation_config = None
+sakura_model = None
 def add_token_cnt(cnt):
     global total_token
     total_token += cnt
@@ -179,42 +182,13 @@ def get_compare_text(source_text, translated_text):
         output_text = output_text.strip()
         return output_text
 
-
-
-def main():
-    def extra_args(parser: ArgumentParser):
-        novel_group = parser.add_argument_group("Novel")
-        novel_group.add_argument("--data_path", type=str, default="data.txt", help="file path of the text you want to translate.")
-        novel_group.add_argument("--output_path", type=str, default="data_translated.txt", help="save path of the text model translated.")
-        novel_group.add_argument("--compare_text", action="store_true", help="whether to output with both source text and translated text in order to compare.")
-        novel_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
-
-    args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
-
-    import coloredlogs
-    coloredlogs.install(level="INFO")
-
-    cfg = from_dict(data_class=M.SakuraModelConfig, data=args.__dict__)
-    sakura_model = M.SakuraModel(cfg=cfg)
-
-    generation_config = GenerationConfig(
-        temperature=0.1,
-        top_p=0.3,
-        top_k=40,
-        num_beams=1,
-        bos_token_id=1,
-        eos_token_id=2,
-        pad_token_id=0,
-        max_new_tokens=512,
-        min_new_tokens=1,
-        do_sample=True
-    )
-
-    print("translating...")
-    with open(args.output_path, 'w', encoding='utf-8') as f_w:
+def handle(output_path, data_path, text_length, compare_text):
+    global sakura_model
+    global generation_config
+    with open(output_path, 'w', encoding='utf-8') as f_w:
         start = time.time()
 
-        data_raw, data_list = get_novel_text_list(args.data_path, args.text_length)
+        data_raw, data_list = get_novel_text_list(data_path, text_length)
         data = ""
         for d in tqdm(data_list):
             prompt = consts.get_prompt(
@@ -239,11 +213,69 @@ def main():
         print("translation completed, used time: ", generation_time, end-start, ", total tokens: ", total_token, ", speed: ", total_token/(end-start), " token/s")
 
         print("saving...")
-        if args.compare_text:
+        if compare_text:
             f_w.write(get_compare_text(data_raw, data))
         else:
             f_w.write(data)
 
+def main():
+    global sakura_model
+    global generation_config
+    def extra_args(parser: ArgumentParser):
+        novel_group = parser.add_argument_group("Novel")
+        novel_group.add_argument("--data_path", type=str, default="data.txt", help="file path of the text you want to translate.")
+        novel_group.add_argument("--output_path", type=str, default="data_translated.txt", help="save path of the text model translated.")
+
+        novel_group.add_argument("--data_folder", type=str, required=False, help="folder path of the text you want to translate.")
+        novel_group.add_argument("--output_folder", type=str, required=False, help="save folder path of the text model translated.")
+
+        novel_group.add_argument("--shutdown", action="store_true", help="shutdown after translate is completed")
+
+        novel_group.add_argument("--compare_text", action="store_true", help="whether to output with both source text and translated text in order to compare.")
+        novel_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
+
+    args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
+
+    is_batch_process = False
+    if args.data_folder and args.output_folder:
+        is_batch_process = True
+        print(f"Using batch mode:\n"
+              f"Input Folder:  {args.data_folder}\n"
+              f"Output Folder: {args.output_folder}")
+    else:
+        print(f"Using normal mode:\n"
+              f"Input File:  {args.data_path}\n"
+              f"Output File: {args.output_path}")
+
+    import coloredlogs
+    coloredlogs.install(level="INFO")
+
+    cfg = from_dict(data_class=M.SakuraModelConfig, data=args.__dict__)
+    sakura_model = M.SakuraModel(cfg=cfg)
+
+    generation_config = GenerationConfig(
+        temperature=0.1,
+        top_p=0.3,
+        top_k=40,
+        num_beams=1,
+        bos_token_id=1,
+        eos_token_id=2,
+        pad_token_id=0,
+        max_new_tokens=512,
+        min_new_tokens=1,
+        do_sample=True
+    )
+
+    print("translating...")
+    if is_batch_process:
+        os.makedirs(args.output_folder, exist_ok=True)
+        for f in os.listdir(args.data_folder):
+            if f.endswith(".txt") or f.endswith(".srt"):
+                handle(os.path.join(args.output_folder, f), os.path.join(args.data_folder, f), args.text_length, args.compare_text)
+    else:
+        handle(args.output_path, args.data_path, args.text_length, args.compare_text)
+    if args.shutdown == 1:
+        os.system("/usr/bin/shutdown")
     print("completed.")
 
 if __name__ == "__main__":
