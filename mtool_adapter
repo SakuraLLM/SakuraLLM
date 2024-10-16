@@ -1,0 +1,88 @@
+from argparse import ArgumentParser
+import json
+import os
+import utils.cli
+def __newFormattedPath(path,info,suffix):
+  import time
+  current_time = time.time() 
+  formatted_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(current_time))
+  directory,file=os.path.split(path)
+  file_name=os.path.splittext(file)[0]
+  path=os.path.join(directory,f'{file_name}_{info}_{formatted_time}.{suffix}')
+  return path
+
+def __json2novel(raw_path):
+  sentence_dic=json.load(raw_path)
+  raw_sentence=list(sentence_dic.keys())
+  data_path= __newFormattedPath(raw_path,'extracted','txt')
+  with open(data_path,'w',encoding='utf-8') as f:
+        f.writelines(raw_sentence)
+  return data_path
+
+def continueLastTask(raw_path:json,last_path:json,output_path:json,text_length):
+  raw_dic=json.load(raw_path)
+  last_translation=set(json.load(last_path).keys())
+  n=0
+  #提取出需要翻译的内容
+  extracted={}
+  for raw_key in raw_dic.keys(): 
+    if raw_key not in last_translation:
+      extracted.update({raw_key:raw_dic[raw_key]})
+      n=n+1
+  extracted_file_path=__newFormattedPath(raw_path,'extracted','json')
+  with open(extracted_file_path,'w',encoding='utf-8') as f:
+    f.write(json.dumps(extracted),indent=4,ensure_ascii=True)
+    
+  print(f'\n已筛选出未翻译的条目共{n}项')
+  
+  
+  translated_json_path=__newFormattedPath(raw_path,'extracted','json')
+  translateFullPairs(extracted_file_path,translated_json_path,text_length)
+  #合并两个json文件
+  translated_dic=json.load(translated_json_path)
+  last_dic=json.load(last_path)
+  last_dic.update(translated_dic)
+  with open(output_path,'w',encoding='utf-8') as f:
+    f.write(json.dumps(last_dic),indent=4,ensure_ascii=True)
+  print(f'\n已合并翻译结果，已保存至{output_path}')
+  return output_path
+  
+def translateFullPairs(raw_path,output_path,text_length):
+    __json2novel(raw_path)
+    raw_list=json.load(raw_path)
+    raw_sentences=list(raw_list.keys())
+    import subprocess as sp
+    data_path=__newFormattedPath(output_path,'translated','txt')
+    sp.run(['python', 'translate_novel.py', '--data_path', data_path, '--output_path', output_path, '--text_length', str(text_length)], capture_output=True, text=True)
+    output_dic={}
+    with open(data_path,'r',encoding='utf-8') as rf:
+      for line in rf:
+          i=0
+          output_dic.update({raw_sentences[i]:line})
+          i=i+1
+    with open(output_path,'w',encoding='utf-8') as wf:
+      wf.write(json.dumps(output_dic),indent=4,ensure_ascii=True)
+    print(f'\n翻译完成，已保存至{output_path}')
+    return output_path
+    
+    
+    
+  
+def main():
+    if __name__ == "__main__":
+       main()
+    def extra_args(parser: ArgumentParser):
+      json_group = parser.add_argument_group("json")
+      json_group.add_argument("--continue_task", action="store true",type=bool,help="whether you want to continue last ")
+      json_group.add_argument("--last_path", type=str, default="last.json", help="file path of the last translation task path")
+      json_group.add_argument("--raw_path", type=str, default="input.json", help="file path of the raw text you want to translate.")
+      json_group.add_argument("--output_path", type=str, default="output_translated.json", help="save path of the text model translated.")
+      json_group.add_argument("--text_length", type=int, default=512, help="input max length in each inference.")
+      args = utils.cli.parse_args(do_validation=True, add_extra_args_fn=extra_args)
+
+      if args.continue_task:
+          continueLastTask(args.raw_path,args.last_path,args.output_path,args.text_length)
+      else:
+          translateFullPairs(args.raw_path,args.output_path,args.text_length)
+          
+          
