@@ -306,6 +306,19 @@ class SakuraModel:
                 is_print_speed):
             yield output, finish_reason
 
+    def completion_stream_prompt(self, prompt: str, generation_config: GenerationConfig,
+                          is_print_speed: bool = True) -> ModelResponse:
+        log_generation_config(generation_config)
+
+        for output, finish_reason in self.__get_model_response_stream_prompt(
+                self.model,
+                self.tokenizer,
+                prompt,
+                self.cfg.model_version,
+                generation_config,
+                is_print_speed):
+            yield output, finish_reason
+
     def test_loaded(self) -> (str, ModelResponse):
         testcase = consts.get_test_case_by_model_version(
             self.cfg.model_name, self.cfg.model_version, self.cfg.model_quant)
@@ -406,6 +419,38 @@ class SakuraModel:
         else:
             self.check_messages(messages)
             for output, finish_reason in self.__general_model_stream(model, tokenizer, messages, model_version,
+                                                                     generation_config):
+                token_cnt += 1
+                yield output, finish_reason
+        t1 = time.time()
+        if is_print_speed:
+            logger.info(
+                "Output generated in "
+                f"{(t1 - t0):.2f} seconds ({token_cnt / (t1 - t0):.2f} tokens/s, {token_cnt} tokens generated)")
+        return
+
+    def __get_model_response_stream_prompt(self,
+                                    model: ModelTypes, tokenizer: AutoTokenizer,
+                                    prompt: str,
+                                    model_version: str, generation_config: GenerationConfig,
+                                    is_print_speed: bool = True) -> ModelResponse:
+        # with self.lock:  # using lock to prevent too many memory allocated on GPU
+        t0 = time.time()
+        token_cnt = 0
+        if self.cfg.llama_cpp:
+            for output, finish_reason in model.stream_generate(prompt, generation_config):
+                token_cnt += 1
+                yield output, finish_reason
+        elif self.cfg.ollama:
+            for output, finish_reason in model.stream_generate(prompt, generation_config):
+                token_cnt += 1
+                yield output, finish_reason
+        elif self.cfg.vllm:
+            for output, finish_reason in model.stream_generate(prompt, generation_config):
+                token_cnt += 1
+                yield output, finish_reason
+        else:
+            for output, finish_reason in self.__general_model_stream_prompt(model, tokenizer, prompt, model_version,
                                                                      generation_config):
                 token_cnt += 1
                 yield output, finish_reason
@@ -537,6 +582,24 @@ class SakuraModel:
                 position = len(response)
                 yield response[start:position], None
                 start = position
+        if token_cnt == generation_config.__dict__['max_new_tokens']:
+            yield "", "length"
+        else:
+            yield "", "stop"
+
+    def __general_model_stream_prompt(self, model: ModelTypes, tokenizer: AutoTokenizer, prompt: str,
+                               model_version: str, generation_config: GenerationConfig):
+        position = 0
+        start = 0
+        token_cnt = 0
+        input_tokens = tokenizer(prompt, return_tensors="pt")
+
+        model.generation_config.__dict__ = generation_config.__dict__
+        for response in model.generate_stream(**input_tokens.to(model.device), generation_config=generation_config):
+            token_cnt += 1
+            position = len(response)
+            yield response[start:position], None
+            start = position
         if token_cnt == generation_config.__dict__['max_new_tokens']:
             yield "", "length"
         else:
