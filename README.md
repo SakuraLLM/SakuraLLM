@@ -230,6 +230,8 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
     query = "将下面的日文文本翻译成中文：" + input_text
     prompt = "<reserved_106>" + query + "<reserved_107>"
     ```
+
+    > 注意 0.8 虽然还可以使用，但是本仓库不再支持调用基于 transformer 的 0.8 版本模型。
     
   - v0.9
 
