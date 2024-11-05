@@ -36,6 +36,8 @@
 
 部分使用方法：[usage.md](https://github.com/SakuraLLM/SakuraLLM/blob/main/usage.md)
 
+> **请注意，如果给轻小说机翻站使用，请参见[机翻站站内教程](https://books.fishhawk.top/forum?category=Guide&page=1)，本 repo 不适用。**
+
 ### 模型下载：
 
 | 参数量 | 发布时间-底模-版本  | 模型 |
