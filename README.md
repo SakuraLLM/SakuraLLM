@@ -101,21 +101,17 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 1. [BallonsTranslator](https://github.com/dmMaze/BallonsTranslator)已经支持Sakura API，可以通过本地部署API后端，使用Sakura翻译漫画。
 
-# 显存需求
+# 显卡需求与显存需求
 
-下面的表格显示了使用不同量化和不同格式的模型时显存占用的大小。如果你的显卡显存不满足上述需求，可以尝试同时使用CPU与GPU进行推理。
+目前[Sakura Launcher GUI](https://github.com/PiDanShouRouZhouXD/Sakura_Launcher_GUI)可以支持NVIDIA独立显卡，部分AMD独立显卡和一部分核显的一键安装与启动。
 
-- llama.cpp GGUF模型（使用Qwen-14B v0.9模型进行测试）
+下面的表格显示了部分模型推荐的显卡显存大小。如果你的显卡显存不满足上述需求，可以尝试同时使用CPU与GPU进行推理。
 
-|  模型量化类型  | 模型大小 | 推荐显存大小 |
-|:-------:|:-------:|:-------:|
-| fp16 | 26.3G | 超出游戏显卡显存范围 |
-| Q8_0 | 14G | 24G |
-| Q6_K | 11.4G | 20G |
-| Q5_K_M | 10.1G | 16G |
-| Q4_K_M | 8.8G | 16G |
-| Q3_K_M | 7.2G | 16G |
-| Q2_K | 6.1G | 12G |
+| 模型 | 显存大小 | 模型规模 |
+|:------:|:------:|:------:|
+| [GalTransl-7B-v2.6-IQ4_XS.gguf](https://huggingface.co/SakuraLLM/GalTransl-7B-v2.6/blob/main/GalTransl-7B-v2.6-IQ4_XS.gguf) | 8G/10G          | 7B          |
+| [sakura-14b-qwen2.5-v1.0-iq4xs.gguf](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF/blob/main/sakura-14b-qwen2.5-v1.0-iq4xs.gguf) | 11G/12G/16G     | 14B         |
+| [sakura-14b-qwen2.5-v1.0-q6k.gguf](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF/blob/main/sakura-14b-qwen2.5-v1.0-q6k.gguf) | 24G             | 14B         |
 
 # 模型详情
 
