@@ -109,7 +109,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 | 模型 | 显存大小 | 模型规模 |
 |:------:|:------:|:------:|
-| [GalTransl-7B-v2.6-IQ4_XS.gguf](https://huggingface.co/SakuraLLM/GalTransl-7B-v2.6/blob/main/GalTransl-7B-v2.6-IQ4_XS.gguf) | 8G/10G          | 7B          |
+| [sakura-7b-qwen2.5-v1.0-iq4xs.gguf](https://huggingface.co/SakuraLLM/Sakura-7B-Qwen2.5-v1.0-GGUF/blob/main/sakura-7b-qwen2.5-v1.0-iq4xs.gguf) | 8G/10G          | 7B          |
 | [sakura-14b-qwen2.5-v1.0-iq4xs.gguf](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF/blob/main/sakura-14b-qwen2.5-v1.0-iq4xs.gguf) | 11G/12G/16G     | 14B         |
 | [sakura-14b-qwen2.5-v1.0-q6k.gguf](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF/blob/main/sakura-14b-qwen2.5-v1.0-q6k.gguf) | 24G             | 14B         |
 
