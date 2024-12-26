@@ -34,9 +34,11 @@
 
 详见[本仓库Wiki](https://github.com/SakuraLLM/Sakura-13B-Galgame/wiki).
 
-部分使用方法：[usage.md](https://github.com/SakuraLLM/SakuraLLM/blob/main/usage.md)
+部分使用方法：[usage.md](https://github.com/SakuraLLM/SakuraLLM/blob/main/usage.md) 
 
 > **请注意，如果给轻小说机翻站使用，请参见[机翻站站内教程](https://books.fishhawk.top/forum?category=Guide&page=1)，本 repo 不适用。**
+> 
+> 如果是翻译字幕等文本，可以考虑直接使用 [AiNiee](https://github.com/NEKOparapa/AiNiee)
 
 ### 模型下载：
 
