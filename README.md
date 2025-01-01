@@ -55,7 +55,7 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 ## News
 
-1. **更新了基于Qwen2.5的v1.0正式版14B模型[Sakura-14B-Qwen2.5-v1.0](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF)、1.5B模型[Qwen2.5-1.5B-v1.0](https://huggingface.co/SakuraLLM/Sakura-1.5B-Qwen2.5-v1.0-GGUF)和7B模型[Sakura-7B-Qwen2.5-v1.0-GGUF](https://huggingface.co/SakuraLLM/Sakura-7B-Qwen2.5-v1.0-GGUF)。prompt格式参见[下方说明](https://github.com/SakuraLLM/SakuraLLM#%E6%8E%A8%E7%90%86)。主要改进：**
+1. **更新了基于Qwen2.5的v1.0正式版14B模型[Sakura-14B-Qwen2.5-v1.0](https://huggingface.co/SakuraLLM/Sakura-14B-Qwen2.5-v1.0-GGUF)、1.5B模型[Sakura-1.5B-Qwen2.5-v1.0](https://huggingface.co/SakuraLLM/Sakura-1.5B-Qwen2.5-v1.0-GGUF)和7B模型[Sakura-7B-Qwen2.5-v1.0](https://huggingface.co/SakuraLLM/Sakura-7B-Qwen2.5-v1.0-GGUF)。prompt格式参见[下方说明](https://github.com/SakuraLLM/SakuraLLM#%E6%8E%A8%E7%90%86)。主要改进：**
     - 改善翻译质量，提高翻译准确率，尤其是人称的准确率。
     - 支持术语表(GPT字典)，以保持专有名词和人称的一致性。
     - 提高部分简单控制符的保留能力，尤其是单行内存在`\n`的情况下保留`\n`的能力。降低行数与原文不一致的概率。
