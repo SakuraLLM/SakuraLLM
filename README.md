@@ -36,9 +36,9 @@
 
 部分使用方法：[usage.md](https://github.com/SakuraLLM/SakuraLLM/blob/main/usage.md) 
 
-> **请注意，如果给轻小说机翻站使用，请参见[机翻站站内教程](https://books.fishhawk.top/forum?category=Guide&page=1)，本 repo 不适用。**
+> **请注意，如果给轻小说机翻站使用，请参见 [机翻站站内教程](https://books.fishhawk.top/forum?category=Guide&page=1)，本 repo 不适用。**
 > 
-> 如果是翻译字幕等文本，可以考虑直接使用 [AiNiee](https://github.com/NEKOparapa/AiNiee)
+> 如果是翻译字幕等文本，可以考虑直接使用 [AiNiee](https://github.com/NEKOparapa/AiNiee) 或 [LinguaGacha](https://github.com/neavo/LinguaGacha)
 
 ### 模型下载：
 
@@ -59,7 +59,8 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
     - 改善翻译质量，提高翻译准确率，尤其是人称的准确率。
     - 支持术语表(GPT字典)，以保持专有名词和人称的一致性。
     - 提高部分简单控制符的保留能力，尤其是单行内存在`\n`的情况下保留`\n`的能力。降低行数与原文不一致的概率。
-    - 由于底模使用GQA，推理速度和显存占用显著改善，可实现更快的多线程推理。关于多线程推理，可参考[Sakura启动器GUI使用教程](https://books.fishhawk.top/forum/656d60530286f15e3384fcf8)或[SakuraLLMServer](https://github.com/neavo/SakuraLLMServer)。
+    - 由于底模使用GQA，推理速度和显存占用显著改善，可实现更快的多线程推理。
+    - 关于多线程推理，可参考 [Sakura启动器GUI使用教程](https://books.fishhawk.top/forum/656d60530286f15e3384fcf8) 或 [OneClickLLAMA](https://github.com/neavo/OneClickLLAMA)
 
 1. **更新了基于Qwen1.5-7B的[Galtransl](https://huggingface.co/SakuraLLM/GalTransl-v1)模型，为视觉小说翻译任务专项优化。对视觉小说脚本中的行内换行、控制符、ruby注音等符号具有较好的保留能力。适配[GalTransl视觉小说翻译工具](https://github.com/xd2333/GalTransl)并调优，支持GPT字典（[字典写法见此](https://github.com/xd2333/GalTransl/wiki/GPT%E5%AD%97%E5%85%B8%E2%80%90sakura-galtransl)）。**
 
@@ -98,9 +99,13 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 
 1. [BallonsTranslator](https://github.com/dmMaze/BallonsTranslator)已经支持Sakura API，可以通过本地部署API后端，使用Sakura翻译漫画。
 
+1. [LinguaGacha](https://github.com/neavo/LinguaGacha) 使用 AI 能力一键翻译 小说、游戏、字幕 等文本内容的次世代文本翻译器
+
 # 显卡需求与显存需求
 
-目前[Sakura Launcher GUI](https://github.com/PiDanShouRouZhouXD/Sakura_Launcher_GUI)可以支持NVIDIA独立显卡，部分AMD独立显卡和一部分核显的一键安装与启动。
+[Sakura Launcher GUI](https://github.com/PiDanShouRouZhouXD/Sakura_Launcher_GUI) 支持NVIDIA独立显卡，部分AMD独立显卡和一部分核显的一键安装与启动。
+
+[OneClickLLAMA](https://github.com/neavo/OneClickLLAMA) 一键包可以支持各种不同显存挡位的显卡，并提供与不同应用搭配的最优性能配置，支持所有显卡
 
 下面的表格显示了部分模型推荐的显卡显存大小。如果你的显卡显存不满足上述需求，可以尝试同时使用CPU与GPU进行推理。
 
@@ -276,6 +281,8 @@ p.s. 如果无法连接到HuggingFace服务器，可将链接中的`huggingface.
 - [GalTransl](https://github.com/XD2333/GalTransl)：Galgame离线翻译，制作补丁
 
 - [AiNiee](https://github.com/NEKOparapa/AiNiee-chatgpt)：RPG游戏翻译
+
+- [LinguaGacha](https://github.com/neavo/LinguaGacha) 使用 AI 能力一键翻译 小说、游戏、字幕 等文本内容的次世代文本翻译器
 
 # 致谢
 
